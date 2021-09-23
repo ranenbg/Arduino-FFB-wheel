@@ -1,0 +1,150 @@
+Milos Rankovic, ranenbg@gmail.com
+first created 25.03.2020.
+last update 27.07.2021.
+
+This txt file contains a list of all available RS232 serial interface commands implemented in my latest Arduino Leonardo FFB wheel firmware version (you can use this info to make your own control UI)
+
+Arduino boards are also recognized as a serial communication device due to FTDI chip and drivers, through which we can send or receive commands from the microcontroler
+
+RS232,   commands are not case sensitive (in this manual cappital letters are used)
+         some commands do not have any parrameter following a letter, but if they have a range of available input values will be shown
+         all commands must be terminated with CR: carage retturn - char(13)
+         arduino terminates all responses at CR+LF: both carrage retturn - char(13) and line feed - char(10)
+         some commands have response and some don't (null means no response in this txt file)
+         most commands can apply changes right away, but some requre Arduino restart (for PWM settings - reconfiguration of internal timer registers is neccessary)
+         if a restart is needed, do not send any additional commands before restart
+         firmware will check if any command is received every 10ms (100 times per second)
+         usual Arduino response time is within few ms
+         at each startup firmware will automaticaly configure all settings from EEPROM (for load cell - it will take 2 sec to do tare zero-ing)
+         ffb clip LED will quickly blink 3 times to indicate that everything is loaded, configured and ready
+
+version, i tried to put some logic in firmware naming, so here is some basic explanation:
+         fw-v XX,  two digits only are a test versions of new firmware features
+         fw-v XX0, three digits ending with 0 - no support for external button box and load cell
+         fw-v XX1, three digits ending with 1 - support for external button box only
+         fw-v XX2, three digits ending with 2 - support for both external button box and load cell
+
+[1] all wheel parameters read out
+received numbers are: wheel rotation angle, general, damper, friction, constant, 
+periodic, spring, inertia, autocenter spring and end stop spring effect gains,
+min PWM, brake pressure, desktop effects, max PWM, CPR and PWM settings
+command		example response
+U		900 100 50 50 100 100 100 50 70 0 0 45 1 500 1600 9
+
+[2] show firmware version
+command		example response
+V		fw-v142
+
+[3] show wheel, encoder and calibration states
+0 - ok, not calibrated
+1 - calibrated
+2 - calibration error
+command		example response
+S		s-0
+
+[4] re-calibrate wheel
+will try to rotate wheel to the right untill a mechanical end stop is detected
+do not use this command if you do not have a mechanical limits for wheel rotation installed
+command		example response
+R		null
+
+[5] adjust load cell brake pressure calibration factor (valid for fw-v XX2 only, for all others it becomes a *PWM balance slider)
+sent and received number is only a relative value
+each load cell will have a different max force
+value of 4 will give 1:1 reading from HX711 24bit ADC chip
+*PWM balance slider - you can compensate for example if motor has stronger pull in one direction
+value	leftPWM(%)	rightPWM (%)
+1	100    		50
+128	100		100
+255	50		100
+command		example response	range
+B 45		1			1-255
+
+[6] re-calibrate pedals
+will reset pedal axis auto-calibration
+if load cell is used for brake it will not affect its calibration factor and will only reset throttle and clutch
+if no load cell is used reset will be done for brake axis as well
+command		example response
+P		1
+
+[7] optical encoder CPR (PPR) adjustment
+sent and received number is CPR - counts per revolution of optical encoder shaft
+encoders usualy have specified PPR - pulses per revolution
+CPR = 4 * PPR * X
+X=1 if encoder is directly mounted to the wheel rim, otherwise it is a gear ratio between encoder and wheel shafts
+command		example response	range
+O 2400		1			4-32767
+
+[8] re-center wheel
+use this command to reset 0deg position of your wheel rim (after you manualy centering the wheel)
+this will be required each time arduino is powered off or reset, but it's very quick and easy to do
+command		example response
+C		1
+
+[9] adjust wheel rotation angle 
+sent and received number is in degrees (lock-to-lock)
+command		example response	range
+G 900		1			30-1800
+
+[10] adjust desktop effects
+byte, bit0-autocentering spring, bit1-damper, bit2-inertia, bit3-friction, bit4-ffb monitor, bits 5-7 are unused
+bit0 - is LSB (lowest significant bit)
+sent and received number is a decimal equivalent (form) of this byte
+command		example response	range
+E 1		1			0-31
+
+[11] adjust PWM settings - requires Arduino restart in order to apply changes (press reset button, or just re-plug Arduino to USB port)
+byte, bit0-phase correct (or fast mode), bit1-dir enabled (or pwm+-), bits 2-5 are frequency select, bits 6-7 are unused
+for available frequency selection see firmware info.txt
+sent number is a decimal equivalent (form) of this byte
+received number is PWM resolution (max number of PWM steps, for this PWM frequency and PWM type)
+the settings will be stored in EEPROM right away (no additional saving is neccesary with command A)
+command		example response	range
+W 5		400			0-39
+
+[12] store all FFB parameter settings in EEPROM (stores everything except for PWM settings)
+command		example response
+A		1
+
+[13] adjust FFB general (overall effects) gain
+sent and received number is in %
+command		example response	range
+FG 100		1			0-200
+
+[14] adjust FFB constant force effect gain
+command		example response	range
+FC 100		1			0-200
+
+[15] adjust FFB damper effect gain
+command		example response	range
+FD 100		1			0-200
+
+[16] adjust FFB friction effect gain
+command		example response	range
+FF 100		1			0-200
+
+[17] adjust FFB periodic effect gain (affects sine, triangle, square, sawtoothup and sawtoothdown effects) 
+command		example response	range
+FS 100		1			0-200
+
+[18] adjust FFB spring effect gain
+command		example response	range
+FM 100		1			0-200
+
+[19] adjust FFB inertia effect gain
+command		example response	range
+FI 100		1			0-200
+
+[20] adjust FFB auto-centering spring effect gain
+command		example response	range
+FA 100		1			0-200
+
+[21] adjust FFB end stop spring effect gain
+command		example response	range
+FB 100		1			0-200
+
+[22] adjust minimal PWM signal level
+received number is x0.1%
+range corresponds to (0.0-20.0)% of max PWM value
+command		example response	range
+FJ 100		1			0-200

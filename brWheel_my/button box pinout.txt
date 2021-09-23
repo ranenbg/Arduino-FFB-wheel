@@ -1,0 +1,79 @@
+﻿Milos Rankovic, ranenbg@gmail.com
+first created 25.03.2020.
+last updated 08.05.2021.
+
+This txt file contains details for connecting a second Arduino Uno or Nano board,
+that will act as a shift register (button box) inside a custom wheel rim
+
+Credits to:
+http://opensource.org/licenses/BSD-3-Clause
+(c) Taras Ivaniukovich (blog@rr-m.org) April 2015
+http://rr-m.org/blog/hacking-a-thrustmaster-tx-rw-wheelbase-with-arduino-uno-part-2/ 
+
+Ver. 1.01 - 2015-06-17
+Ver. 1.02 - 2018-06-17, modified by Milos Rankovic
+
+This sketch emulates Thrustmaster TX RW 458 Italia wheel
+allowing to connect arduino to TX RW wheelbase (may work for T500/T300 as well)
+and emulate button presses - up to 17 buttons can be connected to arduino, if you
+don't need a serial debugging
+
+!!! There are 2 flavours of arduino boards - powered by +5 volts or +3.3 volts !!!
+!!! If you have +5V Arduino version - disconnect it from USB before connecting to a wheelbase !!!
+!!! Just power your arduino from TX RW wheelbase Black pin - it supplies +3.3V voltage (should be enough) !!!
+!!! don't connect USB +5V wire to TX RW wheelbase Black +3.3V - you'll get a collision !!!
+
+Thrustmaster Wheelbase cable pinout (PS/2 connector, also known as mini-Din 6pin female):
+1 - Green    - not used
+2 - Blue     - GND (ground)
+3 - White    - MISO (master in, slave out - to read the data from the wheel)
+4 - Orange   - SS (slave select, or PL - parallel load, set it to 0 when you want to read the data)
+5 - Red      - CLK (clock impulses)
+6 - Black    - +VCC (+3.3 volts! if you have Arduino 5V version - use external +3.3V power or use the wheelbase power!!!)
+
+Arduino UNO pins -> TX RW wheelbase cable pins
+
+Arduino GND                 -> TWRX Blue wire (2)
+Arduino pin 12              -> TXRW White wire (3) (data from wheel to base)
+Arduino pin 10 + pin 2 (SS) -> TXRW Orange wire pin (4) (yes, on Arduino it's wired to two pins. 10 - SS, 2 - INT0)
+Arduino pin 13 (SCK)        -> TXRW Red wire (5)
+Arduino +5V                 -> TXRW Black wire (6) (it gives 3.3V, but must be connected into +5V socket on arduino uno side)
+
+Arduino Leonardo FFB (as wheelbase) -> Arduino Nano or UNO (as button box)
+
+Leonardo GND                -> Nano GND
+Leonardo 5V		    -> Nano 5V
+Leonardo pin 6 (DT_sw)	    -> Nano pin 12
+Leonardo pin 7 (CLK)	    -> Nano pin 13
+Leonardo pin 8 (PL)	    -> Nano pin 10 and pin 2
+
+Button mappings (we send 8 bytes to wheelbase, first 16 bits are for buttons, the rest are unused - no more pins on nano)
+ 
+Byte 0
+  1 – A (button 6)                   -> pin 7 (portD bit7)
+  1 – B (button 4)                   -> pin 6 (portD bit6)
+  1 – RS (button 12)                 -> pin 5 (portD bit5)
+  1 – Menu (button 9)                -> pin 4 (portD bit4)
+  1 – Gear Down (button 1 = L_Pad)   -> pin 3 (portD bit3)
+  1 – X (button 5)                   -> pin 9 (portB bit1)
+  1 – Manettino CCW (button 7, View) -> pin 1 (portD bit1) - if you don't use serial debug (UART TX)
+  1 – Manettino CW (button 8, Menu)  -> pin 0 (portD bit0) - if you don't use serial debug (UART RX)
+
+Byte 1
+  1 – Gear Up (button 2 = R_Pad)     -> pin 8 (portB bit0)
+  1 – Y (button 3)                   -> pin 11 (portB bit3)
+  1 – LS (button 11)                 -> pin A5 (portC bit5)
+  1 – View (button 10 – under X)     -> pin A4 (portC bit4)
+  1 – D-Pad Down                     -> pin A3 (portC bit3)
+  1 - D-Pad Right                    -> pin A2 (portC bit2)
+  1 - D-Pad Left                     -> pin A1 (portC bit1)
+  1 - D-Pad Up                       -> pin A0 (portC bit0)
+  
+Each push button has 2 pins - you connect one to Arduino, another to the Ground :)
+Pressed button gives you "1" (grounded signal), released = "0" (pulled-up to +VCC)
+  
+Free free to modify and use for your needs.
+This sketch and the documentation above provided "AS IS" under the BSD New license.
+http://opensource.org/licenses/BSD-3-Clause
+(c) Taras Ivaniukovich (blog@rr-m.org) April 2015
+(c) Milos Rankovic (ranenbg@gmail.com) June 2018

@@ -1,0 +1,20 @@
+version		features
+11		encoder, 3 axis
+111		encoder, 3 axis, 32 buttons
+112		encoder, 2 axis + 1 for load cell, 32 buttons
+12		encoder, 3 axis, up to 1800deg, 2x stronger damper and inertia
+121		encoder, 3 axis, 32 buttons, up to 1800deg, 2x stronger damper and inertia
+122		encoder, 2 axis + 1 for load cell, 32 buttons, up to 1800deg, 2x stronger damper and inertia
+13		encoder, 3 axis, 3 buttons, up to 1800deg, 2x stronger damper and inertia
+130		encoder, 3 axis, 3 buttons, up to 1800deg, 2x stronger damper and inertia, fixed periodic effects
+131		encoder, 3 axis, 32 buttons, up to 1800deg, 2x stronger damper and inertia, fixed periodic effects + envelope + condition
+133		encoder, 2 axis + 1 for load cell, 3 buttons, up to 1800deg, 2x stronger damper and inertia, fixed periodic effects + envelope + condition
+14		encoder, 3 axis, 3 buttons, up to 1800deg, 2x stronger damper and inertia, fixed periodic effects + envelope + condition, EEPROM update only, FFB balance instead of brake strength
+140		encoder, 3 axis, 3 buttons, up to 1800deg, 2x stronger damper and inertia, EEPROM update only, FFB balance instead of brake strength, reduced serial response details, individual timers for periodic effects + small fix
+141		encoder, 3 axis, 32 buttons, up to 1800deg, 2x stronger damper and inertia, EEPROM update only, FFB balance instead of brake strength, reduced serial response details, individual timers for periodic effects + small fix
+142		encoder, 2 axis + 1 for load cell, 32 buttons up to 1800deg, 2x stronger damper and inertia, EEPROM update only, FFB balance instead of brake strength, reduced serial response details, individual timers for periodic effects + small fix
+141a		the same as v141, with wheel calibration enabled at startup
+141b		the same as v141, with wheel calibration enabled at startup and no pedal autocalibration
+150		the same as v140, but with only 1 FFB axis (fix for LFS)
+151		the same as v141, but with only 1 FFB axis (fix for LFS)
+152		the same as v142, but with only 1 FFB axis (fix for LFS)

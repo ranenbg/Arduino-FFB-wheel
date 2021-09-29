@@ -18,3 +18,5 @@ version		features
 150		the same as v140, but with only 1 FFB axis (fix for LFS)
 151		the same as v141, but with only 1 FFB axis (fix for LFS)
 152		the same as v142, but with only 1 FFB axis (fix for LFS)
+151a		the same as v151, but with no pedal auto calibration
+153		encoder + Z-index, 3 axis, 3 buttons, pedal autocalib, FFB output with 2xDAC (adafruit MCP4725) - recommended for DD wheels

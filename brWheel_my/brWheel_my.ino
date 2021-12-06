@@ -61,12 +61,13 @@ extern u8 valueglobal;
   u8 spi_data_ready = false;*/
 
 b8 fault;
-s16 accel, clutch;
+s16 accel, clutch, hbrake;
 s32 brake; //milos, we need 32bit due to 24 bits on LC ADC
 s32 turn;
 u16 accelMin = Z_AXIS_LOG_MAX, accelMax = 0; // milos
 s16 brakeMin = s16(Z_AXIS_LOG_MAX), brakeMax = 0; // milos, must be signed
 u16 clutchMin = RX_AXIS_LOG_MAX, clutchMax = 0; // milos
+u16 hbrakeMin = RY_AXIS_LOG_MAX, hbrakeMax = 0; // milos
 u32 button = 0; //milos, added
 
 //milos, added
@@ -290,19 +291,22 @@ void loop() {
 #ifdef USE_ADS1105 // milos, if you plan to use ADS1105 for all 3 pedals (no load cell), then change to readADC_SingleEnded
         accel = constrain(ads.readADC_SingleEnded(ACCEL_INPUT) * 2, 0 , 4095); //milos, Z axis, 11bit
         clutch = constrain(ads.readADC_SingleEnded(CLUTCH_INPUT) * 2, 0 , 4095); //milos, RX axis, 11bit
+        hbrake = constrain(ads.readADC_SingleEnded(HBRAKE_INPUT) * 2, 0 , 4095); //milos, RX axis, 11bit
         //accel = constrain(ads.readADC_Differential_0_1() + 2047, 0, 4095);  //milos, Z axis, 12bit
         //clutch = constrain(ads.readADC_SingleEnded(2) * 2, 0 , 4095); //milos, RX axis, 11bit
 
-#else
+#else //if no ads
 #ifdef AVG_INPUTS //milos, added option
         accel = analog_inputs[ACCEL_INPUT];
         clutch = analog_inputs[CLUTCH_INPUT];
-#else
+        hbrake = analog_inputs[HBRAKE_INPUT];
+#else //if no avg
         accel = analogRead(ACCEL_PIN) * 4; // milos, Z axis
         clutch = analogRead(CLUTCH_PIN) * 4; // milos, RX axis
-#endif
+        hbrake = analogRead(HBRAKE_PIN) * 4; // milos, RY axis
+#endif //end of avg
 
-#endif
+#endif //end of ads
 #ifdef USE_LOAD_CELL // milos, when use LC
         if (LC_scaling != last_LC_scaling) {
           LoadCell.setCalFactor(0.25 * float(LC_scaling)); // user set calibration factor (float) // milos, apply only if changed (through serial interface)
@@ -316,42 +320,38 @@ void loop() {
 #else // milos, when no LC
 #ifdef USE_ADS1105
         brake = constrain(ads.readADC_SingleEnded(BRAKE_INPUT) * 2, 0 , 4095); //milos, Y axis, 11bit
-#else
+#else //if no ads
 #ifdef AVG_INPUTS //milos, added option
         brake = analog_inputs[BRAKE_INPUT];
-#else
+#else //if no avg
         brake = analogRead(BRAKE_PIN) * 4; // milos, Y axis
-#endif
-#endif
-#endif
-        if (accel < accelMin) {
-          accelMin = accel;
-        }
-        if (accel > accelMax) {
-          accelMax = accel;
-        }
-        if (brake < brakeMin) {
-          brakeMin = brake;
-        }
-        if (brake > brakeMax) {
-          brakeMax = brake;
-        }
-        if (clutch < clutchMin) {
-          clutchMin = clutch;
-        }
-        if (clutch > clutchMax) {
-          clutchMax = clutch;
-        }
+#endif //end of avg
+#endif //end of ads
+#endif //end of lc
 
+        // milos, update limits for autocalibration
+        if (accel < accelMin) accelMin = accel;
+        if (accel > accelMax) accelMax = accel;
+        if (brake < brakeMin) brakeMin = brake;
+        if (brake > brakeMax) brakeMax = brake;
+        if (clutch < clutchMin) clutchMin = clutch;
+        if (clutch > clutchMax) clutchMax = clutch;
+        if (hbrake < hbrakeMin) hbrakeMin = hbrake;
+        if (hbrake > hbrakeMax) hbrakeMax = hbrake;
+
+        // milos, rescale all axis according to new calibration
 #ifdef  AUTOCALIB
         accel = map(accel, accelMin + dz, accelMax - dz, 0, Z_AXIS_PHYS_MAX);  // milos, with autocalibration
         clutch = map(clutch, clutchMin + dz, clutchMax - dz, 0, RX_AXIS_PHYS_MAX);
-#else
+        hbrake = map(hbrake, hbrakeMin + dz, hbrakeMax - dz, 0, RY_AXIS_PHYS_MAX);
+#else //if no autocalib
         accel = map(accel, 0 + dz, Z_AXIS_PHYS_MAX - dz, 0, Z_AXIS_PHYS_MAX); // milos, no autocalibration
         clutch = map(clutch, 0 + dz, RX_AXIS_PHYS_MAX - dz, 0, RX_AXIS_PHYS_MAX);
-#endif
-        accel = constrain(accel, 0, Z_AXIS_PHYS_MAX);
+        hbrake = map(hbrake, 0 + dz, RY_AXIS_PHYS_MAX - dz, 0, RY_AXIS_PHYS_MAX);
+#endif //end of autocalib
+        accel = constrain(accel, 0, Z_AXIS_PHYS_MAX); // milos, limit axis ranges
         clutch = constrain(clutch, 0, RX_AXIS_PHYS_MAX);
+        hbrake = constrain(hbrake, 0, RY_AXIS_PHYS_MAX);
 
 #ifdef USE_LOAD_CELL // we use LC
         if (brake < bdz) { // milos, cut low values
@@ -376,9 +376,10 @@ void loop() {
 
         button = readInputButtons();
 
-        //SendInputReport((s16)turn, (u16)accel, (u16)brake, (u16)clutch, buttons);
+        //SendInputReport((s16)turn, (u16)accel, (u16)brake, (u16)clutch, button);
         //SendInputReport((s16)turn, (u16)accel, (u16)brake, (u16)clutch, (u16)shifterX, (u16)shifterY, buttons); // original
-        SendInputReport((s32)turn, (u16)brake, (u16)accel, (u16)clutch, button); // milos, X, Y, Z, RX, button
+        //SendInputReport((s32)turn, (u16)brake, (u16)accel, (u16)clutch, button); // milos, X, Y, Z, RX, button
+        SendInputReport((s32)turn, (u16)brake, (u16)accel, (u16)clutch, (u16)hbrake, button); // milos, X, Y, Z, RX, RY, button
 
 #ifdef AVG_INPUTS //milos, added option see config.h
         ClearAnalogInputs();

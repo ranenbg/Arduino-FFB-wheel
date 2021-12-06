@@ -1,24 +1,24 @@
 Milos Rankovic, ranenbg@gmail.com
 first created 21.11.2018.
-last updated 15.09.2021.
+last updated 06.12.2021.
 
 This txt file contains details about Arduino wheel firmware capabilities and features:
 
 Arduino boards supported - Leonardo, Micro or Pro Micro (16MHz clock)
 
-firmware	pwm freq	pwm mode	pwm res		steering	brake		throttle	cluch		buttons
+firmware	pwm freq	pwm mode	pwm res		steering	brake		throttle	clutch		handbrake	buttons
 
-ver14		16KHz*		pwm+-*		500*		16bit	        16bit(LC,a,s)	12bit(a,s)	12bit(a,s)	32(**3, or 16)
+ver16x		16KHz*		pwm+-*		500*		16bit	        16bit(LC,a,s)	12bit(a,s)	12bit(a,s)	12bit(a,s)	28(**3, or 16)
 
-*fully configurable through RS232 or control panel v1.74a
+*fully configurable through RS232 or control panel v1.9
 LC - load cell module HX711 24bit for brake, 2 samples runing average, (0-65535, limited by microsoft FFB driver to 16bits max)
 a - Arduino analog input, 10bit (0-1023)
 s - ADS1105, external ADC, 12bit (0-4095)
-**HID supports 32 buttons, but only 24 buttons are in use curently
+**HID supports 28 buttons, but only 24 buttons are in use curently
 compatible with any thrustmaster wheel rim at 3.3v
 be careful! 5V to 3.3V logic level converter is needed from Arduino wheel base board to Thrustmaster wheel rim
 first 6 buttons are reserved for recognition of thrustmaster wheel rims
-Leonardo, Micro or ProMicro - only up to 3 buttons are available on the main Arduino board (due to no more pins left)
+Leonardo, Micro or ProMicro - only up to 2 buttons are available on the main Arduino board (due to no more pins left)
 Nano - with external Arduino Nano board acting as button box, up to 16 buttons can be used (button box firmware is inlcuded in separate *.ino file)
 
 Axis readout adjustment (LC, a, s) and auto calibration (on/off) - requires recompiling
@@ -39,7 +39,7 @@ Internal FFB effects: auto centering spring, damper, inertia, friction and end s
 Firmware features: RS232 interface for adjusting all FFB coefitients, LC brake pressure, pedal autocalibration, minimal PWM value, rotation angle, recenter wheel,
 recalibrate wheel, recalibrate pedals, wheel version info, truning various desktop effects on/off, turn on/off ffb signal monitor, save ffb config to EEPROM, adjustment of encoder CPR, fully adjustable PWM settings that are stored in EEPROM, FFB clip LED indicator (ligts up gradually from last 10% of FFB signal level)
 
-Control panel: made in Processing 3.5.4, visualises all axis and buttons including serial commands sent and received from Arduino, full adjustment of FFB effect gains, ffb signal monitor, save and load defaults settings from EEPROM, recenter wheel, recalibrate pedals, encoder CPR adjustment, pwm adjustment, COM port cfg via dialog, FFB setting profiles, control panel version v1.81
+Control panel: made in Processing 3.5.4, visualises all axis and buttons including serial commands sent and received from Arduino, full adjustment of FFB effect gains, ffb signal monitor, save and load defaults settings from EEPROM, recenter wheel, recalibrate pedals, encoder CPR adjustment, pwm adjustment, COM port cfg via dialog, FFB setting profiles, control panel version v1.9
 
 FFB output: fully configurable PWM settings, PWM frequency (tied to PWM resolution), PWM types (phase correct or fast TOP), PWM modes (pwm+- or pwm+dir), changes require restarting Arduino, analog 2ch external 12bit DAC MCP4725 available (requires recompiling)
 

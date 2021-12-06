@@ -43,10 +43,13 @@
 u8 analog_inputs_pins[] = // milos, changed to u8, from u16
 {
   ACCEL_PIN,
-#ifndef USE_LOAD_CELL //milos
+#ifdef USE_LOAD_CELL //milos
+  CLUTCH_PIN,
+#else
   BRAKE_PIN,
+  CLUTCH_PIN,
 #endif
-  CLUTCH_PIN //milos, removed ","
+  HBRAKE_PIN
   //SHIFTER_X_PIN, // milos, commented
   //SHIFTER_Y_PIN // milos, commented
 };
@@ -54,10 +57,13 @@ u8 analog_inputs_pins[] = // milos, changed to u8, from u16
 u8 axis_shift_n_bits[] =  // milos, changed to u8, from u16
 {
   Z_AXIS_NB_BITS - ADC_NB_BITS,
-#ifndef USE_LOAD_CELL //milos
+#ifdef USE_LOAD_CELL //milos
+  RX_AXIS_NB_BITS - ADC_NB_BITS,
+#else
   Y_AXIS_NB_BITS - (ADC_NB_BITS + 4), // milos, added - we scale it to 4095, that's why +4
+  RX_AXIS_NB_BITS - ADC_NB_BITS,
 #endif
-  RX_AXIS_NB_BITS - ADC_NB_BITS
+  RY_AXIS_NB_BITS - ADC_NB_BITS
 };
 
 #ifdef AVG_INPUTS //milos, include this only if used
@@ -179,7 +185,7 @@ void InitShiftRegister() {
 }
 #else
 void InitButtons() { // milos, added - if not using shift register, allocate some free pins for buttons
-  pinModeFast(BUTTON0, INPUT_PULLUP);
+  //pinModeFast(BUTTON0, INPUT_PULLUP); //milos, A3 used for hbrake instead
   pinModeFast(BUTTON1, INPUT_PULLUP);
   pinModeFast(BUTTON2, INPUT_PULLUP);
 }
@@ -262,11 +268,15 @@ u32 readInputButtons() {
   /*Serial.print(btnVal_SW, BIN); // milos
     Serial.print(" "); // milos
     Serial.println(btnVal_H, BIN); // milos*/
-#else  // milos, use Arduino Leonardo for 3 buttons
+#else  // milos, when no shift reg, use Arduino Leonardo for 3 buttons
+#ifdef USE_LOAD_CELL //milos - only available if we use a load cell
   bitWrite(buttons, 0, bitRead(digitalReadFast(BUTTON0), B0PORTBIT)); // milos, read bit4 from PORTF A3 into buttons bit0
+#else //milos, when no shift reg and no load cell button0 is unavailable so we set it to 0 (unpressed)
+  bitWrite(buttons, 0, 0);
+#endif //end of lc
   bitWrite(buttons, 1, bitRead(digitalReadFast(BUTTON1), B1PORTBIT)); // milos, read bit1 from PORTF A4 (or bit3 from PORTB, pin14 on ProMicro) into buttons bit1
   bitWrite(buttons, 2, bitRead(digitalReadFast(BUTTON2), B2PORTBIT)); // milos, read bit0 from PORTF A5 (or bit1 from PORTB, pin15 on ProMicro) into buttons bit2
-#endif
+#endif //end of shift reg
 
   //DEBUG_SERIAL.println(btnVal_H);
   //return (~buttons & 0b00000000111111111100000111111111); // milos, added to mask of last 8 bits and some inside ones with inverting all bits

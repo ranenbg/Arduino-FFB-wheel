@@ -14,8 +14,8 @@
 #define USE_LOAD_CELL				// Load cell shield // milos, new library for LC
 #define USE_SHIFT_REGISTER			// 8-bit Parallel-load shift registers G27 board steering wheel (milos, this one is modified for 16 buttons)
 //#define USE_DUAL_SHIFT_REGISTER		// Dual 8-bit Parallel-load shift registers G27 board shifter  (milos, not available curently)
-//#define AVG_INPUTS        // milos, uncomment this to use averaging of analog inputs (if readings can be done faster than CONTROL_PERIOD)
-#define AUTOCALIB        // milos, uncomment this to use autocalibration for pedal axis
+//#define AVG_INPUTS        // milos, uncomment this to use averaging of arduino analog inputs (if readings can be done faster than CONTROL_PERIOD)
+//#define AUTOCALIB        // milos, uncomment this to use autocalibration for pedal axis
 //#define USE_MCP4725      // milos, 12bit DAC (0-5V), uncomment to enable output of FFB signal as DAC voltage output
 //#define USE_PROMICRO    // milos, uncomment if you are using Arduino ProMicro board (leave commented for Leonardo or Micro variants)
 #define USE_EEPROM // milos, uncomment this to enable loading/saving settings from EEPROM
@@ -46,16 +46,20 @@
 #define ACCEL_PIN			A0
 #ifdef USE_LOAD_CELL //milos
 #define CLUTCH_PIN		A1
+#define HBRAKE_PIN    A2
 #else
 #define BRAKE_PIN     A1
 #define CLUTCH_PIN    A2
+#define HBRAKE_PIN    A3
 #endif
 //#define SHIFTER_X_PIN		A4 // milos, commented
 //#define SHIFTER_Y_PIN		A5 // milos, commented
 
-// milos, added - for alternate 3 button option
-#define BUTTON0 A3 // A3, used for button0 instead
+// milos, added - for alternate 3 button option - only available if we use a load cell
+#ifdef USE_LOAD_CELL //milos
+#define BUTTON0 A3 // A3, used for button0
 #define B0PORTBIT 4 // read bit4
+#endif
 
 #ifndef USE_PROMICRO // milos, added - for Leonardo or Micro
 #define BUTTON1 A4 // A4, used for button1 instead
@@ -95,9 +99,11 @@
 #define ACCEL_INPUT 0
 #ifdef USE_LOAD_CELL //milos
 #define CLUTCH_INPUT 1
+#define HBRAKE_INPUT 2
 #else
 #define BRAKE_INPUT 1
 #define CLUTCH_INPUT 2
+#define HBRAKE_INPUT 3
 #endif
 //#define SHIFTER_X_INPUT 3 // milos, commented
 //#define SHIFTER_Y_INPUT 4 // milos, commented
@@ -138,7 +144,7 @@ uint8_t LC_scaling; // milos, load cell scaling factor (affects brake pressure, 
 #define PARAM_ADDR_ENC_CPR       0x19 //milos, encoder CPR
 #define PARAM_ADDR_PWM_SET       0x1D //milos, PWM settings and frequency (byte contents is in pwmstate)
 
-#define VERSION		0x98 // milos, this is my version (previous was 8)
+#define VERSION		0xA2 // milos, this is my version (previous was 8)
 
 #define GetParam(m_offset,m_data)	getParam((m_offset),(u8*)&(m_data),sizeof(m_data))
 #define SetParam(m_offset,m_data)	setParam((m_offset),(u8*)&(m_data),sizeof(m_data))

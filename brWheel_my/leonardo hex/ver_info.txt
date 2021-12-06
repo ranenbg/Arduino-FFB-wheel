@@ -1,4 +1,7 @@
 version		features
+
+- firmware HEX versions bellow require wheel control up to v1.81
+
 11		encoder, 3 axis
 111		encoder, 3 axis, 32 buttons
 112		encoder, 2 axis + 1 for load cell, 32 buttons
@@ -18,5 +21,15 @@ version		features
 150		the same as v140, but with only 1 FFB axis (fix for LFS)
 151		the same as v141, but with only 1 FFB axis (fix for LFS)
 152		the same as v142, but with only 1 FFB axis (fix for LFS)
+150z            the same as v150, but with z-index support
 151a		the same as v151, but with no pedal auto calibration
 153		encoder + Z-index, 3 axis, 3 buttons, pedal autocalib, FFB output with 2xDAC (adafruit MCP4725) - recommended for DD wheels
+
+- firmware HEX versions bellow require wheel control v1.9 or newer
+
+160	        encoder, 4 axis, 2 buttons, pedal autocalib, 1FFB axis
+160a	        the same as v160, but with no pedal auto calibration
+160z	        the same as v160, with Z-index support
+161		encoder, 4 axis, 28 buttons, pedal autocalib, 1FFB axis
+162		encoder, 3 axis + 1 for load cell, no pedal autocalib, 1FFB axis 
+163		encoder + Z-index, 4 axis, 2 buttons, pedal autocalib, 1FFB axis, FFB output with 2xDAC (adafruit MCP4725) - recommended for DD wheels

@@ -92,6 +92,7 @@ void readSerial() {
         accelMin = Z_AXIS_LOG_MAX, accelMax = 0;
         brakeMin = Z_AXIS_LOG_MAX, brakeMax = 0;
         clutchMin = RX_AXIS_LOG_MAX, clutchMax = 0;
+        hbrakeMin = RY_AXIS_LOG_MAX, hbrakeMax = 0;
         //CONFIG_SERIAL.println("ok");
         CONFIG_SERIAL.println(1);
 #else

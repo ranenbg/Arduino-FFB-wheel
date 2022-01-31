@@ -13,7 +13,7 @@ Some firmware features:
 - fully adjustable FFB output in the form of PWM or DAC signals
 - load cell support for HX711 chip
 - all wheel parameters are stored in EEPROM (and automatically loaded at each powerup)
-- wheel control user interface for an easy configuration and monitoring of all inputs
+- wheel control user interface for an easy configuration and monitoring of all inputs/outputs
 
 Detailed documentation and all information about firmware can be found in txt files inside brWheel_my folder.
 

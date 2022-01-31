@@ -137,6 +137,7 @@ void InitInputs() {
   /*for (u8 i = 0; i < sizeof(digital_inputs_pins); i++) //milos, commented
     pinMode(digital_inputs_pins[i], INPUT_PULLUP);*/
 
+  //analogReference(INTERNAL); // sets 2.56V on AREF pin for Leonardo or Micro, can be EXTERNAL
   for (u8 i = 0; i < sizeof(analog_inputs_pins); i++)
     pinMode(analog_inputs_pins[i], INPUT);
 
@@ -185,9 +186,12 @@ void InitShiftRegister() {
 }
 #else
 void InitButtons() { // milos, added - if not using shift register, allocate some free pins for buttons
-  //pinModeFast(BUTTON0, INPUT_PULLUP); //milos, A3 used for hbrake instead
+#ifdef USE_LOAD_CELL
+  pinModeFast(BUTTON0, INPUT_PULLUP); // milos, button0 at A3 is only available if we use load cell
+#endif
   pinModeFast(BUTTON1, INPUT_PULLUP);
   pinModeFast(BUTTON2, INPUT_PULLUP);
+  pinModeFast(BUTTON3, INPUT_PULLUP);
 }
 #endif
 
@@ -268,15 +272,36 @@ u32 readInputButtons() {
   /*Serial.print(btnVal_SW, BIN); // milos
     Serial.print(" "); // milos
     Serial.println(btnVal_H, BIN); // milos*/
-#else  // milos, when no shift reg, use Arduino Leonardo for 3 buttons
-#ifdef USE_LOAD_CELL //milos - only available if we use a load cell
+    
+#else  // milos, when no shift reg, use Arduino Leonardo for 3 or 4 buttons
+#ifdef USE_LOAD_CELL // milos - only available if we use a load cell
   bitWrite(buttons, 0, bitRead(digitalReadFast(BUTTON0), B0PORTBIT)); // milos, read bit4 from PORTF A3 into buttons bit0
 #else //milos, when no shift reg and no load cell button0 is unavailable so we set it to 0 (unpressed)
   bitWrite(buttons, 0, 0);
 #endif //end of lc
   bitWrite(buttons, 1, bitRead(digitalReadFast(BUTTON1), B1PORTBIT)); // milos, read bit1 from PORTF A4 (or bit3 from PORTB, pin14 on ProMicro) into buttons bit1
   bitWrite(buttons, 2, bitRead(digitalReadFast(BUTTON2), B2PORTBIT)); // milos, read bit0 from PORTF A5 (or bit1 from PORTB, pin15 on ProMicro) into buttons bit2
+  bitWrite(buttons, 3, bitRead(digitalReadFast(BUTTON3), B3PORTBIT)); // milos, read bit6 from PORTD D12 into buttons bit3
 #endif //end of shift reg
+
+#ifdef USE_LOAD_CELL // milos - only available if we use a load cell
+#ifndef USE_HATSWITCH // milos, if no hat switch bitshift to the left 4bits to fill in button values
+  buttons = buttons << 4;
+#else // milos, if we use hat switch
+  // milos, decode buttons into hat switch values (button0-up, button1-right, button2-down, button3-left)
+  buttons = decodeHat(buttons);
+#endif // end of hat switch
+#else // if not use load cell but use hat switch
+#ifdef USE_HATSWITCH
+#ifdef USE_SHIFT_REGISTER // milos, if no load cell, but use shift reg we can have hat
+  buttons = decodeHat(buttons);
+#else // if no shift reg, A3 is used for handbrake so no hat switch
+  buttons = buttons << 4;
+#endif // enf of shift register
+#else // if not load cell or no hat
+  buttons = buttons << 4;
+#endif // end of hat switch
+#endif // end of load cell
 
   //DEBUG_SERIAL.println(btnVal_H);
   //return (~buttons & 0b00000000111111111100000111111111); // milos, added to mask of last 8 bits and some inside ones with inverting all bits

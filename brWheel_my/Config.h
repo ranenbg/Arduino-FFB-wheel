@@ -14,8 +14,9 @@
 #define USE_LOAD_CELL				// Load cell shield // milos, new library for LC
 #define USE_SHIFT_REGISTER			// 8-bit Parallel-load shift registers G27 board steering wheel (milos, this one is modified for 16 buttons)
 //#define USE_DUAL_SHIFT_REGISTER		// Dual 8-bit Parallel-load shift registers G27 board shifter  (milos, not available curently)
+//#define USE_HATSWITCH        //milos, uncomment to use first 4 buttons for hat switch instead (can not be used if no load cell or shift register)
 //#define AVG_INPUTS        // milos, uncomment this to use averaging of arduino analog inputs (if readings can be done faster than CONTROL_PERIOD)
-//#define AUTOCALIB        // milos, uncomment this to use autocalibration for pedal axis
+#define USE_AUTOCALIB        // milos, uncomment this to use autocalibration for pedal axis
 //#define USE_MCP4725      // milos, 12bit DAC (0-5V), uncomment to enable output of FFB signal as DAC voltage output
 //#define USE_PROMICRO    // milos, uncomment if you are using Arduino ProMicro board (leave commented for Leonardo or Micro variants)
 #define USE_EEPROM // milos, uncomment this to enable loading/saving settings from EEPROM
@@ -66,11 +67,15 @@
 #define B1PORTBIT 1 // read bit1
 #define BUTTON2 A5 // A5, used for button2 instead
 #define B2PORTBIT 0 // read bit0
+#define BUTTON3 12 // used for button3
+#define B3PORTBIT 6 // read bit6 or D12
 #else // for Pro Micro
 #define BUTTON1 14 // pin14, used for button1 instead
 #define B1PORTBIT 3 // bit3
 #define BUTTON2 15 // pin15, used for button2 instead
 #define B2PORTBIT 1 // bit1
+#define BUTTON3 2 // pin2, used for button3 instead
+#define B3PORTBIT 1 // read bit1 of PORTD
 #endif
 
 #define SHIFTREG_PL			  8	  // PL SH/LD (Shift or Load input) // milos, was 4
@@ -144,7 +149,7 @@ uint8_t LC_scaling; // milos, load cell scaling factor (affects brake pressure, 
 #define PARAM_ADDR_ENC_CPR       0x19 //milos, encoder CPR
 #define PARAM_ADDR_PWM_SET       0x1D //milos, PWM settings and frequency (byte contents is in pwmstate)
 
-#define VERSION		0xA2 // milos, this is my version (previous was 8)
+#define VERSION		0xAC // milos, this is my version (previous was 8)
 
 #define GetParam(m_offset,m_data)	getParam((m_offset),(u8*)&(m_data),sizeof(m_data))
 #define SetParam(m_offset,m_data)	setParam((m_offset),(u8*)&(m_data),sizeof(m_data))
@@ -242,5 +247,30 @@ f32 minTorquePP; //milos, added - min torque percents
 
 boolean zIndexFound = false; //milos, added
 
-#endif // _CONFIG_H_
+// milos, added - function for decoding hat switch bits
+uint32_t decodeHat(uint32_t inbits) {
+  byte hat;
+  byte dec = 0b00001111 & inbits;
+  if (dec == 1) { //up
+    hat = 1;
+  } else if (dec == 2) { //right
+    hat = 3;
+  } else if (dec == 4) { //down
+    hat = 5;
+  } else if (dec == 8) { //left
+    hat = 7;
+  } else if (dec == 3) { //up_right
+    hat = 2;
+  } else if (dec == 6) { //down_right
+    hat = 4;
+  } else if (dec == 9) { //up_left
+    hat = 8;
+  } else if (dec == 12) { //down_left
+    hat = 6;
+  } else {
+    hat = 0;
+  }
+  return ((inbits & 0b11111111111111111111111111110000) | (hat & 0b00001111)); // milos, put first 4 bits from hat into buttons
+}
 
+#endif // _CONFIG_H_

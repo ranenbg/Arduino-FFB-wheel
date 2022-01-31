@@ -18,6 +18,7 @@ void readSerial() {
     s16 temp, temp1;
     f32 wheelAngle;
     u8 ffb_temp;
+    String fwprefix;
     switch (c) {
       case 'U': // milos, show all FFB parameters
         //CONFIG_SERIAL.println("Command      FFB parameters"); // milos
@@ -71,10 +72,31 @@ void readSerial() {
         CONFIG_SERIAL.println(pwmstate, DEC); //milos, send pwmstate byte in decimal form
         break;
       case 'V':
-        CONFIG_SERIAL.println("fw-v" + String(VERSION));
+        CONFIG_SERIAL.print("fw-v");
+        CONFIG_SERIAL.print(VERSION, DEC);
+        // milos, firmware options
+#ifdef USE_AUTOCALIB
+        CONFIG_SERIAL.print("a");
+#endif
+#ifdef USE_ZINDEX
+        CONFIG_SERIAL.print("z");
+#endif
+#ifdef USE_HATSWITCH
+        CONFIG_SERIAL.print("h");
+#endif
+#ifdef USE_ADS1105
+        CONFIG_SERIAL.print("s");
+#endif
+#ifdef AVG_INPUTS
+        CONFIG_SERIAL.print("i");
+#endif
+#ifdef USE_PROMICRO
+        CONFIG_SERIAL.print("m");
+#endif
+        CONFIG_SERIAL.print("\r\n");
         break;
       case 'S':
-        CONFIG_SERIAL.println(String(brWheelFFB.state));
+        CONFIG_SERIAL.println(brWheelFFB.state, DEC);
         break;
       case 'R':
         brWheelFFB.calibrate();
@@ -88,7 +110,7 @@ void readSerial() {
         //SetParam(PARAM_ADDR_BRK_PRES, LC_scaling);//milos, update EEPROM
         break;
       case 'P': // milos, added to recalibrate pedals
-#ifdef AUTOCALIB
+#ifdef USE_AUTOCALIB
         accelMin = Z_AXIS_LOG_MAX, accelMax = 0;
         brakeMin = Z_AXIS_LOG_MAX, brakeMax = 0;
         clutchMin = RX_AXIS_LOG_MAX, clutchMax = 0;
@@ -297,5 +319,3 @@ void readSerial() {
     }
   }
 }
-
-

@@ -107,7 +107,7 @@ uint8_t last_LC_scaling; //milos
 
 #ifdef USE_LOAD_CELL // milos, added
 //HX711 constructor (dt pin, sck pin)
-HX711_ADC LoadCell(4, 5); // milos, pins 4 and 5 respectively
+HX711_ADC LoadCell(4, 5); // milos, added
 #endif
 
 #ifdef USE_QUADRATURE_ENCODER
@@ -216,7 +216,8 @@ void setup()
   lcd.begin(16, 2);
   lcd.clear();
   lcd.setCursor(0, 0);
-  lcd.print("fw-v" + String(VERSION));
+  lcd.print("fw-v");
+  lcd.print(VERSION, DEC);
 #endif
 
   dz = 8; // milos, set the accel, brake and clutch pedal dead zones that will be taken from min and max axis val (default is 8 out of 4095)
@@ -305,8 +306,8 @@ void loop() {
         clutch = analogRead(CLUTCH_PIN) * 4; // milos, RX axis
         hbrake = analogRead(HBRAKE_PIN) * 4; // milos, RY axis
 #endif //end of avg
-
 #endif //end of ads
+
 #ifdef USE_LOAD_CELL // milos, when use LC
         if (LC_scaling != last_LC_scaling) {
           LoadCell.setCalFactor(0.25 * float(LC_scaling)); // user set calibration factor (float) // milos, apply only if changed (through serial interface)
@@ -316,7 +317,7 @@ void loop() {
         //update() should be called at least as often as HX711 sample rate; >10Hz@10SPS, >80Hz@80SPS
         //longer delay in sketch will reduce effective sample rate (be carefull with delay() in loop)
         LoadCell.update(); //milos, I have configured mine for 80Hz reading by applying 5V at pin15 of HX711 chip (by default it's 10Hz, pin15 grounded)
-        brake = LoadCell.getData(); // milos, read smoothed data from LC (running average of 2 samples, see HX711_ADC.h I modded it)
+        brake = LoadCell.getData(); // milos, read smoothed data from LC (running average of 1 samples, see HX711_ADC.h I modded it)
 #else // milos, when no LC
 #ifdef USE_ADS1105
         brake = constrain(ads.readADC_SingleEnded(BRAKE_INPUT) * 2, 0 , 4095); //milos, Y axis, 11bit
@@ -340,7 +341,7 @@ void loop() {
         if (hbrake > hbrakeMax) hbrakeMax = hbrake;
 
         // milos, rescale all axis according to new calibration
-#ifdef  AUTOCALIB
+#ifdef  USE_AUTOCALIB 
         accel = map(accel, accelMin + dz, accelMax - dz, 0, Z_AXIS_PHYS_MAX);  // milos, with autocalibration
         clutch = map(clutch, clutchMin + dz, clutchMax - dz, 0, RX_AXIS_PHYS_MAX);
         hbrake = map(hbrake, hbrakeMin + dz, hbrakeMax - dz, 0, RY_AXIS_PHYS_MAX);
@@ -361,7 +362,7 @@ void loop() {
           brake = constrain(brake, 0, Y_AXIS_PHYS_MAX); // milos
         }
 #else // milos, when no LC
-#ifdef  AUTOCALIB
+#ifdef  USE_AUTOCALIB 
         brake = map(brake, brakeMin + dz, brakeMax - dz, 0, Y_AXIS_PHYS_MAX); // milos, with autocalibration
 #else
         brake = map(brake, 0 + dz, 4095 - dz, 0, Y_AXIS_PHYS_MAX); // milos, no autocalibration
@@ -379,7 +380,7 @@ void loop() {
         //SendInputReport((s16)turn, (u16)accel, (u16)brake, (u16)clutch, button);
         //SendInputReport((s16)turn, (u16)accel, (u16)brake, (u16)clutch, (u16)shifterX, (u16)shifterY, buttons); // original
         //SendInputReport((s32)turn, (u16)brake, (u16)accel, (u16)clutch, button); // milos, X, Y, Z, RX, button
-        SendInputReport((s32)turn, (u16)brake, (u16)accel, (u16)clutch, (u16)hbrake, button); // milos, X, Y, Z, RX, RY, button
+        SendInputReport((s32)turn, (u16)brake, (u16)accel, (u16)clutch, (u16)hbrake, button); // milos, X, Y, Z, RX, RY, hat+button
 
 #ifdef AVG_INPUTS //milos, added option see config.h
         ClearAnalogInputs();
@@ -395,4 +396,3 @@ void loop() {
 #endif
   }
 }
-

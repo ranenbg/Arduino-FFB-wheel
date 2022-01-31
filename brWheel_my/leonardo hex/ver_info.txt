@@ -23,7 +23,7 @@ version		features
 152		the same as v142, but with only 1 FFB axis (fix for LFS)
 150z            the same as v150, but with z-index support
 151a		the same as v151, but with no pedal auto calibration
-153		encoder + Z-index, 3 axis, 3 buttons, pedal autocalib, FFB output with 2xDAC (adafruit MCP4725) - recommended for DD wheels
+153		encoder + Z-index, 2 axis + 1 for load cell, 3 buttons, pedal autocalib, FFB output with 2xDAC (adafruit MCP4725) - recommended for DD wheels
 
 - firmware HEX versions bellow require wheel control v1.9 or newer
 
@@ -31,5 +31,15 @@ version		features
 160a	        the same as v160, but with no pedal auto calibration
 160z	        the same as v160, with Z-index support
 161		encoder, 4 axis, 28 buttons, pedal autocalib, 1FFB axis
-162		encoder, 3 axis + 1 for load cell, no pedal autocalib, 1FFB axis 
-163		encoder + Z-index, 4 axis, 2 buttons, pedal autocalib, 1FFB axis, FFB output with 2xDAC (adafruit MCP4725) - recommended for DD wheels
+162a		encoder, 3 axis + 1 for load cell, 2 + 28buttons, no pedal autocalib, 1FFB axis 
+163		encoder + Z-index, 3 axis + 1 for load cell, 2 + 28buttons, pedal autocalib, 1FFB axis, FFB output with 2xDAC (adafruit MCP4725) - recommended for DD wheels
+
+- firmware HEX versions bellow require wheel control v2.0 or newer
+
+170 		encoder, 4 axis, 4 buttons, no pedal autocalib, 1FFB axis
+170a		encoder, 4 axis, 4 buttons, pedal autocalib, 1FFB axis
+170z 		encoder + Z-index, 4 axis, 4 buttons, no pedal autocalib, 1FFB axis
+171ah		encoder, 4 axis, 4 (1 hat switch) + 24 buttons, pedal autocalib, 1FFB axis
+172h		encoder, 3 axis + 1 for load cell, 4 (1 hat switch) + 24 buttons, no pedal autocalib, 1FFB axis 
+172ah		encoder, 3 axis + 1 for load cell, 4 (1 hat switch) + 24 buttons, pedal autocalib, 1FFB axis
+173azh		encoder + Z-index, 3 axis + 1 for load cell, 4 (1 hat switch) + 24 buttons, pedal autocalib, 1FFB axis, FFB output with 2xDAC (adafruit MCP4725) - recommended for DD wheels

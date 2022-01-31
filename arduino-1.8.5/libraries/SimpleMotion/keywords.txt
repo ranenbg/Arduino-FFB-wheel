@@ -1,0 +1,53 @@
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+smbus				KEYWORD1
+smuint32			KEYWORD1
+smuint16			KEYWORD1
+smuint8				KEYWORD1
+smint32				KEYWORD1
+smint16				KEYWORD1
+smint8				KEYWORD1
+smbool				KEYWORD1
+SM_STATUS			KEYWORD1
+smaddr				KEYWORD1
+SimpleMotion		KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+smOpenBus							KEYWORD2
+smSetTimeout						KEYWORD2
+smCloseBus							KEYWORD2
+smGetVersion						KEYWORD2
+smSetDebugOutput					KEYWORD2
+getCumulativeStatus					KEYWORD2
+resetCumulativeStatus				KEYWORD2
+smAppendCommandToQueue				KEYWORD2
+smExecuteCommandQueue				KEYWORD2
+smGetQueuedCommandReturnValue		KEYWORD2
+smUploadCommandQueueToDeviceBuffer	KEYWORD2
+smBytesReceived						KEYWORD2
+smAppendSMCommandToQueue			KEYWORD2
+smGetQueuedSMCommandReturnValue		KEYWORD2
+smAppendGetParamCommandToQueue		KEYWORD2
+smGetQueuedGetParamReturnValue		KEYWORD2
+smAppendSetParamCommandToQueue		KEYWORD2
+smGetQueuedSetParamReturnValue		KEYWORD2
+smRead1Parameter					KEYWORD2
+smRead2Parameters					KEYWORD2
+smRead3Parameters					KEYWORD2
+smSetParameter						KEYWORD2
+smGetBufferClock					KEYWORD2
+
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+

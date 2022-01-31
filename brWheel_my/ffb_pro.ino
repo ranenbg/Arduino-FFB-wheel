@@ -264,7 +264,7 @@ s16 RampEffect (s8 rStart, s8 rEnd, u16 rPeriod, u16 t) { //milos, added
   return (linFunction(rSlope, ((f32)t) / 1000.0, (s16)rStart * 256));
 }
 
-s16 ApplyEnvelope (s16 metric, u16 t, u8 atLvl, u8 fdLvl, u16 atTime, u16 fdTime, u16 eDuration, u16 eStartDelay) { //milos, added - evelope block effect, start delay and duration
+s16 ApplyEnvelope (s16 metric, u16 t, u8 atLvl, u8 fdLvl, u16 atTime, u16 fdTime, u16 eDuration, u16 eStartDelay) { //milos, added - envelope block effect, start delay and duration
   f32 kA, kF;
   s16 nA;
   if (metric >= 0) { // for positive magnitudes
@@ -303,7 +303,7 @@ void SetIndex () {
 }
 
 float EffectDivider() { //milos, added, calculates effects divider in order to scale equaly with all PWM modes
-  return (32767.0 / float(TOP));
+  return (32767.0 / float(TOP)); //milos, was 32767.0
 }
 
 //--------------------------------------------------------------------------------------------------------
@@ -421,9 +421,9 @@ s32 cFFB::CalcTorqueCommand (s32 pos) {
               } else {
                 command += DamperEffect(spd + (f32)ef.deadBand / 32.0 - f32(ef.offset) / 1638.3, mag * configDamperGain / 100); //milos
               }
-              } else {
+            } else {
               command += 0;
-              }*/
+            }*/
             LogTextLf("_pro damper");
             break;
           case USB_EFFECT_INERTIA:
@@ -435,9 +435,9 @@ s32 cFFB::CalcTorqueCommand (s32 pos) {
               } else {
                 command += InertiaEffect(acl + (f32)ef.deadBand / 640.0 - f32(ef.offset) / 32767.0, mag * configInertiaGain / 100); //milos
               }
-              } else {
+            } else {
               command += 0;
-              }*/
+            }*/
             LogTextLf("_pro inertia");
             break;
           case USB_EFFECT_FRICTION:
@@ -449,9 +449,9 @@ s32 cFFB::CalcTorqueCommand (s32 pos) {
               } else {
                 command += FrictionEffect(spd + (f32)ef.deadBand / 32.0 - f32(ef.offset) / 1638.3, mag * configFrictionGain / 100); //milos
               }
-              } else {
+            } else {
               command += 0;
-              }*/
+            }*/
             LogTextLf("_pro friction");
             break;
           //case USB_EFFECT_CUSTOM: //milos, commented
@@ -561,7 +561,7 @@ void BRFFB::calibrate() {
   }
 #else
   // milos, added Z-index lookup
-  // turn right at least 1 full turn or untill we encouter Z-index pulse
+  // turn right at least 1 full turn or untill we encounter Z-index pulse
   startPos = myEnc.Read();
   SetPWM((MM_MAX_MOTOR_TORQUE - MM_MIN_MOTOR_TORQUE) / 4);
   for (uint16_t i = 0; i < 800; i++) {
@@ -580,7 +580,7 @@ void BRFFB::calibrate() {
     delay(10);
   }
 #endif
-  CONFIG_SERIAL.println(1); // milos, singnal to arduino that cal procedure is done
+  CONFIG_SERIAL.println(1); // milos, signal to arduino that cal procedure is done
 }
 
 BRFFB::BRFFB() {

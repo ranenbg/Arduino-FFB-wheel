@@ -1,0 +1,18 @@
+#######################################
+# Syntax Coloring Map For DigitalWriteFast
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+DigitalWriteFast	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+digitalWriteFast	KEYWORD2
+pinModeFast	KEYWORD2
+digitalReadFast	KEYWORD2
+noAnalogWrite	KEYWORD2

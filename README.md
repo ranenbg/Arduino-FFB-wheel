@@ -10,7 +10,7 @@ Firmware features:
 - FFB calculation and axis/button update rate is 500Hz (2ms period)
 - many options available (external 12bit ADC/DAC, pedal autocalibration, z-index, hatswitch)
 - RS232 serial interface for configuration of all wheel parameters
-- fully adjustable FFB output in the form of PWM or DAC signals
+- fully adjustable FFB output in the form of digital PWM or analog DAC signals
 - load cell support for HX711 chip
 - all wheel parameters are stored in EEPROM (and automatically loaded at each powerup)
 - wheel control user interface for an easy configuration and monitoring of all inputs/outputs

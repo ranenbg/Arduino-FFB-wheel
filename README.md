@@ -2,7 +2,7 @@
 Stand alone USB device recognized as a joystick with force feedback functionality, based on BR Wheel by Fernando Igor from 2017.
 
 Firmware features:
-- suported boards: Leonardo, Micro, Pro Micro
+- supported Arduino boards: Leonardo, Micro, Pro Micro
 - 4 analog axis + 1 for optical encoder
 - 16 buttons via button box firmware uploaded to Arduino Nano/Uno
 - fully supported 16bit FFB effects (custom force not included)

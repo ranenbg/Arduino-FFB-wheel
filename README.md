@@ -5,7 +5,7 @@ Firmware features:
 - supported Arduino boards: Leonardo, Micro and ProMicro (5V, 16MHz)
 - 4 analog axis + 1 for optical encoder
 - 16 buttons via button box firmware uploaded to Arduino Nano/Uno
-- fully supported 16bit FFB effects (custom force not included)
+- fully supported 16bit FFB effects (custom force effect not implemented)
 - envelope and conditional block effects, start delay, durration, deadband
 - FFB calculation and axis/button update rate is 500Hz (2ms period)
 - many options available (external 12bit ADC/DAC, pedal autocalibration, z-index, hatswitch)

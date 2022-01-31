@@ -14,6 +14,8 @@ Some firmware features:
 - load cell support for HX711 chip
 - wheel control user interface for an easy configuration and monitoring of all inputs
 
+Detailed documentation and all information about firmware can be found in txt files inside brWheel_my folder.
+
 Firmware v17x pinouts
 ![plot](./brWheel_my/Firmware-v17x%20pinout.png)
 Button box firmware pinouts

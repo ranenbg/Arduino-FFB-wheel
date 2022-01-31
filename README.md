@@ -11,3 +11,8 @@ Some firmware features:
 - fully adjustable PWM or DAC outputs
 - load cell support for HX711
 - wheel control user interface for easy configuration
+
+Firmware v17x pinouts
+![plot](./brWheel_my/Firmware-v17x pinout.png)
+Button box firmware pinouts
+![plot](./brWheel_my/Firmware-v141 button box pinout.png)

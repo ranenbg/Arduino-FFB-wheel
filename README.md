@@ -7,11 +7,11 @@ Some firmware features:
 - 28 buttons
 - fully supported 16bit FFB effects
 - FFB calculation rate 500Hz
-- many options available (12bit ADC/DAC, autocalibration, z-index, hatswitch)
+- many options available (external 12bit ADC/DAC, pedal autocalibration, z-index, hatswitch)
 - serial interface for configuration of all wheel parameters
 - fully adjustable PWM or DAC outputs
 - load cell support for HX711
-- wheel control user interface for easy configuration
+- wheel control user interface for an easy configuration and monitoring of all inputs
 
 Firmware v17x pinouts
 ![plot](./brWheel_my/Firmware-v17x pinout.png)

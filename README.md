@@ -15,7 +15,7 @@ Firmware features:
 - all wheel parameters are stored in EEPROM (and automatically loaded at each powerup)
 - wheel control user interface for an easy configuration and monitoring of all inputs/outputs
 
-Detailed documentation and all information about firmware can be found in txt files inside brWheel_my folder.
+Detailed documentation and more information about the firmware can be found in txt files inside brWheel_my folder.
 
 Firmware v17x pinouts - for Arduino Leonardo, Micro or ProMicro
 ![plot](./brWheel_my/Firmware-v17x%20pinout.png)

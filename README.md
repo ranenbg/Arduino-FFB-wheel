@@ -11,7 +11,7 @@ Firmware features:
 - many options available (external 12bit ADC/DAC, pedal autocalibration, z-index, hatswitch)
 - RS232 serial interface for configuration of all wheel parameters
 - fully adjustable FFB output in the form of 2channel digital PWM or analog DAC signals
-- load cell support for HX711 chip
+- load cell support for HX711 chip (for brake pedal axis only)
 - all wheel parameters are stored in EEPROM (and automatically loaded at each powerup)
 - wheel control user interface for an easy configuration and monitoring of all inputs/outputs
 

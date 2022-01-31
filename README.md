@@ -22,7 +22,7 @@ Firmware v17x pinouts - for Arduino Leonardo, Micro or ProMicro
 Button box firmware pinouts - for Arduino Nano/Uno
 ![plot](./brWheel_my/Firmware-v141%20button%20box%20pinout.png)
 
-Firmware upload procedure:
-- start XLoader and set 57600baud, ATMega32U4 microcontroler and select desired HEX
+Firmware upload procedure with XLoader:
+- set 57600baud, ATMega32U4 microcontroler and select desired HEX
 - press reset button on Arduino (or shortly connect RST pin to GND)
 - select newly appeared COM port (Arduino in bootloader mode) and press upload (you will only have a few seconds)

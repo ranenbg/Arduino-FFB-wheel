@@ -12,6 +12,7 @@ Some firmware features:
 - RS232 serial interface for configuration of all wheel parameters
 - fully adjustable FFB output in the form of PWM or DAC signals
 - load cell support for HX711 chip
+- all wheel parameters are stored in EEPROM
 - wheel control user interface for an easy configuration and monitoring of all inputs
 
 Detailed documentation and all information about firmware can be found in txt files inside brWheel_my folder.

@@ -7,6 +7,7 @@ Some firmware features:
 - 28 buttons
 - fully supported 16bit FFB effects
 - FFB calculation rate 500Hz
+- many options available (12bit ADC/DAC, autocalibration, z-index, hatswitch)
 - serial interface for configuration of all wheel parameters
 - fully adjustable PWM or DAC outputs
 - load cell support for HX711

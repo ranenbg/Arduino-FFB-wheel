@@ -14,6 +14,6 @@ Some firmware features:
 - wheel control user interface for an easy configuration and monitoring of all inputs
 
 Firmware v17x pinouts
-![plot](./brWheel_my/Firmware-v17x pinout.png)
+![plot](./brWheel_my/Firmware-v17x%20pinout.png)
 Button box firmware pinouts
-![plot](./brWheel_my/Firmware-v141 button box pinout.png)
+![plot](./brWheel_my/Firmware-v141%20button%20box%20pinout.png)

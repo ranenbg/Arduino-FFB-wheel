@@ -9,7 +9,7 @@ Some firmware features:
 - envelope and conditional block effects, start delay and durration
 - FFB calculation and axis/buttons update rate is 500Hz
 - many options available (external 12bit ADC/DAC, pedal autocalibration, z-index, hatswitch)
-- serial interface for configuration of all wheel parameters
+- RS232 serial interface for configuration of all wheel parameters
 - fully adjustable FFB output in the form of PWM or DAC signals
 - load cell support for HX711 chip
 - wheel control user interface for an easy configuration and monitoring of all inputs

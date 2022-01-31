@@ -30,3 +30,4 @@ Firmware upload procedure with XLoader https://github.com/xinabox/xLoader:
 *It is possible that some cheap chinese clones of Arduino Leonardo, Micro or ProMicro do not have a bootloader programmed. In that case you need to upload the original Arduino Leonardo bootloader first. You can find more details about it here: https://docs.arduino.cc/built-in-examples/arduino-isp/ArduinoISP
 
 Credits for original BRWheel firmware: Tero Loimuneva, Saku Kekkonen, Etienne Saint-Paul and Fernando Igor.
+https://github.com/fernandoigor/BRWheel/tree/alphatest

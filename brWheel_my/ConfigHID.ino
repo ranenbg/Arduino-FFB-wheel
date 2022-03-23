@@ -11,8 +11,7 @@ void configHID(USB_ConfigReport *data) {
     //brWheelFFB.offset = (MAX_ENCODER_ROTATION - ROTATION_MAX) / 2; //milos, commented
     //brWheelFFB.offset = 0; //milos, commented
 
-    if (data->Calibrate == 1)
-      brWheelFFB.calibrate();
+    if (data->Calibrate == 1) brWheelFFB.calibrate();
 
     configGeneralGain = constrain(data->GeneralGain, 0, 200);
     configConstantGain = constrain(data->ConstantGain, 0, 200);
@@ -25,15 +24,13 @@ void configHID(USB_ConfigReport *data) {
     configStopGain = constrain(data->StopGain, 0, 200);
 
     int16_t temp = data->MinForce;
-    if (temp < MM_MAX_MOTOR_TORQUE)
-    {
+    if (temp < MM_MAX_MOTOR_TORQUE) {
       MM_MIN_MOTOR_TORQUE = constrain(temp, 0, TOP - 1);
       data->Info = 99;
     }
 
     temp = data->MaxForce;
-    if (temp > MM_MIN_MOTOR_TORQUE)
-    {
+    if (temp > MM_MIN_MOTOR_TORQUE) {
       data->Info = 99;
       MM_MAX_MOTOR_TORQUE = constrain(temp, 1, TOP);
     }
@@ -57,6 +54,7 @@ void configHID(USB_ConfigReport *data) {
       uint8_t Info;
       uint8_t Version;*/
     data->Rotation = ROTATION_MAX / CPR * 360;
+    data->Offset = brWheelFFB.offset; //milos, added
     data->GeneralGain = configGeneralGain;
     data->ConstantGain = configConstantGain;
     data->DamperGain = configDamperGain;
@@ -73,4 +71,3 @@ void configHID(USB_ConfigReport *data) {
   //uint8_t *response = (uint8_t*)data;
   HID_SendReport(0xF2, (uint8_t*)data, 64);
 }
-

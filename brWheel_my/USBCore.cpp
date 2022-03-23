@@ -696,4 +696,3 @@ void USBDevice_::poll()
 }
 
 #endif /* if defined(USBCON) */
-

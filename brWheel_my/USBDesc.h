@@ -109,5 +109,3 @@
 
 #define IMANUFACTURER	1
 #define IPRODUCT		2
-
-

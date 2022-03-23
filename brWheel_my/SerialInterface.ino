@@ -130,7 +130,7 @@ void readSerial() {
         CPR = temp; // milos, update CPR
         ROTATION_MAX = int32_t(float(temp) / 360.0 * float(ROTATION_DEG)); // milos, updated
         ROTATION_MID = ROTATION_MAX / 2; // milos, updated
-        brWheelFFB.offset = 0; //milos
+        //brWheelFFB.offset = 0; //milos
         temp1 = int32_t(wheelAngle * float(ROTATION_MAX) / float(ROTATION_DEG)); // milos, here we recover the old wheel angle
         myEnc.Write(ROTATION_MID + temp1 - brWheelFFB.offset); // milos
         //CONFIG_SERIAL.print("encoder CPR[4-32767]: ");
@@ -150,7 +150,7 @@ void readSerial() {
         //brWheelFFB.offset = 0;
         myEnc.Write(ROTATION_MID); // milos
 #endif
-        CONFIG_SERIAL.println(1);
+        CONFIG_SERIAL.println(brWheelFFB.offset);
         break;
       case 'G': // milos, this was not working, fixed now
         temp = CONFIG_SERIAL.parseInt();
@@ -160,7 +160,7 @@ void readSerial() {
         ROTATION_DEG = temp; // milos, update degrees of rotation
         ROTATION_MAX = int32_t(float(CPR) / 360.0 * float(temp)); // milos, updated
         ROTATION_MID = ROTATION_MAX / 2; // milos, updated
-        brWheelFFB.offset = 0; //milos
+        //brWheelFFB.offset = 0; //milos
         temp1 = int32_t(wheelAngle * float(ROTATION_MAX) / float(ROTATION_DEG)); // milos, here we recover the old wheel angle
         myEnc.Write(ROTATION_MID + temp1 - brWheelFFB.offset); // milos
         //CONFIG_SERIAL.print("Rotation [30-1800]deg: "); // milos

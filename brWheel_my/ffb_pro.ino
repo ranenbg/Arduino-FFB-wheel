@@ -561,7 +561,7 @@ void BRFFB::calibrate() {
   }
 #else
   // milos, added Z-index lookup
-  // turn right at least 1 full turn or untill we encounter Z-index pulse
+  // turn right at least 1 full turn or until we encounter Z-index pulse
   startPos = myEnc.Read();
   SetPWM((MM_MAX_MOTOR_TORQUE - MM_MIN_MOTOR_TORQUE) / 4);
   for (uint16_t i = 0; i < 800; i++) {
@@ -861,4 +861,3 @@ void FfbproCreateNewEffect(USB_FFBReport_CreateNewEffect_Feature_Data_t* inData,
     uint16_t	byteCount;	// 0..511	- only valid with Custom Force
   */
 }
-

@@ -198,6 +198,7 @@ void cQuadEncoder::Update()
 #ifdef USE_ZINDEX //milos, added
   gIndexFound = true;
   zIndexFound = true;
+  brWheelFFB.state = 1;
   gPosition = ROTATION_MID;
 #endif
 }
@@ -211,4 +212,3 @@ ISR(INT3_vect)
 {
   gQuadEncoder.Update();
 }
-

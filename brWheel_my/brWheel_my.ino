@@ -3,7 +3,7 @@
 
   Copyright 2015  Etienne Saint-Paul  (esaintpaul [at] gameseed [dot] fr)
   Copyright 2017  Fernando Igor  (fernandoigor [at] msn [dot] com)
-  Copyright 2018-2021  Milos Rankovic (ranenbg [at] gmail [dot] com)
+  Copyright 2018-2022  Milos Rankovic (ranenbg [at] gmail [dot] com)
 
   Permission to use, copy, modify, distribute, and sell this
   software and its documentation for any purpose is hereby granted
@@ -195,10 +195,10 @@ void setup()
   ROTATION_MAX = uint16_t(float(CPR) / 360.0 * float(ROTATION_DEG)); // milos
   ROTATION_MID = ROTATION_MAX / 2; // milos
 
-  myEnc.Init(ROTATION_MID + brWheelFFB.offset, true); //ROTATION_MID + gCalibrator.mOffset); // milos, pullups enabled
+  //myEnc.Init(ROTATION_MID + brWheelFFB.offset, true); //ROTATION_MID + gCalibrator.mOffset); // milos, pullups enabled
+  myEnc.Init(ROTATION_MID, true); // milos, pullups enabled, do not apply any encoder offset here
 
   InitInputs();
-
   FfbSetDriver(0);
 
 #ifdef USE_VNH5019
@@ -209,7 +209,7 @@ void setup()
   SetPWM(0); // milos, set PWM (or DAC) to 0 at startup
 
 #ifdef USE_QUADRATURE_ENCODER
-  (CALIBRATE_AT_INIT ? brWheelFFB.calibrate() : myEnc.Write(ROTATION_MID + brWheelFFB.offset));
+  (CALIBRATE_AT_INIT ? brWheelFFB.calibrate() : myEnc.Write(ROTATION_MID)); //milos, allways set encoder at 0deg (ROTATION_MID) at startup
 #endif
 
 #ifdef USE_LCD //milos
@@ -250,7 +250,7 @@ void loop() {
 #endif
 #ifdef  USE_SHIFT_REGISTER
   for (uint8_t i = 0; i <= SHIFTS_NUM; i++) { //milos, added (read all states in one pass)
-    nextInputState();           // Refresh state of shift-register
+    nextInputState();           // Refresh all states of shift-register
   }
 #endif
 
@@ -261,12 +261,16 @@ void loop() {
     timeDiffConfigSerial = now_micros - last_ConfigSerial;
 
 #ifdef USE_QUADRATURE_ENCODER
-    if ((now_micros - last_refresh) >= CONTROL_PERIOD)
-    {
+    if ((now_micros - last_refresh) >= CONTROL_PERIOD) {
       //SYNC_LED_HIGH(); //milos
       last_refresh = now_micros;
 
-      turn = myEnc.Read() - ROTATION_MID + brWheelFFB.offset;
+      if (zIndexFound) {
+        turn = myEnc.Read() - ROTATION_MID + brWheelFFB.offset; //milos, only apply z-index offset if z-index pulse is found
+      } else {
+        turn = myEnc.Read() - ROTATION_MID;
+      }
+
       command = gFFB.CalcTorqueCommand(turn);
       turn *= f32(X_AXIS_PHYS_MAX) / f32(ROTATION_MAX); //milos
       turn = constrain(turn, -MID_REPORT_X, MID_REPORT_X); //milos
@@ -341,7 +345,7 @@ void loop() {
         if (hbrake > hbrakeMax) hbrakeMax = hbrake;
 
         // milos, rescale all axis according to new calibration
-#ifdef  USE_AUTOCALIB 
+#ifdef  USE_AUTOCALIB
         accel = map(accel, accelMin + dz, accelMax - dz, 0, Z_AXIS_PHYS_MAX);  // milos, with autocalibration
         clutch = map(clutch, clutchMin + dz, clutchMax - dz, 0, RX_AXIS_PHYS_MAX);
         hbrake = map(hbrake, hbrakeMin + dz, hbrakeMax - dz, 0, RY_AXIS_PHYS_MAX);
@@ -362,7 +366,7 @@ void loop() {
           brake = constrain(brake, 0, Y_AXIS_PHYS_MAX); // milos
         }
 #else // milos, when no LC
-#ifdef  USE_AUTOCALIB 
+#ifdef  USE_AUTOCALIB
         brake = map(brake, brakeMin + dz, brakeMax - dz, 0, Y_AXIS_PHYS_MAX); // milos, with autocalibration
 #else
         brake = map(brake, 0 + dz, 4095 - dz, 0, Y_AXIS_PHYS_MAX); // milos, no autocalibration

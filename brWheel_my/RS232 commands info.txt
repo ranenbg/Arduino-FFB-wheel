@@ -1,54 +1,66 @@
 Milos Rankovic, ranenbg@gmail.com
 first created 25.03.2020.
-last update 27.07.2021.
+last update 08.03.2022.
 
 This txt file contains a list of all available RS232 serial interface commands implemented in my latest Arduino Leonardo FFB wheel firmware version (you can use this info to make your own control UI)
 
-Arduino boards are also recognized as a serial communication device due to FTDI chip and drivers, through which we can send or receive commands from the microcontroler
+Arduino boards are also recognized as a serial communication device due to FTDI chip CH340 and drivers, through which we can send or receive commands from the microcontroler
 
 RS232,   commands are not case sensitive (in this manual cappital letters are used)
-         some commands do not have any parrameter following a letter, but if they have a range of available input values will be shown
-         all commands must be terminated with CR: carage retturn - char(13)
-         arduino terminates all responses at CR+LF: both carrage retturn - char(13) and line feed - char(10)
+         some commands do not have any parameter following a letter, but if they have, a range of available input values will be shown
+         all commands must be terminated with CR: carriage return - char(13)
+         arduino terminates all responses at CR+LF: both carriage return - char(13) and line feed - char(10)
          some commands have response and some don't (null means no response in this txt file)
-         most commands can apply changes right away, but some requre Arduino restart (for PWM settings - reconfiguration of internal timer registers is neccessary)
+         most commands can apply changes right away, but some require Arduino restart (for PWM settings - reconfiguration of internal timer registers is neccessary)
          if a restart is needed, do not send any additional commands before restart
          firmware will check if any command is received every 10ms (100 times per second)
          usual Arduino response time is within few ms
-         at each startup firmware will automaticaly configure all settings from EEPROM (for load cell - it will take 2 sec to do tare zero-ing)
-         ffb clip LED will quickly blink 3 times to indicate that everything is loaded, configured and ready
+         at each startup firmware will automaticaly configure all settings from EEPROM (for load cell - it will take 2 sec to do tare zeroing)
+         FFB clip LED will quickly blink 3 times to indicate that everything is loaded, configured and ready
 
 version, i tried to put some logic in firmware naming, so here is some basic explanation:
-         fw-v XX,  two digits only are a test versions of new firmware features
-         fw-v XX0, three digits ending with 0 - no support for external button box and load cell
-         fw-v XX1, three digits ending with 1 - support for external button box only
-         fw-v XX2, three digits ending with 2 - support for both external button box and load cell
+         fw-vXX,  two digits only are a test versions of new firmware features
+         fw-vXX0, three digits ending with 0 - the basic firmware with no external devices support, except for optical encoder
+         fw-vXX1, three digits ending with 1 - adds support for external button box
+         fw-vXX2, three digits ending with 2 - adds support for both external button box and load cell
+         fw-vXX3, three digits ending with 3 - adds support for external button box, load cell and two external 12bit DAC - MCP4725
+
+options, firmware version include some letter after 2 or 3 digit number, here is what they mean:
+         a - pedal autocalibration enabled
+         z - encoder z-index support
+         h - enabled Hat Switch (uses first 4 buttons from button box)
+         s - enabled external 12bit ADC - ADS1105 (for analog inputs)
+         d - enabled external 12bit DAC - MCP4725 (for analog FFB output)
+         m - replacement pinouts for ProMicro (for FFB clipping LED and buttons 3,4)
 
 [1] all wheel parameters read out
 received numbers are: wheel rotation angle, general, damper, friction, constant, 
 periodic, spring, inertia, autocenter spring and end stop spring effect gains,
 min PWM, brake pressure, desktop effects, max PWM, CPR and PWM settings
 command		example response
-U		900 100 50 50 100 100 100 50 70 0 0 45 1 500 1600 9
+U		1080 100 50 50 100 100 100 50 70 0 0 45 1 500 2400 9
 
 [2] show firmware version
 command		example response
-V		fw-v142
+V		fw-v172ah
 
 [3] show wheel, encoder and calibration states
-0 - ok, not calibrated
-1 - calibrated
+0 - not calibrated or no z-index found
+1 - calibrated or z-index found
 2 - calibration error
 command		example response
 S		s-0
 
 [4] re-calibrate wheel
-will try to rotate wheel to the right untill a mechanical end stop is detected
-do not use this command if you do not have a mechanical limits for wheel rotation installed
+for firmware without "z" option, this procedure will try to rotate wheel to the right untill a mechanical end stop is detected
+do not use this command if you do not have a mechanical limits for wheel rotation installed, you can use center command instead
+for firmware with "z" option, this procedure will rotate the wheel untill a z-index pulse from encoder is detected
+at the position of z-index a 0deg value will be assigned, return the wheel by hand to center and send center command
+this will save the z-index pulse position in EEPROM and on next powerup as soon as z-index is detected the wheel will be autocentered
 command		example response
 R		null
 
-[5] adjust load cell brake pressure calibration factor (valid for fw-v XX2 only, for all others it becomes a *PWM balance slider)
+[5] adjust load cell brake pressure calibration factor (valid for fw-v XX2 only, for all other it becomes a *PWM balance slider)
 sent and received number is only a relative value
 each load cell will have a different max force
 value of 4 will give 1:1 reading from HX711 24bit ADC chip
@@ -73,13 +85,14 @@ encoders usualy have specified PPR - pulses per revolution
 CPR = 4 * PPR * X
 X=1 if encoder is directly mounted to the wheel rim, otherwise it is a gear ratio between encoder and wheel shafts
 command		example response	range
-O 2400		1			4-32767
+O 2400		1			from 4 to 65535/(ROT_DEG/360)
 
 [8] re-center wheel
 use this command to reset 0deg position of your wheel rim (after you manualy centering the wheel)
-this will be required each time arduino is powered off or reset, but it's very quick and easy to do
-command		example response
-C		1
+this will be required each time arduino is powered on or reset, but it's very quick and easy to do
+for HEX firmware with "z" option enabled, the response is the value of z-index offset in the units of encoder CPR
+command		example response	range
+C		0			from -CPR to +CPR
 
 [9] adjust wheel rotation angle 
 sent and received number is in degrees (lock-to-lock)

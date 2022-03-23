@@ -8,6 +8,7 @@ typedef struct
 {
   uint8_t ReportId;
   uint16_t Rotation;
+  int16_t Offset; //milos, added
   uint8_t GeneralGain;
   uint8_t ConstantGain;
   uint8_t DamperGain;
@@ -29,4 +30,3 @@ typedef struct
 void configHID(USB_ConfigReport *data);
 
 #endif // _CONFIGHID_H_
-

@@ -16,7 +16,7 @@
 ** SOFTWARE.
 */
 
-//#include "Platform.h"
+#include "Platform.h"
 #include "USBAPI.h"
 #include "USBDesc.h"
 #include "HID.h"

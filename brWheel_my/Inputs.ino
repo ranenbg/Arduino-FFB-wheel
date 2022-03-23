@@ -191,7 +191,11 @@ void InitButtons() { // milos, added - if not using shift register, allocate som
 #endif
   pinModeFast(BUTTON1, INPUT_PULLUP);
   pinModeFast(BUTTON2, INPUT_PULLUP);
-  pinModeFast(BUTTON3, INPUT_PULLUP);
+#ifdef USE_PROMICRO
+#ifndef USE_ZINDEX
+  pinModeFast(BUTTON3, INPUT_PULLUP); // if we use pro micro but not z-index
+#endif // end of z-index
+#endif // end of pro micro
 }
 #endif
 
@@ -272,7 +276,7 @@ u32 readInputButtons() {
   /*Serial.print(btnVal_SW, BIN); // milos
     Serial.print(" "); // milos
     Serial.println(btnVal_H, BIN); // milos*/
-    
+
 #else  // milos, when no shift reg, use Arduino Leonardo for 3 or 4 buttons
 #ifdef USE_LOAD_CELL // milos - only available if we use a load cell
   bitWrite(buttons, 0, bitRead(digitalReadFast(BUTTON0), B0PORTBIT)); // milos, read bit4 from PORTF A3 into buttons bit0
@@ -281,7 +285,15 @@ u32 readInputButtons() {
 #endif //end of lc
   bitWrite(buttons, 1, bitRead(digitalReadFast(BUTTON1), B1PORTBIT)); // milos, read bit1 from PORTF A4 (or bit3 from PORTB, pin14 on ProMicro) into buttons bit1
   bitWrite(buttons, 2, bitRead(digitalReadFast(BUTTON2), B2PORTBIT)); // milos, read bit0 from PORTF A5 (or bit1 from PORTB, pin15 on ProMicro) into buttons bit2
+#ifdef USE_PROMICRO
+#ifndef USE_ZINDEX
   bitWrite(buttons, 3, bitRead(digitalReadFast(BUTTON3), B3PORTBIT)); // milos, read bit6 from PORTD D12 into buttons bit3
+#else //milos, we can not have button3 for promicro when we use z-index encoder
+  bitWrite(buttons, 3, 0);
+#endif // end of z-index
+#else //milos, if we use promicro but do not use z-index we can have button3
+  bitWrite(buttons, 3, bitRead(digitalReadFast(BUTTON3), B3PORTBIT)); // milos, read bit1 from PORTD D2 into buttons bit3
+#endif // end of pro micro
 #endif //end of shift reg
 
 #ifdef USE_LOAD_CELL // milos - only available if we use a load cell
@@ -337,4 +349,3 @@ void AverageAnalogInputs () {
   }
 }
 #endif
-

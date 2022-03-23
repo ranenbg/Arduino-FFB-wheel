@@ -42,4 +42,5 @@ version		features
 171ah		encoder, 4 axis, 4 (1 hat switch) + 24 buttons, pedal autocalib, 1FFB axis
 172h		encoder, 3 axis + 1 for load cell, 4 (1 hat switch) + 24 buttons, no pedal autocalib, 1FFB axis 
 172ah		encoder, 3 axis + 1 for load cell, 4 (1 hat switch) + 24 buttons, pedal autocalib, 1FFB axis
+172azh		encoder + Z-index, 3 axis + 1 for load cell, 4 (1 hat switch) + 24 buttons, pedal autocalib, 1FFB axis
 173azh		encoder + Z-index, 3 axis + 1 for load cell, 4 (1 hat switch) + 24 buttons, pedal autocalib, 1FFB axis, FFB output with 2xDAC (adafruit MCP4725) - recommended for DD wheels

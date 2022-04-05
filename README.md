@@ -18,9 +18,9 @@ Firmware features:
 Detailed documentation and more information about the firmware can be found in txt files inside brWheel_my folder.
 
 Firmware v17x pinouts - for Arduino Leonardo, Micro or ProMicro
-![plot](./brWheel_my/Firmware-v17x%20pinout.png)
+![plot](./brWheel_my/Firmware-v18x%20pinout.png)
 Button box firmware pinouts - for Arduino Nano/Uno
-![plot](./brWheel_my/Firmware-v141%20button%20box%20pinout.png)
+![plot](./brWheel_my/Firmware-vXX1%20button%20box%20pinout.png)
 
 Firmware upload procedure with XLoader https://github.com/xinabox/xLoader:
 - set 57600baud, ATMega32U4 microcontroler and select desired HEX

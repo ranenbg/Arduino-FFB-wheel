@@ -1,6 +1,6 @@
 Milos Rankovic, ranenbg@gmail.com
 first created 25.03.2020.
-last update 08.03.2022.
+last update 05.04.2022.
 
 This txt file contains a list of all available RS232 serial interface commands implemented in my latest Arduino Leonardo FFB wheel firmware version (you can use this info to make your own control UI)
 
@@ -49,7 +49,7 @@ V		fw-v172ah
 1 - calibrated or z-index found
 2 - calibration error
 command		example response
-S		s-0
+S		1			
 
 [4] re-calibrate wheel
 for firmware without "z" option, this procedure will try to rotate wheel to the right untill a mechanical end stop is detected
@@ -92,7 +92,7 @@ use this command to reset 0deg position of your wheel rim (after you manualy cen
 this will be required each time arduino is powered on or reset, but it's very quick and easy to do
 for HEX firmware with "z" option enabled, the response is the value of z-index offset in the units of encoder CPR
 command		example response	range
-C		0			from -CPR to +CPR
+C		1			from -CPR to +CPR
 
 [9] adjust wheel rotation angle 
 sent and received number is in degrees (lock-to-lock)
@@ -136,7 +136,7 @@ FD 100		1			0-200
 command		example response	range
 FF 100		1			0-200
 
-[17] adjust FFB periodic effect gain (affects sine, triangle, square, sawtoothup and sawtoothdown effects) 
+[17] adjust FFB periodic effect gain (affects sine, triangle, square, sawtoothup and sawtoothdown effects only) 
 command		example response	range
 FS 100		1			0-200
 

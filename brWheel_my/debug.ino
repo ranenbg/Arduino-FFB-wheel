@@ -39,7 +39,7 @@ const u8 DEBUG_DETAIL = 4; // Include additional details to debug data
 // Controls whether debug data contains data as hexadecimal ascii instead of as raw binary
 #define DEBUG_DATA_AS_HEX
 
-volatile u8 gDebugMode = 0;// DEBUG_TO_NONE;//2; // set this higher if debugging e.g. at startup is needed
+volatile u8 gDebugMode = 1;// DEBUG_TO_NONE;//1; // set this higher if debugging e.g. at startup is needed
 
 #ifdef DEBUG_ENABLE_USB
 // Internal buffer for sending debug data to USB COM-port
@@ -49,6 +49,7 @@ volatile uint16_t debug_buffer_used = 0;
 
 void LogSendData(u8 *data, uint16_t len)
 {
+#ifdef DEBUG_FFB
   if (gDebugMode == DEBUG_TO_NONE)
     return;
 
@@ -64,11 +65,13 @@ void LogSendData(u8 *data, uint16_t len)
     LogSendByte(data[i]);
 #endif
   }
+#endif
 }
 
 
 void LogText(const char *text)
 {
+#ifdef DEBUG_FFB
   if (gDebugMode == DEBUG_TO_NONE)
     return;
 
@@ -81,21 +84,25 @@ void LogText(const char *text)
       LogSendByte('\r');	// CR
     LogSendByte(c);
   }
+#endif
 }
 
 void LogTextLf(const char *text)
 {
+#ifdef DEBUG_FFB
   if (gDebugMode == DEBUG_TO_NONE)
     return;
 
   LogText(text);
   LogSendByte('\r');	// CR
   LogSendByte('\n');	// LF
+#endif
 }
 
 
 void LogTextP(const char *text)
 {
+#ifdef DEBUG_FFB
   if (gDebugMode == DEBUG_TO_NONE)
     return;
 
@@ -108,31 +115,37 @@ void LogTextP(const char *text)
       LogSendByte('\r');	// CR
     LogSendByte(c);
   }
+#endif
 }
 
 void LogTextLfP(const char *text)
 {
+#ifdef DEBUG_FFB
   if (gDebugMode == DEBUG_TO_NONE)
     return;
 
   LogTextP(text);
   LogSendByte('\r');	// CR
   LogSendByte('\n');	// LF
+#endif
 }
 
 
 void LogBinary(const void *data, uint16_t len)
 {
+#ifdef DEBUG_FFB
   if (gDebugMode == DEBUG_TO_NONE)
     return;
 
   u8 temp = (u8) (len & 0xFF);
   if (temp > 0)
     LogSendData((u8*) data, temp);
+#endif
 }
 
 void LogBinaryLf(const void *data, uint16_t len)
 {
+#ifdef DEBUG_FFB
   if (gDebugMode == DEBUG_TO_NONE)
     return;
 
@@ -141,31 +154,37 @@ void LogBinaryLf(const void *data, uint16_t len)
     LogSendData((u8*) data, temp);
   LogSendByte('\r');	// CR
   LogSendByte('\n');	// LF
+#endif
 }
 
 void LogData(const char *text, u8 reportId, const void *data, uint16_t len)
 {
+#ifdef DEBUG_FFB
   if (gDebugMode == DEBUG_TO_NONE)
     return;
 
   LogText(text);
   LogBinary(&reportId, 1);
   LogBinary(data, len);
+#endif
 }
 
 void LogDataLf(const char *text, u8 reportId, const void *data, uint16_t len)
 {
+#ifdef DEBUG_FFB
   if (gDebugMode == DEBUG_TO_NONE)
     return;
 
   LogText(text);
   LogBinary(&reportId, 1);
   LogBinaryLf(data, len);
+#endif
 }
 
 // Log all reports found in the given data (may have one or more)
 void LogReport(const char *text, const uint16_t *reportSizeArray, u8 *data, uint16_t len)
 {
+#ifdef DEBUG_FFB
   if (gDebugMode == DEBUG_TO_NONE)
     return;
 
@@ -183,6 +202,7 @@ void LogReport(const char *text, const uint16_t *reportSizeArray, u8 *data, uint
   }
   LogSendByte('\r');	// CR
   LogSendByte('\n');	// LF
+#endif
 }
 
 b8 DoDebug(const u8 type)
@@ -205,5 +225,3 @@ void LogSendByte(u8 data)
 void FlushDebugBuffer(void)
 {
 }
-
-

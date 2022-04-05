@@ -56,10 +56,13 @@
 //#define SHIFTER_X_PIN		A4 // milos, commented
 //#define SHIFTER_Y_PIN		A5 // milos, commented
 
-// milos, added - for alternate 3 button option - only available if we use a load cell
+// milos, added - for alternate button0 options
 #ifdef USE_LOAD_CELL //milos
 #define BUTTON0 A3 // A3, used for button0
 #define B0PORTBIT 4 // read bit4
+#else
+#define BUTTON0 4 // D4, used for button0
+#define B0PORTBIT 4 // read bit4 of PIND
 #endif
 
 #ifndef USE_PROMICRO // milos, added - for Leonardo or Micro
@@ -75,15 +78,24 @@
 #define BUTTON2 15 // pin15, used for button2 instead
 #define B2PORTBIT 1 // bit1
 #define BUTTON3 2 // pin2, used for button3 instead
-#define B3PORTBIT 1 // read bit1 of PORTD
+#define B3PORTBIT 1 // read bit1 of PIND
 #endif
 
+#ifdef USE_SHIFT_REGISTER //milos, added
 #define SHIFTREG_PL			  8	  // PL SH/LD (Shift or Load input) // milos, was 4
 #define SHIFTREG_CLK		  7 	// CLOCK 8-bit Parallel shift // milos, was 5 //my was 12, temp set to 7
 #define SHIFTREG_DATA_SW	6		// DATA from Steering Wheel
 //#define SHIFTREG_DATA_H		7		// DATA from Shifter H (Dual 8-bit) //milos, not in use
 //#define SHIFTREG_DATA_OUT	13	// DATA Shift-Out LED (8-bit)   ###### NOT YET IMPLEMENTED ###### //milos, was 3
 #define SHIFTS_NUM  33 // milos, added - defines number of shifts for shift register from the button box (depends on number of buttons we want to read, see inputs.ino)
+#else //milos, if no shift reg re-alocate some pins to button4-6 instead
+#define BUTTON4 6 // D6 or bit7 of PIND
+#define B4PORTBIT 7 // bit7
+#define BUTTON5 7 // D7 or bit6 of PINE
+#define B5PORTBIT 6 // bit6
+#define BUTTON6 8 // D8 or bit4 of PINB
+#define B6PORTBIT 4 // bit4
+#endif //end of shift reg
 
 #ifdef USE_DSP56ADC16S
 #define ADC_PIN_CLKIN		5
@@ -149,7 +161,7 @@ uint8_t LC_scaling; // milos, load cell scaling factor (affects brake pressure, 
 #define PARAM_ADDR_ENC_CPR       0x19 //milos, encoder CPR
 #define PARAM_ADDR_PWM_SET       0x1D //milos, PWM settings and frequency (byte contents is in pwmstate)
 
-#define VERSION		0xAC // milos, this is my version (previous was 8)
+#define VERSION		0xB6 // milos, this is my version (previous was 8)
 
 #define GetParam(m_offset,m_data)	getParam((m_offset),(u8*)&(m_data),sizeof(m_data))
 #define SetParam(m_offset,m_data)	setParam((m_offset),(u8*)&(m_data),sizeof(m_data))
@@ -250,7 +262,7 @@ boolean zIndexFound = false; //milos, added
 // milos, added - function for decoding hat switch bits
 uint32_t decodeHat(uint32_t inbits) {
   byte hat;
-  byte dec = 0b00001111 & inbits;
+  byte dec = 0b00001111 & inbits; //milos, only take 1st 4 bits from inbits
   if (dec == 1) { //up
     hat = 1;
   } else if (dec == 2) { //right
@@ -270,7 +282,7 @@ uint32_t decodeHat(uint32_t inbits) {
   } else {
     hat = 0;
   }
-  return ((inbits & 0b11111111111111111111111111110000) | (hat & 0b00001111)); // milos, put first 4 bits from hat into buttons
+  return ((inbits & 0b11111111111111111111111111110000) | (hat & 0b00001111)); // milos, put hat bits into first 4 bits of buttons and keep the rest unchanged
 }
 
 #endif // _CONFIG_H_

@@ -44,7 +44,8 @@
 // bare in mind the Nyquist sampling frequency, for 500Hz we can reproduce up to 250Hz wave (4ms period)
 // that should be more than enough for all vibrational effects
 u32 t0 = 0; //milos, added
-u16 effectTime[MAX_EFFECTS+1]; //milos, added - ffb calculation timer (individual effect elapsed playing time in ms, max is 65535)
+u32 effectTime[MAX_EFFECTS]; //milos, added - ffb calculation timer (effect elapsed playing time in ms, max is 65535)
+bool t0_updated = false; //milos, added - keeps track if we updated zero time when effects start
 
 // ---- Input
 
@@ -70,8 +71,8 @@ typedef struct
   uint8_t	enableAxis; // bits: 0=X, 1=Y, 2=DirectionEnable
   //uint8_t	directionX;	// angle (0=0 .. 255=360deg) //milos, commented
   //uint8_t	directionY;	// angle (0=0 .. 255=360deg) //milos, commented
-  uint8_t direction; // angle (0=0 .. 255=359, exp 0, deg) //milos, 8bit
-  //uint16_t direction; // angle (0=0 .. 35999=35999, exp -2, deg) //milos, 16bit
+  //uint8_t direction; // angle (0=0 .. 255=359, exp 0, deg) //milos, 8bit
+  uint16_t direction; // angle (0=0 .. 32767=35999, exp -2, deg) //milos, 16bit
   uint16_t startDelay;	// 0..65535, exp -3, s //milos, uncommented
 } USB_FFBReport_SetEffect_Output_Data_t;
 
@@ -292,9 +293,9 @@ typedef struct
 {
   u8 state;	// see constants MEffectState_*
   u8 type;	// see constants USB_EFFECT_*
-  u8 attackLevel, fadeLevel, deadBand, direction; //, deviceGain; //milos, added deadBand, direction and deviceGain
+  u8 attackLevel, fadeLevel, deadBand, enableAxis; //milos, added deadBand and enableAxis
   s8 rampStart, rampEnd; //milos, added
-  u16 gain, period; // samplingPeriod;	// ms //milos, changed gain from u8 to u16, added samplingPeriod
+  u16 gain, period, direction; // samplingPeriod;	// ms //milos, changed gain from u8 to u16, added samplingPeriod
   u16 duration, fadeTime, attackTime, startDelay; //milos, added attackTime and startDelay
   s16 magnitude, positiveSaturation;  //milos, added positiveSaturation
   s16 offset;
@@ -324,4 +325,3 @@ typedef struct
 } FFB_Driver;
 
 #endif // _FFB_PRO_
-

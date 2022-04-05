@@ -390,12 +390,11 @@ void loop() {
         ClearAnalogInputs();
 #endif
         if (timeDiffConfigSerial >= CONFIG_SERIAL_PERIOD) {
-          if (CONFIG_SERIAL.available() > 0) {
-            readSerial();
-          }
+          readSerial();
           last_ConfigSerial = now_micros;
         }
       }
+      //SYNC_LED_LOW(); //milos
     }
 #endif
   }

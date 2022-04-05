@@ -43,7 +43,7 @@ extern volatile u8 gDebugMode;
 b8 DoDebug(const u8 type);
 
 // If below are defined, code for respective debug target is included into build
-//#define DEBUG_ENABLE_UART
+#define DEBUG_ENABLE_UART
 //#define DEBUG_ENABLE_USB
 
 #define DEBUG_BUFFER_SIZE 512
@@ -90,4 +90,3 @@ void FlushDebugBuffer(void);
 #endif
 
 #endif // _DEBUG_H_
-

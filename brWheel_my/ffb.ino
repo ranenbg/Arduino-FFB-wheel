@@ -4,6 +4,7 @@
   Copyright 2012  Tero Loimuneva (tloimu [at] gmail [dot] com)
   Copyright 2013  Saku Kekkonen
   Copyright 2015  Etienne Saint-Paul  (esaintpaul [at] gameseed [dot] fr)
+  Copyright 2018-2022  Milos Rankovic (ranenbg [at] gmail [dot] com)
 
   Permission to use, copy, modify, distribute, and sell this
   software and its documentation for any purpose is hereby granted
@@ -117,7 +118,6 @@ b8 HID_GetReport (Setup& setup)
 
 b8 HID_SetReport (Setup& setup)
 {
-
   u8 report_id = setup.wValueL;
   u8 report_type = setup.wValueH;
   if (report_id == 5)
@@ -192,14 +192,13 @@ uint8_t GetNextFreeEffect(void)
       break;	// the last spot was taken
     nextEID++;
   }
-
   gEffectStates[id].state = MEffectState_Allocated;
-
   return id;
 }
+
 void StopAllEffects(void)
 {
-  LogTextLf("FFB.ino StopAllEffects ");
+  LogTextLf("FFB.ino StopAllEffects");
   for (uint8_t id = FIRST_EID; id <= MAX_EFFECTS; id++)
     StopEffect(id);
 }
@@ -209,6 +208,11 @@ void StartEffect(uint8_t id)
   if ((id > MAX_EFFECTS) || (gEffectStates[id].state == 0))
     return;
   gEffectStates[id].state |= MEffectState_Playing;
+  //milos, added - update zero time only when first effect starts
+  if (!t0_updated) {
+    t0 = millis();
+    t0_updated = true;
+  }
 }
 
 void StopEffect(uint8_t id)
@@ -216,8 +220,10 @@ void StopEffect(uint8_t id)
   if ((id > MAX_EFFECTS) || (gEffectStates[id].state == 0))
     return;
   gEffectStates[id].state &= ~MEffectState_Playing;
-  if (!gDisabledEffects.effectId[id])
+  if (!gDisabledEffects.effectId[id]) {
     ffb->StopEffect(id);
+    t0_updated = false; //milos, added
+  }
 }
 
 void FreeEffect(uint8_t id)
@@ -225,21 +231,18 @@ void FreeEffect(uint8_t id)
   gFFB.mAutoCenter = true;
   if (id > MAX_EFFECTS)
     return;
-
-  LogText("FFB.ino Free effect ");
-  LogBinaryLf(&id, 1);
   gEffectStates[id].state = 0;
   if (id < nextEID)
     nextEID = id;
-
   ffb->FreeEffect(id);
+  t0_updated = false; //milos, added
 }
 
 void FreeAllEffects(void)
 {
-  LogTextLf("FFB.ino Free All effects");
   nextEID = FIRST_EID;
   memset((void*) gEffectStates, 0, sizeof(gEffectStates));
+  LogTextLf("FFB.ino FreeAllEffects");
 }
 
 // Lengths of each report type
@@ -282,34 +285,71 @@ void FfbOnUsbData(uint8_t *data, uint16_t len)
   {
     case 1:
       FfbHandle_SetEffect((USB_FFBReport_SetEffect_Output_Data_t *) data);
-      //LogTextLf("Set Effect");
+      //milos, added
+      LogText("SetEff - index:");
+      LogBinary(&((USB_FFBReport_SetEffect_Output_Data_t*)data)->effectBlockIndex, 1);
+      LogText(", type:");
+      LogBinary(&((USB_FFBReport_SetEffect_Output_Data_t*)data)->effectType, 1);
+      LogText(", gain:");
+      LogBinary(&((USB_FFBReport_SetEffect_Output_Data_t*)data)->gain, 2);
+      LogText(", dur:");
+      LogBinary(&((USB_FFBReport_SetEffect_Output_Data_t*)data)->duration, 2);
+      LogText(", dly:");
+      LogBinary(&((USB_FFBReport_SetEffect_Output_Data_t*)data)->startDelay, 2);
+      LogText(", dir:");
+      LogBinary(&((USB_FFBReport_SetEffect_Output_Data_t*)data)->direction, 2);
+      LogText(", axis:");
+      LogBinaryLf(&((USB_FFBReport_SetEffect_Output_Data_t*)data)->enableAxis, 1);
       break;
     case 2:
       ffb->SetEnvelope((USB_FFBReport_SetEnvelope_Output_Data_t*) data, &gEffectStates[effectId]);
-      //LogTextLf("Set Envelope");
+      //milos, added
+      LogText("SetEnv - aL:");
+      LogBinary(&((USB_FFBReport_SetEnvelope_Output_Data_t*)data)->attackLevel, 1);
+      LogText(", aT:");
+      LogBinary(&((USB_FFBReport_SetEnvelope_Output_Data_t*)data)->attackTime, 2);
+      LogText(", fL:");
+      LogBinary(&((USB_FFBReport_SetEnvelope_Output_Data_t*)data)->fadeLevel, 1);
+      LogText(", fT:");
+      LogBinaryLf(&((USB_FFBReport_SetEnvelope_Output_Data_t*)data)->fadeTime, 2);
       break;
     case 3:
       ffb->SetCondition((USB_FFBReport_SetCondition_Output_Data_t*) data, &gEffectStates[effectId]);
-      /*LogText("Set Condition - offset : ");
-        LogBinary(&((USB_FFBReport_SetCondition_Output_Data_t*)data)->cpOffset, 2);
-        LogText(" ,PositiveCoef : ");
-        LogBinary(&((USB_FFBReport_SetCondition_Output_Data_t*)data)->positiveCoefficient, 2);
-        LogText(" ,PositiveSaturation : ");
-        LogBinary(&((USB_FFBReport_SetCondition_Output_Data_t*)data)->positiveSaturation, 2);
-        LogText(" ,DeadBand : ");
-        LogBinaryLf(&((USB_FFBReport_SetCondition_Output_Data_t*)data)->deadBand, 1);*/
+      //milos, added
+      LogText("SetCond - cpOff:");
+      LogBinary(&((USB_FFBReport_SetCondition_Output_Data_t*)data)->cpOffset, 2);
+      LogText(", posC:");
+      LogBinary(&((USB_FFBReport_SetCondition_Output_Data_t*)data)->positiveCoefficient, 2);
+      LogText(", posS:");
+      LogBinary(&((USB_FFBReport_SetCondition_Output_Data_t*)data)->positiveSaturation, 2);
+      LogText(", deadB:");
+      LogBinaryLf(&((USB_FFBReport_SetCondition_Output_Data_t*)data)->deadBand, 1);
       break;
     case 4:
       ffb->SetPeriodic((USB_FFBReport_SetPeriodic_Output_Data_t*) data, &gEffectStates[effectId]);
-      //LogTextLf("Set Periodic");
+      //milos, added
+      LogText("SetPer - mag:");
+      LogBinary(&((USB_FFBReport_SetPeriodic_Output_Data_t*)data)->magnitude, 2);
+      LogText(", off:");
+      LogBinary(&((USB_FFBReport_SetPeriodic_Output_Data_t*)data)->offset, 2);
+      LogText(", phs:");
+      LogBinary(&((USB_FFBReport_SetPeriodic_Output_Data_t*)data)->phase, 1);
+      LogText(", per:");
+      LogBinaryLf(&((USB_FFBReport_SetPeriodic_Output_Data_t*)data)->period, 2);
       break;
     case 5:
       ffb->SetConstantForce((USB_FFBReport_SetConstantForce_Output_Data_t*) data, &gEffectStates[effectId]);
-      //LogTextLf("Set Constant Force");
+      //milos, added
+      LogText("SetCF - mag:");
+      LogBinaryLf(&((USB_FFBReport_SetConstantForce_Output_Data_t*)data)->magnitude, 2);
       break;
     case 6:
       ffb->SetRampForce((USB_FFBReport_SetRampForce_Output_Data_t*)data, &gEffectStates[effectId]);
-      //LogTextLf("Set Ramp Force");
+      //milos, added
+      LogText("SetRF - start:");
+      LogBinary(&((USB_FFBReport_SetRampForce_Output_Data_t*)data)->rampStart, 1);
+      LogText(", end:");
+      LogBinaryLf(&((USB_FFBReport_SetRampForce_Output_Data_t*)data)->rampEnd, 1);
       break;
     case 7:
       //FfbHandle_SetCustomForceData((USB_FFBReport_SetCustomForceData_Output_Data_t*) data); //milos, commented since there was nothing implemented inside
@@ -323,19 +363,28 @@ void FfbOnUsbData(uint8_t *data, uint16_t len)
       break;
     case 10:
       FfbHandle_EffectOperation((USB_FFBReport_EffectOperation_Output_Data_t*) data);
-      //LogTextLf("Set operation");
+      //milos, added
+      LogText("SetEffOper - op:");
+      LogBinary(&((USB_FFBReport_EffectOperation_Output_Data_t*)data)->operation, 1);
+      LogText(", loop:");
+      LogBinaryLf(&((USB_FFBReport_EffectOperation_Output_Data_t*)data)->loopCount, 1);
       break;
     case 11:
       FfbHandle_BlockFree((USB_FFBReport_BlockFree_Output_Data_t *) data);
-      //LogTextLf("Set blockfree");
+      //milos, added
+      LogText("SetBlockFree - id:");
+      LogBinaryLf(&((USB_FFBReport_BlockFree_Output_Data_t *)data)->effectBlockIndex, 1);
       break;
     case 12:
       FfbHandle_DeviceControl((USB_FFBReport_DeviceControl_Output_Data_t*) data);
-      //LogTextLf("Set devicecontrol");
+      LogText("SetDeviceControl:");
+      LogBinaryLf(&((USB_FFBReport_DeviceControl_Output_Data_t*)data)->control, 1);
       break;
     case 13:
       FfbHandle_DeviceGain((USB_FFBReport_DeviceGain_Output_Data_t*) data);
-      //LogTextLf("Set device gain");
+      //milos, added
+      LogText("SetDeviceGain:");
+      LogBinaryLf(&((USB_FFBReport_DeviceGain_Output_Data_t*)data)->deviceGain, 1);
       break;
     case 14:
       //FfbHandle_SetCustomForce((USB_FFBReport_SetCustomForce_Output_Data_t*) data); //milos, commented since there was nothing implemented inside
@@ -376,6 +425,7 @@ void FfbOnCreateNewEffect (USB_FFBReport_CreateNewEffect_Feature_Data_t* inData,
     effect->fadeLevel = 0xFF;
     effect->startDelay = 0x00; //milos, added
     effect->direction = 0x00; //milos, added - 0deg
+    effect->enableAxis = 0x00; //milos, added - enable X-axis
     effect->gain = 0x7FFF; //milos, changed from 0xFF since it is now 16bit (32767)
     effect->magnitude = 0; // milos, added
     effect->offset = 0x00;
@@ -384,9 +434,9 @@ void FfbOnCreateNewEffect (USB_FFBReport_CreateNewEffect_Feature_Data_t* inData,
 
     ffb->CreateNewEffect(inData, effect);
 
-    LogText("Created effect ");
+    LogText("Created effect");
     LogBinary(&outData->effectBlockIndex, 1);
-    LogText(", type ");
+    LogText(", type");
     LogBinaryLf(&inData->effectType, 1);
   }
   outData->ramPoolAvailable = 0xFFFF;	// =0 or 0xFFFF - don't really know what this is used for?
@@ -397,7 +447,7 @@ void FfbHandle_SetEffect(USB_FFBReport_SetEffect_Output_Data_t *data)
 {
   volatile TEffectState* effect = &gEffectStates[data->effectBlockIndex];
   ffb->SetEffect(data, effect);
-  LogTextLf("Set Effect");
+  //LogTextLf("Set Effect"); //milos, commented
 }
 
 void FfbOnPIDPool(USB_FFBReport_PIDPool_Feature_Data_t *data)
@@ -406,7 +456,7 @@ void FfbOnPIDPool(USB_FFBReport_PIDPool_Feature_Data_t *data)
 
   data->reportId = 7;
   data->ramPoolSize = 0xFFFF;
-  data->maxSimultaneousEffects = 0x0A;	// FFP supports playing up to 10 simultaneous effects
+  data->maxSimultaneousEffects = 0x0B;	// FFP supports playing up to 11 simultaneous effects
   data->memoryManagement = 3;
 }
 
@@ -429,7 +479,8 @@ void FfbHandle_EffectOperation(USB_FFBReport_EffectOperation_Output_Data_t *data
 
   if (data->operation == 1)
   { // Start
-    LogTextLf("Start Effect");
+    LogText("Start Effect - id:");
+    LogBinaryLf(eid, 1);
     StartEffect(eid);
     if (!gDisabledEffects.effectId[eid])
       ffb->StartEffect(eid);
@@ -450,7 +501,8 @@ void FfbHandle_EffectOperation(USB_FFBReport_EffectOperation_Output_Data_t *data
   }
   else if (data->operation == 3)
   { // Stop
-    LogTextLf("Stop Effect");
+    LogText("Stop Effect - id:");
+    LogBinaryLf(eid, 1);
     StopEffect(eid);
   }
 }
@@ -535,8 +587,8 @@ void FfbHandle_DeviceGain(USB_FFBReport_DeviceGain_Output_Data_t *data)
     uint8_t reportId; // =13
     uint8_t deviceGain; //0..255  (physical 0..10000) //milos, back to 8bit
   */
-  LogTextP(PSTR("Device Gain: "));
-  LogBinaryLf(&data->deviceGain, 1);
+  //LogTextP(PSTR("Device Gain: "));
+  //LogBinaryLf(&data->deviceGain, 1);
   //ffb->SetDeviceGain(data->deviceGain, 63); //milos, added
 }
 
@@ -603,22 +655,21 @@ uint8_t FfbDebugListEffects(uint8_t *index)
     return 0;
 
   TEffectState *e = (TEffectState*) &gEffectStates[*index];
-
   LogBinary(index, 1);
-  if (e->state == MEffectState_Allocated)
+  if (e->state == MEffectState_Allocated) {
     LogTextP(PSTR(" Allocated"));
-  else if (e->state == MEffectState_Playing)
+  } else if (e->state == MEffectState_Playing) {
     LogTextP(PSTR(" Playing\n"));
-  else
+  } else {
     LogTextP(PSTR(" Free"));
+  }
 
-  if (gDisabledEffects.effectId[*index])
+  if (gDisabledEffects.effectId[*index]) {
     LogTextP(PSTR(" (Disabled)\n"));
-  else
+  } else {
     LogTextP(PSTR(" (Enabled)\n"));
-
-  if (e->state)
-  {
+  }
+  if (e->state) {
     LogTextP(PSTR("  duration="));
     LogBinary(&e->duration, 2);
     LogTextP(PSTR("\n  fadeTime="));
@@ -666,4 +717,3 @@ void FfbEnableEffectId(uint8_t inId, uint8_t inEnable)
 }
 
 #endif
-

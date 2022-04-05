@@ -23,7 +23,7 @@ typedef struct
   uint8_t Centralize;
   uint8_t Calibrate;
   uint8_t Info;
-  uint8_t Version;
+  uint16_t Version; //milos, changed from uint8_t
 } USB_ConfigReport;
 
 

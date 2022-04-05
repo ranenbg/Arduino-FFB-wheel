@@ -27,18 +27,10 @@
 #include <digitalWriteFast.h>
 #include "Config.h"
 #include "QuadEncoder.h"
-//#include "HX711.h" // milos, commented
 #include <HX711_ADC.h> // milos, credits to library creator Olav Kallhovd sept2017
 #include "USBDesc.h"
 
-//#define ENCODER_OPTIMIZE_INTERRUPTS
-//#include <Encoder.h>
-
 //--------------------------------------- Globals --------------------------------------------------------
-
-//s16 adc_val = 0; //milos, commented since it was not used
-
-//u8 digital_inputs_pins[] = {3,6,7,8,11,12}; // original
 
 u8 analog_inputs_pins[] = // milos, changed to u8, from u16
 {
@@ -111,21 +103,7 @@ void InitADC () {
 #endif
 
 #ifdef USE_LOAD_CELL
-void InitLoadCell () { // milos, uncommented
-  /*gLoadCell.power_down(); // milos, commented
-    gLoadCell.power_up();
-    u32 mil = millis();
-    last_send = mil;
-    while ((mil - last_send) < 100)
-    {
-  	mil = millis();
-  	if (gLoadCell.is_ready())
-  	{
-  		gLoadCell.set_gain(128);
-  		gLoadCell.tare(30);	//Assuming there is no weight on the scale at start up, reset the scale to 0
-  		return(true);
-  	}
-    }*/
+void InitLoadCell () { // milos, added
   LoadCell.begin(); // milos
   LoadCell.setGain(); // milos - set gain for channel A, default is 128, available is 64 (32 - for channel B only)
   LoadCell.start(2000); // milos, tare preciscion can be improved by adding a few seconds of stabilising time, (default 2000)
@@ -134,16 +112,9 @@ void InitLoadCell () { // milos, uncommented
 #endif
 
 void InitInputs() {
-  /*for (u8 i = 0; i < sizeof(digital_inputs_pins); i++) //milos, commented
-    pinMode(digital_inputs_pins[i], INPUT_PULLUP);*/
-
   //analogReference(INTERNAL); // sets 2.56V on AREF pin for Leonardo or Micro, can be EXTERNAL
   for (u8 i = 0; i < sizeof(analog_inputs_pins); i++)
     pinMode(analog_inputs_pins[i], INPUT);
-
-  /*#ifdef USE_QUADRATURE_ENCODER
-  	//myEnc.Init(ROTATION_MID + gCalibrator.mOffset);
-    #endif*/
 
 #ifdef USE_SHIFT_REGISTER
   InitShiftRegister();
@@ -162,7 +133,6 @@ void InitInputs() {
 #ifdef AVG_INPUTS //milos, include this only if used
   nb_mes = 0;
 #endif
-  //load_cell_channel = 0;
 }
 
 //--------------------------------------------------------------------------------------------------------
@@ -184,21 +154,25 @@ void InitShiftRegister() {
   SHIFTREG_STATE = 0;
   bytesVal_SW = 0;
 }
-#else
+#else // no shift reg
 void InitButtons() { // milos, added - if not using shift register, allocate some free pins for buttons
-#ifdef USE_LOAD_CELL
-  pinModeFast(BUTTON0, INPUT_PULLUP); // milos, button0 at A3 is only available if we use load cell
-#endif
-  pinModeFast(BUTTON1, INPUT_PULLUP);
-  pinModeFast(BUTTON2, INPUT_PULLUP);
-#ifdef USE_PROMICRO
+  pinMode(BUTTON0, INPUT_PULLUP);
+  pinMode(BUTTON1, INPUT_PULLUP);
+  pinMode(BUTTON2, INPUT_PULLUP);
+#ifndef USE_PROMICRO
+  pinMode(BUTTON3, INPUT_PULLUP); // for Leonardo and Micro, we can use button3 even with z-index
+#else // if use proMicro
 #ifndef USE_ZINDEX
-  pinModeFast(BUTTON3, INPUT_PULLUP); // if we use pro micro but not z-index
+  pinMode(BUTTON3, INPUT_PULLUP); // on proMicro only available if we do not use z-index
 #endif // end of z-index
-#endif // end of pro micro
+#endif // end of proMicro
+  pinMode(BUTTON4, INPUT_PULLUP);
+  pinMode(BUTTON5, INPUT_PULLUP);
+  pinMode(BUTTON6, INPUT_PULLUP);
 }
-#endif
+#endif // end of shift reg
 
+#ifdef USE_SHIFT_REGISTER
 void nextInputState() {
   u8 bitVal = 0;
   if (SHIFTREG_STATE > SHIFTS_NUM) {	// SINGLE SHIFT = 25 states  DUAL SHIFT = 49 states (both zero include), 33 for 16 shifts //milos, 49 for 24 shifts or 3 bytes, 65 for 32 shifts or 4 bytes
@@ -243,6 +217,7 @@ void nextInputState() {
   SHIFTREG_STATE++;
   //Serial.println(SHIFTREG_STATE); // milos, added
 }
+#endif
 
 u32 readInputButtons() {
   u32 buttons = 0;
@@ -278,49 +253,35 @@ u32 readInputButtons() {
     Serial.println(btnVal_H, BIN); // milos*/
 
 #else  // milos, when no shift reg, use Arduino Leonardo for 3 or 4 buttons
-#ifdef USE_LOAD_CELL // milos - only available if we use a load cell
-  bitWrite(buttons, 0, bitRead(digitalReadFast(BUTTON0), B0PORTBIT)); // milos, read bit4 from PORTF A3 into buttons bit0
-#else //milos, when no shift reg and no load cell button0 is unavailable so we set it to 0 (unpressed)
-  bitWrite(buttons, 0, 0);
-#endif //end of lc
-  bitWrite(buttons, 1, bitRead(digitalReadFast(BUTTON1), B1PORTBIT)); // milos, read bit1 from PORTF A4 (or bit3 from PORTB, pin14 on ProMicro) into buttons bit1
-  bitWrite(buttons, 2, bitRead(digitalReadFast(BUTTON2), B2PORTBIT)); // milos, read bit0 from PORTF A5 (or bit1 from PORTB, pin15 on ProMicro) into buttons bit2
+  bitWrite(buttons, 0, !bitRead(digitalReadFast(BUTTON0), B0PORTBIT)); // milos, read bit4 from PINF A3 (or bit4 from PIND when no lc) into buttons bit0
+  bitWrite(buttons, 1, !bitRead(digitalReadFast(BUTTON1), B1PORTBIT)); // milos, read bit1 from PINF A4 (or bit3 from PINB, pin14 on ProMicro) into buttons bit1
+  bitWrite(buttons, 2, !bitRead(digitalReadFast(BUTTON2), B2PORTBIT)); // milos, read bit0 from PINF A5 (or bit1 from PINB, pin15 on ProMicro) into buttons bit2
 #ifdef USE_PROMICRO
 #ifndef USE_ZINDEX
-  bitWrite(buttons, 3, bitRead(digitalReadFast(BUTTON3), B3PORTBIT)); // milos, read bit6 from PORTD D12 into buttons bit3
-#else //milos, we can not have button3 for promicro when we use z-index encoder
+  bitWrite(buttons, 3, !bitRead(digitalReadFast(BUTTON3), B3PORTBIT)); // milos, read bit6 from PIND D12 into buttons bit3
+#else //milos, we can not have button3 for proMicro when we use z-index encoder
   bitWrite(buttons, 3, 0);
 #endif // end of z-index
-#else //milos, if we use promicro but do not use z-index we can have button3
-  bitWrite(buttons, 3, bitRead(digitalReadFast(BUTTON3), B3PORTBIT)); // milos, read bit1 from PORTD D2 into buttons bit3
+#else //milos, if we use Leonardo or Micro we can have button3 even with z-index
+  bitWrite(buttons, 3, !bitRead(digitalReadFast(BUTTON3), B3PORTBIT)); // milos, read bit1 from PIND D2 into buttons bit3
 #endif // end of pro micro
+  bitWrite(buttons, 4, !bitRead(digitalReadFast(BUTTON4), B4PORTBIT)); // milos, read bit7 from PIND D6 into buttons bit4
+  bitWrite(buttons, 5, !bitRead(digitalReadFast(BUTTON5), B5PORTBIT)); // milos, read bit6 from PINE D7 into buttons bit5
+  bitWrite(buttons, 6, !bitRead(digitalReadFast(BUTTON6), B6PORTBIT)); // milos, read bit4 from PINB D8 into buttons bit6
 #endif //end of shift reg
 
-#ifdef USE_LOAD_CELL // milos - only available if we use a load cell
-#ifndef USE_HATSWITCH // milos, if no hat switch bitshift to the left 4bits to fill in button values
-  buttons = buttons << 4;
-#else // milos, if we use hat switch
-  // milos, decode buttons into hat switch values (button0-up, button1-right, button2-down, button3-left)
-  buttons = decodeHat(buttons);
-#endif // end of hat switch
-#else // if not use load cell but use hat switch
-#ifdef USE_HATSWITCH
-#ifdef USE_SHIFT_REGISTER // milos, if no load cell, but use shift reg we can have hat
-  buttons = decodeHat(buttons);
-#else // if no shift reg, A3 is used for handbrake so no hat switch
-  buttons = buttons << 4;
-#endif // enf of shift register
-#else // if not load cell or no hat
-  buttons = buttons << 4;
-#endif // end of hat switch
-#endif // end of load cell
+#ifdef USE_HATSWITCH //milos, added
+  buttons = decodeHat(buttons); //milos, decodes hat switch values into only 1st 4 buttons (button0-up, button1-right, button2-down, button3-left)
+#else
+  buttons = buttons << 4; //milos, bitshift to the left 4bits to skip updating hat switch
+#endif
 
   //DEBUG_SERIAL.println(btnVal_H);
   //return (~buttons & 0b00000000111111111100000111111111); // milos, added to mask of last 8 bits and some inside ones with inverting all bits
   //return (buttons & 0b00000000111111111111111111111111); // milos, added to mask of last 8 bits, since we are not reading them anyway
   //return (buttons & 0b00000000111111111100000111111111); // milos, do not update buttons for thrustmaster wheel rim identification (3 bytes read)
   //return (~buttons & 0b00000000000000001111111111111111); // milos, added to invert only first 16 bits
-  return (buttons); // milos, we read all 4 bytes
+  return (buttons); // milos, we send all 4 bytes
 }
 
 //--------------------------------------------------------------------------------------------------------

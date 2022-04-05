@@ -38,7 +38,7 @@ void FfbproStartEffect(uint8_t id);
 void FfbproStopEffect(uint8_t id);
 void FfbproFreeEffect(uint8_t id);
 
-void FfbproModifyDuration(uint8_t effectId, uint16_t duration);
+void FfbproModifyDuration(uint8_t effectId, uint16_t duration, uint16_t stdelay); //milos, added stdelay
 //void FfbproSetDeviceGain(USB_FFBReport_DeviceGain_Output_Data_t* data, volatile TEffectState* effect); //milos, added
 
 void FfbproSetEnvelope(USB_FFBReport_SetEnvelope_Output_Data_t* data, volatile TEffectState* effect);
@@ -46,7 +46,7 @@ void FfbproSetCondition(USB_FFBReport_SetCondition_Output_Data_t* data, volatile
 void FfbproSetPeriodic(USB_FFBReport_SetPeriodic_Output_Data_t* data, volatile TEffectState* effect);
 void FfbproSetConstantForce(USB_FFBReport_SetConstantForce_Output_Data_t* data, volatile TEffectState* effect);
 void FfbproSetRampForce(USB_FFBReport_SetRampForce_Output_Data_t* data, volatile TEffectState* effect);
-uint8_t FfbproSetEffect(USB_FFBReport_SetEffect_Output_Data_t *data, volatile TEffectState* effect); //milos, changed from int to uint8_t
+uint8_t FfbproSetEffect(USB_FFBReport_SetEffect_Output_Data_t* data, volatile TEffectState* effect); //milos, changed from int to uint8_t
 void FfbproCreateNewEffect(USB_FFBReport_CreateNewEffect_Feature_Data_t* inData, volatile TEffectState* effect);
 
 class cSpeedObs {
@@ -102,4 +102,3 @@ class BRFFB {
 };
 
 #endif // _FFB_PRO_
-

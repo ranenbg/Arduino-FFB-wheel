@@ -140,8 +140,7 @@ const u8 _hidReportDescriptor[] =
   0x17, X_AXIS_LOG_MIN & 0xFF, (X_AXIS_LOG_MIN >> 8) & 0xFF, (X_AXIS_LOG_MIN >> 16) & 0xFF, (X_AXIS_LOG_MIN >> 24) & 0xFF, // LOGICAL_MINIMUM // milos, new 32bit
   0x27, X_AXIS_LOG_MAX & 0xFF, (X_AXIS_LOG_MAX >> 8) & 0xFF, (X_AXIS_LOG_MAX >> 16) & 0xFF, (X_AXIS_LOG_MAX >> 24) & 0xFF, // LOGICAL_MAXIMUM // milos, new 32bit
   0x35, 0x00,         // PHYSICAL_MINIMUM (00)
-  //0x47, X_AXIS_PHYS_MAX & 0xFF, (X_AXIS_PHYS_MAX >> 8) & 0xFF, 0, 0,//(X_AXIS_PHYS_MAX >> 16) & 0xFF,(X_AXIS_PHYS_MAX >> 24) & 0xFF, // PHYSICAL_MAXIMUM (0xffff) // milos, old
-  0x47, X_AXIS_PHYS_MAX & 0xFF, (X_AXIS_PHYS_MAX >> 8) & 0xFF, (X_AXIS_PHYS_MAX >> 16) & 0xFF, (X_AXIS_PHYS_MAX >> 24) & 0xFF, // PHYSICAL_MAXIMUM (0xffff) // milos, new extended to 32bits
+  0x47, X_AXIS_PHYS_MAX & 0xFF, (X_AXIS_PHYS_MAX >> 8) & 0xFF, (X_AXIS_PHYS_MAX >> 16) & 0xFF, (X_AXIS_PHYS_MAX >> 24) & 0xFF, // PHYSICAL_MAXIMUM (0xffff) // milos, new 32bits
   0x75, X_AXIS_NB_BITS,   // REPORT_SIZE (AXIS_NB_BITS)
   0x95, 0x01,            // REPORT_COUNT (1)
   0x81, 0x02,         // INPUT (Data,Var,Abs)
@@ -183,13 +182,13 @@ const u8 _hidReportDescriptor[] =
   0x81, 0x02,         // INPUT (Data,Var,Abs)
 
   /*0x09, 0x35,         // USAGE (rz)
-  0x16, RZ_AXIS_LOG_MIN & 0xFF, (RZ_AXIS_LOG_MIN >> 8) & 0xFF, // LOGICAL_MINIMUM
-  0x27, RZ_AXIS_LOG_MAX & 0xFF, (RZ_AXIS_LOG_MAX >> 8) & 0xFF, 0, 0, // LOGICAL_MAXIMUM
-  0x35, 0x00,         // PHYSICAL_MINIMUM (00)
-  0x47, RZ_AXIS_PHYS_MAX & 0xFF, (RZ_AXIS_PHYS_MAX >> 8) & 0xFF, 0, 0,//(RZ_AXIS_PHYS_MAX >> 16) & 0xFF,(RZ_AXIS_PHYS_MAX >> 24) & 0xFF, // PHYSICAL_MAXIMUM (0xffff)
-  0x75, RZ_AXIS_NB_BITS,   // REPORT_SIZE (AXIS_NB_BITS)
-  0x95, 0x01,           // REPORT_COUNT (1)
-  0x81, 0x02,         // INPUT (Data,Var,Abs)*/
+    0x16, RZ_AXIS_LOG_MIN & 0xFF, (RZ_AXIS_LOG_MIN >> 8) & 0xFF, // LOGICAL_MINIMUM
+    0x27, RZ_AXIS_LOG_MAX & 0xFF, (RZ_AXIS_LOG_MAX >> 8) & 0xFF, 0, 0, // LOGICAL_MAXIMUM
+    0x35, 0x00,         // PHYSICAL_MINIMUM (00)
+    0x47, RZ_AXIS_PHYS_MAX & 0xFF, (RZ_AXIS_PHYS_MAX >> 8) & 0xFF, 0, 0,//(RZ_AXIS_PHYS_MAX >> 16) & 0xFF,(RZ_AXIS_PHYS_MAX >> 24) & 0xFF, // PHYSICAL_MAXIMUM (0xffff)
+    0x75, RZ_AXIS_NB_BITS,   // REPORT_SIZE (AXIS_NB_BITS)
+    0x95, 0x01,           // REPORT_COUNT (1)
+    0x81, 0x02,         // INPUT (Data,Var,Abs)*/
 
   //0xc0, // END_COLLECTION
 
@@ -363,16 +362,16 @@ const u8 _hidReportDescriptor[] =
   0x0B, 0x01, 0x00, 0x0A, 0x00, // USAGE (Ordinals:Instance 1)
   0x0B, 0x02, 0x00, 0x0A, 0x00, // USAGE (Ordinals:Instance 2)
   0x66, 0x14, 0x00,	// UNIT (Eng Rot:Angular Pos)
-  //0x55, 0xFE,	// UNIT_EXPONENT (-2) //milos, commented 16bit
-  0x55, 0x00, // UNIT_EXPONENT (0) //milos, 8bit
+  0x55, 0xFE,  // UNIT_EXPONENT (-2) //milos, 16bit
+  //0x55, 0x00, // UNIT_EXPONENT (0) //milos, 8bit
   0x15, 0x00,	// LOGICAL_MINIMUM (00)
-  0x26, 0xFF, 0x00,  // LOGICAL_MAXIMUM (255) //milos, 8bit
-  //0x27, 0x9F, 0x8C, 0x00, 0x00,  // LOGICAL_MAXIMUM (35999) //milos, commented 16bit
+  0x26, 0xFF, 0x7F,  // LOGICAL_MAXIMUM (32767) //milos, 16bit
+  //0x26, 0xFF, 0x00,  // LOGICAL_MAXIMUM (255) //milos, 8bit
   0x35, 0x00,	// PHYSICAL_MINIMUM (0)
-  //0x47, 0x9F, 0x8C, 0x00, 0x00,	// PHYSICAL_MAXIMUM (35999) //milos, commented 16bit
-  0x46, 0x67, 0x01,  // PHYSICAL_MAXIMUM (359) //milos, 8bit
-  0x75, 0x08,	// REPORT_SIZE (08) //milos, 8bit
-  //0x75, 0x10,  // REPORT_SIZE (16) //milos, commented 16bit
+  0x47, 0x9F, 0x8C, 0x00, 0x00,	// PHYSICAL_MAXIMUM (35999) //milos, 16bit
+  //0x46, 0x67, 0x01,  // PHYSICAL_MAXIMUM (359) //milos, 8bit
+  0x75, 0x10,  // REPORT_SIZE (16) //milos, 16bit
+  //0x75, 0x08,  // REPORT_SIZE (08) //milos, 8bit
   0x95, 0x01,	// REPORT_COUNT (01)
   0x91, 0x02,	// OUTPUT (Data,Var,Abs)
   0x55, 0x00,	// UNIT_EXPONENT (00)

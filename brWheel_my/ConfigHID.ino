@@ -5,9 +5,9 @@
 
 void configHID(USB_ConfigReport *data) {
   if (data->Info == 1) {
-    int16_t rotation = data->Rotation;
-    rotation = constrain(rotation, 30, 1800);
-    ROTATION_MAX = (CPR / 360) * rotation;
+    int16_t temp = data->Rotation;
+    temp = constrain(temp, 30, 1800);
+    ROTATION_MAX = CPR * temp / 360;
     //brWheelFFB.offset = (MAX_ENCODER_ROTATION - ROTATION_MAX) / 2; //milos, commented
     //brWheelFFB.offset = 0; //milos, commented
 
@@ -23,7 +23,7 @@ void configHID(USB_ConfigReport *data) {
     configCenterGain = constrain(data->CenterGain, 0, 200);
     configStopGain = constrain(data->StopGain, 0, 200);
 
-    int16_t temp = data->MinForce;
+    temp = data->MinForce;
     if (temp < MM_MAX_MOTOR_TORQUE) {
       MM_MIN_MOTOR_TORQUE = constrain(temp, 0, TOP - 1);
       data->Info = 99;
@@ -34,10 +34,10 @@ void configHID(USB_ConfigReport *data) {
       data->Info = 99;
       MM_MAX_MOTOR_TORQUE = constrain(temp, 1, TOP);
     }
-  }
-  else if (data->Info == 255) {
+  } else if (data->Info == 255) {
     /*uint8_t ReportId;
       uint16_t Rotation;
+      int16_t Offset; //milos, added
       uint8_t GeneralGain;
       uint8_t ConstantGain;
       uint8_t DamperGain;
@@ -52,8 +52,8 @@ void configHID(USB_ConfigReport *data) {
       uint8_t Centralize;
       uint8_t Calibrate;
       uint8_t Info;
-      uint8_t Version;*/
-    data->Rotation = ROTATION_MAX / CPR * 360;
+      uint16_t Version; //milos, changed from uint8_t*/
+    data->Rotation = ROTATION_MAX * 360 / CPR;
     data->Offset = brWheelFFB.offset; //milos, added
     data->GeneralGain = configGeneralGain;
     data->ConstantGain = configConstantGain;

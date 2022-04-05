@@ -31,7 +31,7 @@
 #include "QuadEncoder.h"
 #include "Config.h"
 
-#include <util/delay.h> //milos, commented
+#include <util/delay.h>
 
 //------------------------------------- Defines ----------------------------------------------------------
 
@@ -277,14 +277,13 @@ s16 ApplyEnvelope (s16 metric, u16 t, u8 atLvl, u8 fdLvl, u16 atTime, u16 fdTime
     kF = (f32)(-metric - (s16)(fdLvl * 128)) / ((f32)fdTime); // negative fade slope
   }
 
-  if (t >= eStartDelay && t < eDuration + eStartDelay) { // play effect after start delay till effect duration
-    t -= eStartDelay; // ofset time by start delay
-    if (t >= 0 && t < atTime) { // attack
-      return (linFunction(kA, t, nA));
-    } else if (t >= atTime && t <= eDuration - fdTime) { // constant
+  if (t >= eStartDelay && t < eDuration + eStartDelay) { // play effect after start delay with a given effect duration
+    if (t >= eStartDelay && t < atTime + eStartDelay) { // attack
+      return (linFunction(kA, t - eStartDelay, nA));
+    } else if (t >= atTime + eStartDelay && t <= eDuration + eStartDelay - fdTime) { // magnitude
       return (metric);
-    } else if (t > eDuration - fdTime && t < eDuration ) { // fade
-      return (linFunction(kF, t - eDuration + fdTime, metric));
+    } else if (t > eDuration + eStartDelay - fdTime && t < eDuration + eStartDelay) { // fade
+      return (linFunction(kF, t - eDuration - eStartDelay + fdTime, metric));
     }
   } else {
     return (0);
@@ -320,16 +319,17 @@ s32 cFFB::CalcTorqueCommand (s32 pos) {
       if (bitRead(effstate, 0)) command += SpringEffect(pos, AUTO_CENTER_SPRING / EffectDivider() * configCenterGain / 100); //milos, autocenter spring force is equal (scaled accordingly) for all PWM modes - desktop autocenter effect
     }
   } else for (u8 id = FIRST_EID; id <= MAX_EFFECTS; id++) {
+
       /*milos
         u8 state;  // see constants MEffectState_*
         u8 type;  // see constants USB_EFFECT_*
-        u8 attackLevel, fadeLevel; //pad; //milos, removed pad since it was not used
+        u8 attackLevel, fadeLevel, deadBand, enableAxis; //milos, added deadBand and enableAxis
         s8 rampStart, rampEnd; //milos, added
-        u16 gain, period; // samplingPeriod;  // ms //milos, changed gain from u8 to u16, added samplingPeriod
+        u16 gain, period, direction; // samplingPeriod; // ms //milos, changed gain from u8 to u16, added samplingPeriod
         u16 duration, fadeTime, attackTime, startDelay; //milos, added attackTime and startDelay
-        s16 magnitude;
+        s16 magnitude, positiveSaturation;  //milos, added positiveSaturation
         s16 offset;
-        u16 phase;
+        u8 phase; //milos, changed back to u8 from u16
 
         ef.magnitude has range -32767..32767 16bit logical (the same physical)
         ef.period has range 0..65535 16bit logical, 0-65535 physical 16bit, exp -3, unit s
@@ -345,18 +345,13 @@ s32 cFFB::CalcTorqueCommand (s32 pos) {
         ef.rampStart has range -127..127 8bit logical, -32767 to 32767 physical
         ef.rampEnd has range -127..127 8bit logical, -32767 to 32767 physical
         ef.deadBand has range 0..255 8bit logical, 0 to 32767 physical
-        ef.direction has range 0..255 8bit logical, 0 to 359 physical, exp 0, unit deg
+        ef.direction has range 0..32767 16bit logical, 0 to 35999 physical, exp -2, unit deg
       */
 
       volatile TEffectState &ef = gEffectStates[id];
-      if (Btest(ef.state, MEffectState_Allocated | MEffectState_Playing))
-      {
-        //s32 err = ef.offset - pos; //milos commented, was not in use
-        s32 mag = ScaleMagnitude(ef.magnitude, ef.gain, EffectDivider()); // milos, effects are scaled equaly for all PWM modes
+      if (Btest(ef.state, MEffectState_Allocated | MEffectState_Playing)) {
 
-        // rFactor2 use only offset for main effect
-        //ef.offset;			    //milos, this is CpOffset (condition) parameter for effect types like spring, damper, friction and inertia that changes X-pos
-        //for periodic effects this is offset which changes magnitude
+        s32 mag = ScaleMagnitude(ef.magnitude, ef.gain, EffectDivider()); // milos, effects are scaled equaly for all PWM modes
 
         if (ef.period <= (CONTROL_PERIOD / 1000) * 2) { //milos, make sure to cap the max frequency (or to limit min period)
           ef.period = (CONTROL_PERIOD / 1000) * 2; //milos, do now allow periods less than 4ms (more than 250Hz wave we can not reproduce with 500Hz FFB calculation rate anyway)
@@ -364,43 +359,43 @@ s32 cFFB::CalcTorqueCommand (s32 pos) {
 
         switch (ef.type) {
           case USB_EFFECT_CONSTANT:
-            command -= ConstrainEffect(ScaleMagnitude(ApplyEnvelope(ef.magnitude, effectTime[id], ef.attackLevel, ef.fadeLevel, ef.attackTime, ef.fadeTime, ef.duration, ef.startDelay) //milos, added
+            command -= ConstrainEffect(ScaleMagnitude(ApplyEnvelope(ef.magnitude, effectTime[id - 1], ef.attackLevel, ef.fadeLevel, ef.attackTime, ef.fadeTime, ef.duration, ef.startDelay) //milos, added
                                        , ef.gain, EffectDivider())) * configConstantGain / 100; //milos, added
-            //command *= sin((f32(ef.direction) + 1.0) / 256.0 * TWO_PI); //milos, added to calculate direction
-            LogTextLf("_pro constant");
+            if (bitRead(ef.enableAxis, 2)) command *= sin(TWO_PI * ef.direction / 32768.0); //milos, added to project force vector on FFB X-axis, if direction is enabled (bit2 of enableAxis byte)
+            //LogTextLf("_pro constant");
             break;
           case USB_EFFECT_RAMP:
-            command -= ConstrainEffect(ScaleMagnitude(ApplyEnvelope(RampEffect(ef.rampStart, ef.rampEnd, ef.duration, effectTime[id]), effectTime[id], ef.attackLevel, ef.fadeLevel, ef.attackTime, ef.fadeTime, ef.duration, ef.startDelay) //milos, added
+            command -= ConstrainEffect(ScaleMagnitude(ApplyEnvelope(RampEffect(ef.rampStart, ef.rampEnd, ef.duration, effectTime[id - 1]), effectTime[id - 1], ef.attackLevel, ef.fadeLevel, ef.attackTime, ef.fadeTime, ef.duration, ef.startDelay) //milos, added
                                        , ef.gain, EffectDivider())); //milos, added
-            LogTextLf("_pro ramp");
+            //LogTextLf("_pro ramp");
             break;
           case USB_EFFECT_SINE:
-            command += ScaleMagnitude((s32)ef.offset + SineEffect(ApplyEnvelope(ef.magnitude, effectTime[id], ef.attackLevel, ef.fadeLevel, ef.attackTime, ef.fadeTime, ef.duration, ef.startDelay), ef.period, ef.phase, effectTime[id]) //milos, added
+            command += ScaleMagnitude((s32)ef.offset + SineEffect(ApplyEnvelope(ef.magnitude, effectTime[id - 1], ef.attackLevel, ef.fadeLevel, ef.attackTime, ef.fadeTime, ef.duration, ef.startDelay), ef.period, ef.phase, effectTime[id - 1]) //milos, added
                                       , ef.gain, EffectDivider()) * configPeriodicGain / 100; //milos, added
-            LogTextLf("_pro sine");
+            //LogTextLf("_pro sine");
             break;
           case USB_EFFECT_SQUARE:
-            command += ScaleMagnitude((s32)ef.offset + SquareEffect(ApplyEnvelope(ef.magnitude, effectTime[id], ef.attackLevel, ef.fadeLevel, ef.attackTime, ef.fadeTime, ef.duration, ef.startDelay), ef.period, ef.phase, effectTime[id]) //milos, added
+            command += ScaleMagnitude((s32)ef.offset + SquareEffect(ApplyEnvelope(ef.magnitude, effectTime[id - 1], ef.attackLevel, ef.fadeLevel, ef.attackTime, ef.fadeTime, ef.duration, ef.startDelay), ef.period, ef.phase, effectTime[id - 1]) //milos, added
                                       , ef.gain, EffectDivider()) * configPeriodicGain / 100; //milos, added
-            LogTextLf("_pro square");
+            //LogTextLf("_pro square");
             break;
           case USB_EFFECT_TRIANGLE:
-            command += ScaleMagnitude((s32)ef.offset + TriangleEffect(ApplyEnvelope(ef.magnitude, effectTime[id], ef.attackLevel, ef.fadeLevel, ef.attackTime, ef.fadeTime, ef.duration, ef.startDelay), ef.period, ef.phase, effectTime[id]) //milos, added
+            command += ScaleMagnitude((s32)ef.offset + TriangleEffect(ApplyEnvelope(ef.magnitude, effectTime[id - 1], ef.attackLevel, ef.fadeLevel, ef.attackTime, ef.fadeTime, ef.duration, ef.startDelay), ef.period, ef.phase, effectTime[id - 1]) //milos, added
                                       , ef.gain, EffectDivider()) * configPeriodicGain / 100; //milos, added
-            LogTextLf("_pro triangle");
+            //LogTextLf("_pro triangle");
             break;
           case USB_EFFECT_SAWTOOTHUP:
-            command += ScaleMagnitude((s32)ef.offset + SawtoothUpEffect(ApplyEnvelope(ef.magnitude, effectTime[id], ef.attackLevel, ef.fadeLevel, ef.attackTime, ef.fadeTime, ef.duration, ef.startDelay), ef.period, ef.phase, effectTime[id]) //milos, added
+            command += ScaleMagnitude((s32)ef.offset + SawtoothUpEffect(ApplyEnvelope(ef.magnitude, effectTime[id - 1], ef.attackLevel, ef.fadeLevel, ef.attackTime, ef.fadeTime, ef.duration, ef.startDelay), ef.period, ef.phase, effectTime[id - 1]) //milos, added
                                       , ef.gain, EffectDivider()) * configPeriodicGain / 100; //milos, added
-            LogTextLf("_pro sawtoothup");
+            //LogTextLf("_pro sawtoothup");
             break;
           case USB_EFFECT_SAWTOOTHDOWN:
-            command += ScaleMagnitude((s32)ef.offset + SawtoothDownEffect(ApplyEnvelope(ef.magnitude, effectTime[id], ef.attackLevel, ef.fadeLevel, ef.attackTime, ef.fadeTime, ef.duration, ef.startDelay), ef.period, ef.phase, effectTime[id]) //milos, added
+            command += ScaleMagnitude((s32)ef.offset + SawtoothDownEffect(ApplyEnvelope(ef.magnitude, effectTime[id - 1], ef.attackLevel, ef.fadeLevel, ef.attackTime, ef.fadeTime, ef.duration, ef.startDelay), ef.period, ef.phase, effectTime[id - 1]) //milos, added
                                       , ef.gain, EffectDivider()) * configPeriodicGain / 100; //milos, added
-            LogTextLf("_pro sawtoothdown");
+            //LogTextLf("_pro sawtoothdown");
             break;
           case USB_EFFECT_SPRING:
-            //command += SpringEffect(pos - (s16)((s32(ef.offset) * ROTATION_MID) >> 15), mag * configSpringGain / 100); //milos, for spring, damper, inertia and friction forces ef.offset is cpOffset, here we scale it to ROTATION_MID
+            //command += SpringEffect(pos - (s16)((s32(ef.offset) * ROTATION_MID) >> 15), mag * configSpringGain / 100 / 16); //milos, for spring, damper, inertia and friction forces ef.offset is cpOffset, here we scale it to ROTATION_MID
             //milos, with implemented cpOffset and dead band
             s16 mult;
             mult = 8;
@@ -408,9 +403,9 @@ s32 cFFB::CalcTorqueCommand (s32 pos) {
               if (pos - (s16)((s32(ef.offset) * ROTATION_MID) >> 15) >= 0) {
                 mult = -8;
               }
-              command += SpringEffect(pos + (s16)ef.deadBand * mult - (s16)(((s32)ef.offset * ROTATION_MID) >> 15), mag * configSpringGain / 100); //milos
+              command += SpringEffect(pos + (s16)ef.deadBand * mult - (s16)(((s32)ef.offset * ROTATION_MID) >> 15), mag * configSpringGain / 100 / 16); //milos
             }
-            LogTextLf("_pro spring");
+            //LogTextLf("_pro spring");
             break;
           case USB_EFFECT_DAMPER:
             command += DamperEffect(spd - (f32)ef.offset / 1638.3, mag * configDamperGain / 100) ; //milos, here we scale it to speed
@@ -421,10 +416,10 @@ s32 cFFB::CalcTorqueCommand (s32 pos) {
               } else {
                 command += DamperEffect(spd + (f32)ef.deadBand / 32.0 - f32(ef.offset) / 1638.3, mag * configDamperGain / 100); //milos
               }
-            } else {
+              } else {
               command += 0;
-            }*/
-            LogTextLf("_pro damper");
+              }*/
+            //LogTextLf("_pro damper");
             break;
           case USB_EFFECT_INERTIA:
             command += InertiaEffect(acl - (f32)ef.offset / 32767.0, mag * configInertiaGain / 100); //milos, here we scale it to acceleration
@@ -435,10 +430,10 @@ s32 cFFB::CalcTorqueCommand (s32 pos) {
               } else {
                 command += InertiaEffect(acl + (f32)ef.deadBand / 640.0 - f32(ef.offset) / 32767.0, mag * configInertiaGain / 100); //milos
               }
-            } else {
+              } else {
               command += 0;
-            }*/
-            LogTextLf("_pro inertia");
+              }*/
+            //LogTextLf("_pro inertia");
             break;
           case USB_EFFECT_FRICTION:
             command += FrictionEffect(spd - (f32)ef.offset / 1638.3, mag * configFrictionGain / 100);
@@ -449,24 +444,23 @@ s32 cFFB::CalcTorqueCommand (s32 pos) {
               } else {
                 command += FrictionEffect(spd + (f32)ef.deadBand / 32.0 - f32(ef.offset) / 1638.3, mag * configFrictionGain / 100); //milos
               }
-            } else {
+              } else {
               command += 0;
-            }*/
-            LogTextLf("_pro friction");
+              }*/
+            //LogTextLf("_pro friction");
             break;
           //case USB_EFFECT_CUSTOM: //milos, commented
           //break;
           case USB_EFFECT_PERIODIC:
             command -= ConstrainEffect(ScaleMagnitude(ef.offset, 32767, EffectDivider())) * configPeriodicGain / 100; //milos, for periodic forces ef.offset changes magnitude, here we scale it to all PWM modes
-            LogTextLf("_pro periodic");
+            //LogTextLf("_pro periodic");
             break;
           default:
             break;
         }
+        effectTime[id - 1] = millis() - t0; //milos, added - advance FFB timer
       }
-      effectTime[id] += (millis() - t0); //milos, added - advance FFB timer by one time step
     }
-  t0 = millis(); //milos, added
 
   if (bitRead(effstate, 1)) command += DamperEffect(spd, ScaleMagnitude(327 * configDamperGain, 32767, EffectDivider())) ; //milos, added - user damper effect
   if (bitRead(effstate, 2)) command += InertiaEffect(acl, ScaleMagnitude(327 * configInertiaGain, 32767, EffectDivider())) ; //milos, added - user inertia effect
@@ -484,18 +478,7 @@ s32 cFFB::CalcTorqueCommand (s32 pos) {
       command += SpringEffect(pos, BOUNDARY_SPRING / EffectDivider() * configStopGain / 100); //milos, boundary spring force is equal (scaled accordingly) for all PWM modes
     }
   }
-  //milos, testing effects
-  //command += ScaleMagnitude(TriangleEffect(32767, abs(pos) / 16 + 2, 0, ffbTimeStep), 32767, EffectDivider()); //milos, put desired periodic effect you wish to test here
-  //Serial.println(ApplyEnvelope(SineEffect(32767, 100, 0, ffbTimeStep), ffbTimeStep, 255, 255, 0, 0, 5000, 1000));
-  //Serial.println(RampEffect(-127, 127, abs(pos) / 16 + 16, ffbTimeStep));
-  //command += ScaleMagnitude(RampEffect(-127, 127, abs(pos) / 16 + 16, ffbTimeStep), 32767, EffectDivider());
-  /*Serial.print(32767);
-    Serial.print(" ");
-    Serial.print(TriangleEffect(ApplyEnvelope(20000, ffbTimeStep, 0, 0, 128, 128, 512, 1024), 8, 0, ffbTimeStep)); //milos, testing envelope on triangle
-    Serial.print(" ");
-    Serial.println(-32767);*/
-  //command += ScaleMagnitude(ApplyEnvelope(-30000, ffbTimeStep, 32, 64, 128, 128, 1024, 1024), 32767, EffectDivider());
-  //u16 ffbTimeStep += (CONTROL_PERIOD / 1000); //milos, increment ffb time by 2ms
+
   command = ConstrainEffect(command * configGeneralGain / 100);
   if (bitRead(effstate, 4)) CONFIG_SERIAL.println(command); // milos, added - FFB real time monitor
   return (command);
@@ -523,29 +506,6 @@ void BRFFB::calibrate() {
   //ROTATION_MAX = rightGap; //milos, commented
   myEnc.Write(ROTATION_MAX); //milos
 
-  /* Girar para esquerda atï¿½ o batente e setar a posicao atual/2 */
-  /*#ifdef USE_PWM
-    setPWMDir(-(MM_MIN_MOTOR_TORQUE + MM_MAX_MOTOR_TORQUE) / 4);
-    #endif
-    #ifdef USE_PWM_milos
-    setPWM_milos(-(MM_MIN_MOTOR_TORQUE + MM_MAX_MOTOR_TORQUE) / 4);
-    #endif
-    delay(200);
-    for (uint16_t i = 0; i < 1000; i++) {
-    #ifdef USE_PWM
-    setPWMDir(-(MM_MIN_MOTOR_TORQUE + MM_MAX_MOTOR_TORQUE) / 4);
-    #endif
-    #ifdef USE_PWM_milos
-    setPWM_milos(-(MM_MIN_MOTOR_TORQUE + MM_MAX_MOTOR_TORQUE) / 4); // milos, go left
-    #endif
-    delay(400);
-    if (leftGap == (actual = myEnc.Read()))
-      break;
-    else
-      leftGap = actual;
-    }
-    myEnc.Write(ROTATION_MIN); // milos*/
-
   SetPWM(0);
   if (startPos == actual) {
     cal_println("error");
@@ -553,10 +513,6 @@ void BRFFB::calibrate() {
   }
   else {
     this->state = 1;
-    //cal_print("Distance: "); //milos
-    //cal_print(rightGap - ROTATION_MID); //milos
-    //cal_print("/"); //milos
-    //cal_println(ROTATION_MAX); //milos
     cal_println("completed");  //milos
   }
 #else
@@ -587,13 +543,6 @@ BRFFB::BRFFB() {
   offset = 0;
   state = 0;
 }
-
-/*void BRFFB::refresh(s32 turn) { // BUG
-	if (brWheelFFB.autoCenter) {
-		setFFB(-turn*AUTO_CENTER_SPRING*gSpringSet);
-	}
-  }
-*/
 
 //--------------------------------------------------------------------------------------------------------
 
@@ -630,8 +579,7 @@ void FfbproStartEffect(uint8_t effectId)
 {
   //brWheelFFB.autoCenter = false;
   gFFB.mAutoCenter = false;
-  //ffbTimeStep = 0; //milos, added
-  effectTime[effectId] = 0; //milos, added - reset timer for this effect when we start it
+  effectTime[effectId - 1] = 0; //milos, added - reset timer for this effect when we start it
 }
 
 void FfbproStopEffect(uint8_t effectId)
@@ -648,25 +596,26 @@ void FfbproFreeEffect(uint8_t effectId)
 
 // modify operations ---------------------------------------------------------
 
-void FfbproModifyDuration(uint8_t effectId, uint16_t duration)
+void FfbproModifyDuration(uint8_t effectId, uint16_t duration, uint16_t stdelay) //milos, added stdelay
 {
   /*
     { // FFB: Set Effect Output Report
-    uint8_t reportId; // =1
+    uint8_t  reportId; // =1
     uint8_t effectBlockIndex; // 1..40
-    uint8_t effectType; // 1..12 (effect usages: 26,27,30,31,32,33,34,40,41,42,43,28) //milos, total 11, 28 is removed
-    uint16_t duration; // 0..32767 ms
-    uint16_t triggerRepeatInterval; // 0..32767 ms
-    uint16_t samplePeriod;  // 0..32767 ms
-    uint8_t gain; // 0..255  (physical 0..32767) //milos, was 10000
+    uint8_t effectType; // 1..12 (effect usages: 26,27,30,31,32,33,34,40,41,42,43,28) //milos, total 11, 28 is removed (custom force)
+    uint16_t duration; // 0..65535, exp -3, s
+    uint16_t triggerRepeatInterval; // 0..65535, exp -3, s //milos
+    int16_t gain; // 0..32767  (physical 0..32767) //milos, was 0(0)..(255)10000, uint8_t
     uint8_t triggerButton;  // button ID (0..8)
     uint8_t enableAxis; // bits: 0=X, 1=Y, 2=DirectionEnable
-    uint8_t direction; // angle (0=0 .. 255=36000, exp -2, deg) //milos
+    uint8_t direction; // angle (0=0 .. 255=359, exp 0, deg) //milos, 8bit
+    uint16_t startDelay;  // 0..65535, exp -3, s //milos, uncommented
     } USB_FFBReport_SetEffect_Output_Data_t;
   */
   volatile TEffectState* effect = &gEffectStates[effectId]; // milos, added
   effect->duration = duration; // milos, added
-  effectTime[effectId] = 0; //milos, added - reset timer for this effect when duration is changed
+  effect->startDelay = stdelay; // milos, added
+  effectTime[effectId - 1] = 0; //milos, added - reset timer for this effect when duration is changed
 }
 
 /*void FfbproSetDeviceGain(USB_FFBReport_DeviceGain_Output_Data_t* data, volatile TEffectState * effect) //milos, added
@@ -714,13 +663,6 @@ void FfbproSetCondition (USB_FFBReport_SetCondition_Output_Data_t* data, volatil
   effect->offset = (s16)data->cpOffset; //milos, this offset changes X-pos
   effect->deadBand = (u8)data->deadBand; //milos, added
   effect->positiveSaturation = (s16)data->positiveSaturation; //milos, postitve saturation can also be negative (not used currently)
-  /*if (abs(effect->magnitude) > (s16)data->positiveSaturation) { //milos, added
-    if (effect->magnitude >= 0) {
-      effect->magnitude = (s16)data->positiveSaturation;
-    } else {
-      effect->magnitude = -((s16)data->positiveSaturation);
-    }
-    }*/
 }
 
 void FfbproSetPeriodic (USB_FFBReport_SetPeriodic_Output_Data_t* data, volatile TEffectState * effect)
@@ -758,7 +700,6 @@ void FfbproSetConstantForce (USB_FFBReport_SetConstantForce_Output_Data_t* data,
 void FfbproSetRampForce (USB_FFBReport_SetRampForce_Output_Data_t* data, volatile TEffectState * effect)
 {
   uint8_t eid = data->effectBlockIndex; //milos, uncommented
-  // FFP supports only ramp up from MIN to MAX and ramp down from MAX to MIN? //milos, no, you can set ramp start and ramp end as you like between MIN and MAX
   /*USB effect data:
     uint8_t	reportId;	// =6
     uint8_t	effectBlockIndex;	// 1..40
@@ -780,7 +721,7 @@ void setFFB(s32 command) {
   //setPWMDir(command);
 }
 
-uint8_t FfbproSetEffect (USB_FFBReport_SetEffect_Output_Data_t *data, volatile TEffectState * effect)  //milos, changed from int to uint8_t
+uint8_t FfbproSetEffect (USB_FFBReport_SetEffect_Output_Data_t* data, volatile TEffectState * effect)  //milos, changed from int to uint8_t
 {
   /*
     {
@@ -803,23 +744,20 @@ uint8_t FfbproSetEffect (USB_FFBReport_SetEffect_Output_Data_t *data, volatile T
     uint8_t effectBlockIndex; // 1..40
     uint8_t effectType; // 1..12 (effect usages: 26,27,30,31,32,33,34,40,41,42,43,28) //milos, total 11, 28 is removed (custom force)
     uint16_t duration; // 0..65535, exp -3, s
-    uint16_t triggerRepeatInterval; // 0..65535, exp -3, s
-    uint16_t samplePeriod;  // 0..65535, exp -3, s
-    uint16_t gain; // 0..32767  (physical 0..32767) //milos, was 0(0)..(255)10000, uint8_t
+    uint16_t triggerRepeatInterval; // 0..65535, exp -3, s //milos
+    int16_t gain; // 0..32767  (physical 0..32767) //milos, was 0(0)..(255)10000, uint8_t
     uint8_t triggerButton;  // button ID (0..8)
     uint8_t enableAxis; // bits: 0=X, 1=Y, 2=DirectionEnable
-    //uint8_t directionX; // angle (0=0 .. 255=360deg) //milos, commented
-    //uint8_t directionY; // angle (0=0 .. 255=360deg) //milos, commented
-    uint8_t direction; // angle (0=0 .. 255=36000, exp -2, deg) //milos
+    uint16_t direction; // angle (0=0 .. 65535=35999, exp -2, deg) //milos, 16bit
     uint16_t startDelay;  // 0..65535, exp -3, s //milos, uncommented
     } USB_FFBReport_SetEffect_Output_Data_t;
   */
   effect->type = data->effectType; //milos, this is where effect type is being set
   effect->gain = (s16)data->gain;
-  //effect->samplingPeriod = data->samplingPeriod; //milos, added
-  FfbproModifyDuration(eid, (u16)data->duration); //milos, added
-  effect->startDelay = (u16)data->startDelay; //milos, added
-  effect->direction = (u8)data->direction; //milos, added
+  FfbproModifyDuration(eid, (u16)data->duration, (u16)data->startDelay); //milos, added
+  //effect->startDelay = (u16)data->startDelay; //milos, added
+  effect->direction = (u16)data->direction; //milos, added
+  effect->enableAxis = (u8)data->enableAxis; //milos, added
   //bool is_periodic = false; //milos, commented
   //s32 mag = (((s32)effect->magnitude)*((s32)effect->gain)) / 163;
   // Fill in the effect type specific data

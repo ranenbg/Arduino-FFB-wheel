@@ -44,3 +44,9 @@ version		features
 172ah		encoder, 3 axis + 1 for load cell, 4 (1 hat switch) + 24 buttons, pedal autocalib, 1FFB axis
 172azh		encoder + Z-index, 3 axis + 1 for load cell, 4 (1 hat switch) + 24 buttons, pedal autocalib, 1FFB axis
 173azh		encoder + Z-index, 3 axis + 1 for load cell, 4 (1 hat switch) + 24 buttons, pedal autocalib, 1FFB axis, FFB output with 2xDAC (adafruit MCP4725) - recommended for DD wheels
+
+180z		encoder + Z-index, 4 axis, 4 buttons (no hat switch), no pedal autocalib, 2 FFB axis, periodic effects timing, duration and start delay fix, 16bit direction, new HX711 library, debug FFB optimizations, 16x less strong spring
+180az		the same as v180, but has pedal autocalib
+181z		the same as v180, but has shift register support for 16 buttons, hat swich takes 1st 4 buttons
+182azh		the same as v181, but has pedal autocalib and load cell support
+183azh		the same as v182, but has analog FFB output with 2x 12bit DAC MCP4275

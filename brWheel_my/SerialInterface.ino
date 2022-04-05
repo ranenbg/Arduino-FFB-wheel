@@ -146,11 +146,12 @@ void readSerial() {
         //CONFIG_SERIAL.println(temp1);  // milos
 #ifdef USE_ZINDEX
         brWheelFFB.offset = -myEnc.Read() + ROTATION_MID;
+        CONFIG_SERIAL.println(brWheelFFB.offset);
 #else
         //brWheelFFB.offset = 0;
         myEnc.Write(ROTATION_MID); // milos
+        CONFIG_SERIAL.println(1);
 #endif
-        CONFIG_SERIAL.println(brWheelFFB.offset);
         break;
       case 'G': // milos, this was not working, fixed now
         temp = CONFIG_SERIAL.parseInt();

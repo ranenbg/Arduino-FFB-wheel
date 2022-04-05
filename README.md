@@ -17,7 +17,7 @@ Firmware features:
 
 Detailed documentation and more information about the firmware can be found in txt files inside brWheel_my folder.
 
-Firmware v17x pinouts - for Arduino Leonardo, Micro or ProMicro
+Firmware v18x pinouts - for Arduino Leonardo, Micro or ProMicro
 ![plot](./brWheel_my/Firmware-v18x%20pinout.png)
 Button box firmware pinouts - for Arduino Nano/Uno
 ![plot](./brWheel_my/Firmware-vXX1%20button%20box%20pinout.png)

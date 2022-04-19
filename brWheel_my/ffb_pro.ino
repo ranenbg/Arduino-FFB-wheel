@@ -361,7 +361,7 @@ s32 cFFB::CalcTorqueCommand (s32 pos) {
           case USB_EFFECT_CONSTANT:
             command -= ConstrainEffect(ScaleMagnitude(ApplyEnvelope(ef.magnitude, effectTime[id - 1], ef.attackLevel, ef.fadeLevel, ef.attackTime, ef.fadeTime, ef.duration, ef.startDelay) //milos, added
                                        , ef.gain, EffectDivider())) * configConstantGain / 100; //milos, added
-            if (bitRead(ef.enableAxis, 2)) command *= sin(TWO_PI * ef.direction / 32768.0); //milos, added to project force vector on FFB X-axis, if direction is enabled (bit2 of enableAxis byte)
+            if (bitRead(ef.enableAxis, 2)) command *= sin(TWO_PI * ef.direction / 32768.0); //milos, added - project force vector on FFB X-axis, if direction is enabled (bit2 of enableAxis byte)
             //LogTextLf("_pro constant");
             break;
           case USB_EFFECT_RAMP:

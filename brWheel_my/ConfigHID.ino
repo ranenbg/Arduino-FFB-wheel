@@ -8,8 +8,8 @@ void configHID(USB_ConfigReport *data) {
     int16_t temp = data->Rotation;
     temp = constrain(temp, 30, 1800);
     ROTATION_MAX = CPR * temp / 360;
+    ROTATION_MID = ROTATION_MAX / 2;
     //brWheelFFB.offset = (MAX_ENCODER_ROTATION - ROTATION_MAX) / 2; //milos, commented
-    //brWheelFFB.offset = 0; //milos, commented
 
     if (data->Calibrate == 1) brWheelFFB.calibrate();
 
@@ -53,7 +53,7 @@ void configHID(USB_ConfigReport *data) {
       uint8_t Calibrate;
       uint8_t Info;
       uint16_t Version; //milos, changed from uint8_t*/
-    data->Rotation = ROTATION_MAX * 360 / CPR;
+    data->Rotation = ROTATION_DEG; //milos, added
     data->Offset = brWheelFFB.offset; //milos, added
     data->GeneralGain = configGeneralGain;
     data->ConstantGain = configConstantGain;

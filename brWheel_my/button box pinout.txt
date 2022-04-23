@@ -1,6 +1,6 @@
 ﻿Milos Rankovic, ranenbg@gmail.com
 first created 25.03.2020.
-last updated 08.05.2021.
+last updated 19.04.2022.
 
 This txt file contains details for connecting a second Arduino Uno or Nano board,
 that will act as a shift register (button box) inside a custom wheel rim
@@ -43,9 +43,9 @@ Arduino Leonardo FFB (as wheelbase) -> Arduino Nano or UNO (as button box)
 
 Leonardo GND                -> Nano GND
 Leonardo 5V		    -> Nano 5V
-Leonardo pin 6 (DT_sw)	    -> Nano pin 12
-Leonardo pin 7 (CLK)	    -> Nano pin 13
-Leonardo pin 8 (PL)	    -> Nano pin 10 and pin 2
+Leonardo pin 6 (DT_sh)	    -> Nano pin 12
+Leonardo pin 7 (CLK_sh)	    -> Nano pin 13
+Leonardo pin 8 (PL_sh)	    -> Nano pin 10 and pin 2
 
 Button mappings (we send 8 bytes to wheelbase, first 16 bits are for buttons, the rest are unused - no more pins on nano)
  

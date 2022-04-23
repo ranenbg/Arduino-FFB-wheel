@@ -1,6 +1,0 @@
-simplemotion.cpp:491: error: invalid conversion from 'const smbus' to 'smVerbosityLevel'
-simplemotion.cpp:512: error: invalid conversion from 'const smbus' to 'smVerbosityLevel'
-simplemotion.cpp:525: error: invalid conversion from 'const smbus' to 'smVerbosityLevel'
-simplemotion.cpp:539: error: invalid conversion from 'const smbus' to 'smVerbosityLevel'
-simplemotion.cpp:550: error: invalid conversion from 'const smbus' to 'smVerbosityLevel'
-simplemotion.cpp:870: error: return-statement with a value, in function returning 'void'

@@ -1,6 +1,6 @@
 /*
 Ver. 1.01 - 2015-06-17
-Ver. 1.02 - 2018-06-17, modifyed by Milos Rankovic
+Ver. 1.02 - 2018-06-17, modified by Milos Rankovic
 
 This sketch emulates Thrustmaster TX RW 458 Italia wheel
 allowing to connect arduino to TX RW wheelbase (may work for T500/T300 as well)
@@ -32,9 +32,9 @@ Arduino Leonardo FFB (as wheelbase) -> Arduino Nano or UNO (as button box)
 
 Leonardo GND                -> Nano GND
 Leonardo 5V                 -> Nano 5V
-Leonardo pin 6 (DT_sw)      -> Nano pin 12
-Leonardo pin 7 (CLK)        -> Nano pin 13
-Leonardo pin 8 (PL)         -> Nano pin 10 and pin 2
+Leonardo pin 6 (DT_sh)      -> Nano pin 12
+Leonardo pin 7 (CLK_sh)     -> Nano pin 13
+Leonardo pin 8 (PL_sh)      -> Nano pin 10 and pin 2
 
 Button mappings (we send 8 bytes to wheelbase, first 16 bits are for buttons, the rest are unused - no more pins on nano)
  
@@ -87,9 +87,9 @@ void setup (void) {
   //wheelState[0] = B11000000; // TX RW Ferrari 458 Italia Wheel first data byte
   //wheelState[1] = B11111111; // second data byte - buttons
   //wheelState[2] = B11111111; // third data byte - buttons
-  wheelState[0] = B00000000; // milos (1st byte for my Arduino Leonardo FFB)
-  wheelState[1] = B00000000; // milos (2nd byte for my Arduino Leonardo FFB)
-  wheelState[2] = B00000000; // milos
+  wheelState[0] = B00000000; // milos (1st 8 buttons for my Arduino Leonardo FFB)
+  wheelState[1] = B00000000; // milos (2nd 8 buttons for my Arduino Leonardo FFB)
+  wheelState[2] = B00000000; // milos (3rd byte not used currently)
   wheelState[3] = B00000000; // this and below - not used, but T300 wheelbase reads all 8 bytes...
   wheelState[4] = B00000000;
   wheelState[5] = B00000000;

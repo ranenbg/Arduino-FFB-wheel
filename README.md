@@ -17,6 +17,11 @@ Firmware features:
 
 Detailed documentation and more information about the firmware can be found in txt files inside brWheel_my folder.
 
+## Firmware download - compiled HEX
+
++ ***[Latest Release](https://github.com/ranenbg/Arduino-FFB-wheel/releases/latest)***
++ ***[Past Versions](https://github.com/ranenbg/Arduino-FFB-wheel/releases)***
+
 # Firmware pinouts and wiring diagrams
 ![plot](./brWheel_my/Firmware-v18x%20pinout.png)
 Button box firmware pinouts - for Arduino Nano/Uno

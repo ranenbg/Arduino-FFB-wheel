@@ -21,7 +21,6 @@ Firmware v18x pinouts - for Arduino Leonardo, Micro or ProMicro
 ![plot](./brWheel_my/Firmware-v18x%20pinout.png)
 Button box firmware pinouts - for Arduino Nano/Uno
 ![plot](./brWheel_my/Firmware-vXX1%20button%20box%20pinout.png)
-Wiring for external ADC - for Arduino Leonardo, Micro or ProMicro
 ![plot](./brWheel_my/ads1015_wiring_diagram.png)
 
 Firmware upload procedure with XLoader https://github.com/xinabox/xLoader:

@@ -17,14 +17,15 @@ Firmware features:
 
 Detailed documentation and more information about the firmware can be found in txt files inside brWheel_my folder.
 
-# Firmware v18x pinouts and wiring diagrams
+# Firmware pinouts and wiring diagrams
 ![plot](./brWheel_my/Firmware-v18x%20pinout.png)
 Button box firmware pinouts - for Arduino Nano/Uno
 ![plot](./brWheel_my/Firmware-vXX1%20button%20box%20pinout.png)
 ![plot](./brWheel_my/ads1015_wiring_diagram.png)
 ![plot](./brWheel_my/mcp4725_wiring_diagram.png)
 
-# Firmware upload procedure with XLoader https://github.com/xinabox/xLoader:
+# Firmware upload procedure
+You can use XLoader https://github.com/xinabox/xLoader:
 - set 57600baud, ATMega32U4 microcontroler and select desired HEX
 - press reset button on Arduino (or shortly connect RST pin to GND)
 - select newly appeared COM port (Arduino in bootloader mode*) and press upload (you will only have a few seconds)

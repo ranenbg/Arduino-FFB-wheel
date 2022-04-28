@@ -17,17 +17,17 @@ Firmware features:
 
 Detailed documentation and more information about the firmware can be found in txt files inside brWheel_my folder.
 
-## Firmware download - compiled HEX
-
-+ ***[Latest Release](https://github.com/ranenbg/Arduino-FFB-wheel/releases/latest)***
-+ ***[Past Versions](https://github.com/ranenbg/Arduino-FFB-wheel/releases)***
-
 # Firmware pinouts and wiring diagrams
 ![plot](./brWheel_my/Firmware-v18x%20pinout.png)
 Button box firmware pinouts - for Arduino Nano/Uno
 ![plot](./brWheel_my/Firmware-vXX1%20button%20box%20pinout.png)
 ![plot](./brWheel_my/ads1015_wiring_diagram.png)
 ![plot](./brWheel_my/mcp4725_wiring_diagram.png)
+
+## Firmware download
+
++ ***[Latest Release](https://github.com/ranenbg/Arduino-FFB-wheel/releases/latest)***
++ ***[Past Versions](https://github.com/ranenbg/Arduino-FFB-wheel/releases)***
 
 # Firmware upload procedure
 You can use XLoader https://github.com/xinabox/xLoader:

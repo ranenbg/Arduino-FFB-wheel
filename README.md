@@ -39,5 +39,5 @@ You can use XLoader https://github.com/xinabox/xLoader:
 
 ## Credits
 
-Original BRWheel firmware: Tero Loimuneva, Saku Kekkonen, Etienne Saint-Paul and Fernando Igor.
+Original BRWheel firmware by: Tero Loimuneva, Saku Kekkonen, Etienne Saint-Paul and Fernando Igor.
 https://github.com/fernandoigor/BRWheel/tree/alphatest

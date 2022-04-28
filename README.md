@@ -29,7 +29,7 @@ Button box firmware pinouts - for Arduino Nano/Uno
 + ***[Latest Release](https://github.com/ranenbg/Arduino-FFB-wheel/releases/latest)***
 + ***[Past Versions](https://github.com/ranenbg/Arduino-FFB-wheel/releases)***
 
-# Firmware upload procedure
+## Firmware upload procedure
 You can use XLoader https://github.com/xinabox/xLoader:
 - set 57600baud, ATMega32U4 microcontroler and select desired HEX
 - press reset button on Arduino (or shortly connect RST pin to GND)

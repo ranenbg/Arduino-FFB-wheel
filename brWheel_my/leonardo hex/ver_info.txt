@@ -49,5 +49,7 @@ version		features
 180as		encoder, 4 axis, 4 buttons (no hat switch), pedal autocalib, support for ADS1015 external ADC for pedals
 180az		the same as v180, but has pedal autocalib
 181z		the same as v180, but has shift register support for 16 buttons, hat swich takes 1st 4 buttons
+181as		the same as 180as, but has shift register support for 16 buttons	
+181ahs		the same as v181as but has 1st for buttons used for hat switch
 182azh		the same as v181, but has pedal autocalib and load cell support
 183azh		the same as v182, but has analog FFB output with 2x 12bit DAC MCP4275

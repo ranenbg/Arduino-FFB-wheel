@@ -5,7 +5,7 @@ version		features
 180m		encoder, 4 axis, 7 buttons (no hat switch), no pedal autocalib, 2 FFB axis, periodic effects timing, duration and start delay fix, 16bit direction, new HX711 library, debug FFB optimizations, 16x less strong spring
 180asm		encoder, 4 axis, 4 buttons (no hat switch), pedal autocalib, support for ADS1015 external ADC for pedals
 180zm		the same as v180, but has Z-index encoder support
-180azm		the same as v180, but has pedal autocalib
+180azm		the same as v180, but has Z-index encoder support and pedal autocalib
 181zm		the same as v180, but has shift register support for 16 buttons, hat swich takes 1st 4 buttons
 182azhm		the same as v181, but has pedal autocalib and load cell support
 183azhm		the same as v182, but has analog FFB output with 2x 12bit DAC MCP4275

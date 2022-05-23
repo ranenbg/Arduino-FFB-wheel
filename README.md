@@ -13,7 +13,7 @@ Firmware features:
 - fully adjustable FFB output in the form of 2channel digital PWM or analog DAC signals
 - load cell support for HX711 chip (for brake pedal axis only)
 - all wheel parameters are stored in EEPROM (and automatically loaded at each powerup)
-- wheel control user interface for an easy configuration and monitoring of all inputs/outputs
+- wheel control **[Arduino FFB gui](https://github.com/ranenbg/Arduino-FFB-gui)** for an easy configuration and monitoring of all inputs/outputs 
 
 Detailed documentation and more information about the firmware can be found in txt files inside brWheel_my folder.
 

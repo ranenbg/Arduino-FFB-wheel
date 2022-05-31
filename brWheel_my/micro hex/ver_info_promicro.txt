@@ -6,6 +6,8 @@ version		features
 180asm		encoder, 4 axis, 4 buttons (no hat switch), pedal autocalib, support for ADS1015 external ADC for pedals
 180zm		the same as v180, but has Z-index encoder support
 180azm		the same as v180, but has Z-index encoder support and pedal autocalib
+180aztm		the same as v180azm, with 4x4 button matrix support
+180azhtm	the same as v180azm, with 4x4 button matrix support and a hat switch (1st 4 buttons are used by hat, so 12 is left)
 181zm		the same as v180, but has shift register support for 16 buttons, hat swich takes 1st 4 buttons
 182azhm		the same as v181, but has pedal autocalib and load cell support
 183azhm		the same as v182, but has analog FFB output with 2x 12bit DAC MCP4275

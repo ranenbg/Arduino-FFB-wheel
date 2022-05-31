@@ -169,6 +169,9 @@ void InitButtons() { // milos, added - if not using shift register, allocate som
   pinMode(BUTTON4, INPUT_PULLUP);
   pinMode(BUTTON5, INPUT_PULLUP);
   pinMode(BUTTON6, INPUT_PULLUP);
+#ifndef USE_LOAD_CELL
+  pinMode(BUTTON7, INPUT_PULLUP);
+#endif // end of load cell
 }
 #endif // end of shift reg
 
@@ -256,10 +259,13 @@ u32 readInputButtons() {
   bitWrite(buttons, 0, !bitRead(digitalReadFast(BUTTON0), B0PORTBIT)); // milos, read bit4 from PINF A3 (or bit4 from PIND when no lc) into buttons bit0
   bitWrite(buttons, 1, !bitRead(digitalReadFast(BUTTON1), B1PORTBIT)); // milos, read bit1 from PINF A4 (or bit3 from PINB, pin14 on ProMicro) into buttons bit1
   bitWrite(buttons, 2, !bitRead(digitalReadFast(BUTTON2), B2PORTBIT)); // milos, read bit0 from PINF A5 (or bit1 from PINB, pin15 on ProMicro) into buttons bit2
+#ifndef USE_LOADCELL // milos, only available if we do not use load cell
+  bitWrite(buttons, 7, !bitRead(digitalReadFast(BUTTON7), B7PORTBIT)); // milos, read bit6 from PINC D5 into buttons bit7
+#endif // end of load cell
 #ifdef USE_PROMICRO
 #ifndef USE_ZINDEX
   bitWrite(buttons, 3, !bitRead(digitalReadFast(BUTTON3), B3PORTBIT)); // milos, read bit6 from PIND D12 into buttons bit3
-#else //milos, we can not have button3 for proMicro when we use z-index encoder
+#else // milos, we can not have button3 for proMicro when we use z-index encoder
   bitWrite(buttons, 3, 0);
 #endif // end of z-index
 #else //milos, if we use Leonardo or Micro we can have button3 even with z-index
@@ -270,17 +276,21 @@ u32 readInputButtons() {
   bitWrite(buttons, 6, !bitRead(digitalReadFast(BUTTON6), B6PORTBIT)); // milos, read bit4 from PINB D8 into buttons bit6
 #endif //end of shift reg
 
-#ifdef USE_HATSWITCH //milos, added
+#ifdef USE_BTNMATRIX // milos, added
+  buttons = decodeMatrix(buttons);
+#endif
+
+#ifdef USE_HATSWITCH // milos, added
   buttons = decodeHat(buttons); //milos, decodes hat switch values into only 1st 4 buttons (button0-up, button1-right, button2-down, button3-left)
 #else
   buttons = buttons << 4; //milos, bitshift to the left 4bits to skip updating hat switch
 #endif
 
-  //DEBUG_SERIAL.println(btnVal_H);
   //return (~buttons & 0b00000000111111111100000111111111); // milos, added to mask of last 8 bits and some inside ones with inverting all bits
   //return (buttons & 0b00000000111111111111111111111111); // milos, added to mask of last 8 bits, since we are not reading them anyway
   //return (buttons & 0b00000000111111111100000111111111); // milos, do not update buttons for thrustmaster wheel rim identification (3 bytes read)
   //return (~buttons & 0b00000000000000001111111111111111); // milos, added to invert only first 16 bits
+  //DEBUG_SERIAL.println(buttons, BIN);
   return (buttons); // milos, we send all 4 bytes
 }
 

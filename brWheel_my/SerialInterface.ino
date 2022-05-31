@@ -90,6 +90,9 @@ void readSerial() {
 #ifdef AVG_INPUTS
         CONFIG_SERIAL.print("i");
 #endif
+#ifdef USE_BTNMATRIX
+        CONFIG_SERIAL.print("t");
+#endif
 #ifdef USE_PROMICRO
         CONFIG_SERIAL.print("m");
 #endif

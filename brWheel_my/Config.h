@@ -11,10 +11,11 @@
 //#define USE_DSP56ADC16S			// 16 bits Stereo ADC (milos, can not be used if USE_SHIFT_REGISTER is uncommented)
 #define USE_QUADRATURE_ENCODER		// Position Quadrature encoder
 #define USE_ZINDEX          // milos, use Z-index encoder channel (warning, can not be used with USE_ADS1105 or USE_MCP4725)
-#define USE_LOAD_CELL				// Load cell shield // milos, new library for LC
-#define USE_SHIFT_REGISTER			// 8-bit Parallel-load shift registers G27 board steering wheel (milos, this one is modified for 16 buttons)
+//#define USE_LOAD_CELL				// Load cell shield // milos, new library for LC
+//#define USE_SHIFT_REGISTER			// 8-bit Parallel-load shift registers G27 board steering wheel (milos, this one is modified for 16 buttons)
 //#define USE_DUAL_SHIFT_REGISTER		// Dual 8-bit Parallel-load shift registers G27 board shifter  (milos, not available curently)
-#define USE_HATSWITCH        //milos, uncomment to use first 4 buttons for hat switch instead (can not be used if no load cell or shift register)
+//#define USE_HATSWITCH        //milos, uncomment to use first 4 buttons for hat switch instead (can not be used if no load cell or shift register)
+#define USE_BTNMATRIX        //milos, uncomment to use 8 pins as a 4x4 button matrix for total of 16 buttons (can not be used with USE_LOAD_CELL)
 //#define AVG_INPUTS        // milos, uncomment this to use averaging of arduino analog inputs (if readings can be done faster than CONTROL_PERIOD)
 #define USE_AUTOCALIB        // milos, uncomment this to use autocalibration for pedal axis
 //#define USE_MCP4725      // milos, 12bit DAC (0-5V), uncomment to enable output of FFB signal as DAC voltage output
@@ -63,6 +64,8 @@
 #else
 #define BUTTON0 4 // D4, used for button0
 #define B0PORTBIT 4 // read bit4 of PIND
+#define BUTTON7 5 // D5, used for button7
+#define B7PORTBIT 6 // read bit6 of PINC
 #endif
 
 #ifndef USE_PROMICRO // milos, added - for Leonardo or Micro
@@ -161,7 +164,7 @@ uint8_t LC_scaling; // milos, load cell scaling factor (affects brake pressure, 
 #define PARAM_ADDR_ENC_CPR       0x19 //milos, encoder CPR
 #define PARAM_ADDR_PWM_SET       0x1D //milos, PWM settings and frequency (byte contents is in pwmstate)
 
-#define VERSION		0xB6 // milos, this is my version (previous was 8)
+#define VERSION		0xB4 // milos, this is my version (previous was 8)
 
 #define GetParam(m_offset,m_data)	getParam((m_offset),(u8*)&(m_data),sizeof(m_data))
 #define SetParam(m_offset,m_data)	setParam((m_offset),(u8*)&(m_data),sizeof(m_data))
@@ -283,6 +286,25 @@ uint32_t decodeHat(uint32_t inbits) {
     hat = 0;
   }
   return ((inbits & 0b11111111111111111111111111110000) | (hat & 0b00001111)); // milos, put hat bits into first 4 bits of buttons and keep the rest unchanged
+}
+
+// milos, added - function for decoding 4x4 button matrix into 16 buttons
+uint32_t decodeMatrix(uint32_t btpin) {
+  // bits 0-3 of btpin are columns
+  // bits 4-7 of btpin are rows
+  // Matrix element is Bij
+  //     D4  A4  A5  D12
+  // D6 |b11 b12 b13 b14|
+  // D7 |b21 b22 b23 b24|
+  // D8 |b31 b32 b33 b34|
+  // D5 |b41 b42 b43 b44|
+  uint16_t matrix = 0;
+  for (uint8_t i = 0; i < 4; i++) { // rows (along X)
+    for (uint8_t j = 0; j < 4; j++) { // columns (along Y)
+      bitWrite(matrix, i * 4 + j, bitRead(btpin, 4 + i) & bitRead(btpin, j));
+    }
+  }
+  return ((btpin & 0b11111111111111110000000000000000) | (matrix & 0b00000000000000001111111111111111)); // milos, put matrix bits into first 16 bits of buttons and keep the rest unchanged
 }
 
 #endif // _CONFIG_H_

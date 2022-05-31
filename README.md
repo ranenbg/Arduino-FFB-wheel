@@ -4,7 +4,7 @@ Stand alone USB device recognized as a joystick with force feedback functionalit
 Firmware features:
 - supported Arduino boards: Leonardo, Micro and ProMicro (5V, 16MHz)
 - 4 analog axis + 1 for optical encoder, 2 FFB axis (only 1 has pwm or dac output)
-- 16 buttons via button box firmware uploaded to Arduino Nano/Uno
+- 16 buttons via by 4x4 matrix or by button box firmware uploaded to Arduino Nano/Uno
 - fully supported 16bit FFB effects (custom force effect not implemented)
 - envelope and conditional block effects, start delay, durration, deadband
 - FFB calculation and axis/button update rate is 500Hz (2ms period)
@@ -23,6 +23,7 @@ Detailed documentation and more information about the firmware can be found in t
 ![plot](./brWheel_my/Firmware-vXX1%20button%20box%20pinout.png)
 ![plot](./brWheel_my/ads1015_wiring_diagram.png)
 ![plot](./brWheel_my/mcp4725_wiring_diagram.png)
+![plot](./brWheel_my/button_matrix_wiring_diagram.png)
 
 ## Firmware download
 

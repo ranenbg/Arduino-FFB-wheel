@@ -45,13 +45,13 @@ version		features
 172azh		encoder + Z-index, 3 axis + 1 for load cell, 4 (1 hat switch) + 24 buttons, pedal autocalib, 1FFB axis
 173azh		encoder + Z-index, 3 axis + 1 for load cell, 4 (1 hat switch) + 24 buttons, pedal autocalib, 1FFB axis, FFB output with 2xDAC (adafruit MCP4725) - recommended for DD wheels
 
-180z		encoder + Z-index, 4 axis, 4 buttons (no hat switch), no pedal autocalib, 2 FFB axis, periodic effects timing, duration and start delay fix, 16bit direction, new HX711 library, debug FFB optimizations, 16x less strong spring
-180as		encoder, 4 axis, 4 buttons (no hat switch), pedal autocalib, support for ADS1015 external ADC for pedals
-180az		the same as v180, but has pedal autocalib
-180azt		the same as v180az, with 4x4 button matrix support
-180azht		the same as v180az, with 4x4 button matrix support and a hat switch (1st 4 buttons are used by hat, so 12 is left)							
-181z		the same as v180, but has shift register support for 16 buttons, hat swich takes 1st 4 buttons
+180		encoder, 4 axis, 8 buttons, 2 FFB axis, periodic effects timing fix, duration and start delay fix, 16bit direction, new HX711 library, debug FFB optimizations, 16x less strong spring
+180z		the same as v180, with support for encoder Z-index channel
+180as		the same as v180, with pedal autocalib and support for ADS1015 external ADC for pedals
+180az		the same as v180z, with pedal autocalib
+180azt		the same as v180az, with 4x4 button matrix support							
+181z		the same as v180z, but has shift register support for 16 buttons
 181as		the same as 180as, but has shift register support for 16 buttons	
-181ahs		the same as v181as but has 1st for buttons used for hat switch
-182azh		the same as v181, but has pedal autocalib and load cell support
-183azh		the same as v182, but has analog FFB output with 2x 12bit DAC MCP4275
+181ahs		the same as v181as but has hat switch support (1st 4 buttons from shift register are used) 
+182azh		the same as v181z, with pedal autocalib and load cell support with HX711
+183azh		the same as v182azh, but has analog FFB output with 2x12bit DAC MCP4275

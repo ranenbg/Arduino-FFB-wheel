@@ -21,9 +21,12 @@ Detailed documentation and more information about the firmware can be found in t
 ![plot](./brWheel_my/Firmware-v18x%20pinout.png)
 ## Button box firmware pinouts - for Arduino Nano/Uno
 ![plot](./brWheel_my/Firmware-vXX1%20button%20box%20pinout.png)
+## Button matrix pinouts
+![plot](./brWheel_my/button_matrix_wiring_diagram.png)
+## External i2C devices pinouts
 ![plot](./brWheel_my/ads1015_wiring_diagram.png)
 ![plot](./brWheel_my/mcp4725_wiring_diagram.png)
-![plot](./brWheel_my/button_matrix_wiring_diagram.png)
+
 
 ## Firmware download
 

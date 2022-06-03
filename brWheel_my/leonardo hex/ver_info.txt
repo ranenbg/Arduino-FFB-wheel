@@ -49,7 +49,8 @@ version		features
 180z		the same as v180, with support for encoder Z-index channel
 180as		the same as v180, with pedal autocalib and support for ADS1015 external ADC for pedals
 180az		the same as v180z, with pedal autocalib
-180azt		the same as v180az, with 4x4 button matrix support							
+180azt		the same as v180az, with 4x4 button matrix support
+180azht		the same as v180azt, with hat switch support (1st 4 buttons from a matrix are used)					
 181z		the same as v180z, but has shift register support for 16 buttons
 181as		the same as 180as, but has shift register support for 16 buttons	
 181ahs		the same as v181as but has hat switch support (1st 4 buttons from shift register are used) 

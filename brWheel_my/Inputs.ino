@@ -166,12 +166,25 @@ void InitButtons() { // milos, added - if not using shift register, allocate som
   pinMode(BUTTON3, INPUT_PULLUP); // on proMicro only available if we do not use z-index
 #endif // end of z-index
 #endif // end of proMicro
+#ifndef USE_BTNMATRIX
   pinMode(BUTTON4, INPUT_PULLUP);
   pinMode(BUTTON5, INPUT_PULLUP);
   pinMode(BUTTON6, INPUT_PULLUP);
 #ifndef USE_LOAD_CELL
   pinMode(BUTTON7, INPUT_PULLUP);
 #endif // end of load cell
+#else // if use button matrix
+  pinMode(BUTTON4, OUTPUT);
+  pinMode(BUTTON5, OUTPUT);
+  pinMode(BUTTON6, OUTPUT);
+  setMatrixRow(BUTTON4, HIGH);
+  setMatrixRow(BUTTON5, HIGH);
+  setMatrixRow(BUTTON6, HIGH);
+#ifndef USE_LOAD_CELL
+  pinMode(BUTTON7, OUTPUT);
+  setMatrixRow(BUTTON7, HIGH);
+#endif // end of load cell
+#endif // end of button matrix
 }
 #endif // end of shift reg
 
@@ -256,29 +269,52 @@ u32 readInputButtons() {
     Serial.println(btnVal_H, BIN); // milos*/
 
 #else  // milos, when no shift reg, use Arduino Leonardo for 3 or 4 buttons
-  bitWrite(buttons, 0, !bitRead(digitalReadFast(BUTTON0), B0PORTBIT)); // milos, read bit4 from PINF A3 (or bit4 from PIND when no lc) into buttons bit0
-  bitWrite(buttons, 1, !bitRead(digitalReadFast(BUTTON1), B1PORTBIT)); // milos, read bit1 from PINF A4 (or bit3 from PINB, pin14 on ProMicro) into buttons bit1
-  bitWrite(buttons, 2, !bitRead(digitalReadFast(BUTTON2), B2PORTBIT)); // milos, read bit0 from PINF A5 (or bit1 from PINB, pin15 on ProMicro) into buttons bit2
+#ifndef USE_BTNMATRIX // milos, added - read all buttons only if we are not using button matrix
+  /*bitWrite(buttons, 0, !bitRead(digitalReadFast(BUTTON0), B0PORTBIT)); // milos, read bit4 from PINF A3 (or bit4 from PIND when no lc) into buttons bit0
+    bitWrite(buttons, 1, !bitRead(digitalReadFast(BUTTON1), B1PORTBIT)); // milos, read bit1 from PINF A4 (or bit3 from PINB, pin14 on ProMicro) into buttons bit1
+    bitWrite(buttons, 2, !bitRead(digitalReadFast(BUTTON2), B2PORTBIT)); // milos, read bit0 from PINF A5 (or bit1 from PINB, pin15 on ProMicro) into buttons bit2*/
+  bitWrite(buttons, 0, readSingleButton(0));
+  bitWrite(buttons, 1, readSingleButton(1));
+  bitWrite(buttons, 2, readSingleButton(2));
 #ifndef USE_LOADCELL // milos, only available if we do not use load cell
-  bitWrite(buttons, 7, !bitRead(digitalReadFast(BUTTON7), B7PORTBIT)); // milos, read bit6 from PINC D5 into buttons bit7
+  //bitWrite(buttons, 7, !bitRead(digitalReadFast(BUTTON7), B7PORTBIT)); // milos, read bit6 from PINC D5 into buttons bit7
+  bitWrite(buttons, 7, readSingleButton(7));
 #endif // end of load cell
 #ifdef USE_PROMICRO
 #ifndef USE_ZINDEX
-  bitWrite(buttons, 3, !bitRead(digitalReadFast(BUTTON3), B3PORTBIT)); // milos, read bit6 from PIND D12 into buttons bit3
+  //bitWrite(buttons, 3, !bitRead(digitalReadFast(BUTTON3), B3PORTBIT)); // milos, read bit6 from PIND D12 into buttons bit3
+  bitWrite(buttons, 3, readSingleButton(3));
 #else // milos, we can not have button3 for proMicro when we use z-index encoder
   bitWrite(buttons, 3, 0);
 #endif // end of z-index
 #else //milos, if we use Leonardo or Micro we can have button3 even with z-index
-  bitWrite(buttons, 3, !bitRead(digitalReadFast(BUTTON3), B3PORTBIT)); // milos, read bit1 from PIND D2 into buttons bit3
+  //bitWrite(buttons, 3, !bitRead(digitalReadFast(BUTTON3), B3PORTBIT)); // milos, read bit1 from PIND D2 into buttons bit3
+  bitWrite(buttons, 3, readSingleButton(3));
 #endif // end of pro micro
-  bitWrite(buttons, 4, !bitRead(digitalReadFast(BUTTON4), B4PORTBIT)); // milos, read bit7 from PIND D6 into buttons bit4
-  bitWrite(buttons, 5, !bitRead(digitalReadFast(BUTTON5), B5PORTBIT)); // milos, read bit6 from PINE D7 into buttons bit5
-  bitWrite(buttons, 6, !bitRead(digitalReadFast(BUTTON6), B6PORTBIT)); // milos, read bit4 from PINB D8 into buttons bit6
+  /*bitWrite(buttons, 4, !bitRead(digitalReadFast(BUTTON4), B4PORTBIT)); // milos, read bit7 from PIND D6 into buttons bit4
+    bitWrite(buttons, 5, !bitRead(digitalReadFast(BUTTON5), B5PORTBIT)); // milos, read bit6 from PINE D7 into buttons bit5
+    bitWrite(buttons, 6, !bitRead(digitalReadFast(BUTTON6), B6PORTBIT)); // milos, read bit4 from PINB D8 into buttons bit6*/
+  bitWrite(buttons, 4, readSingleButton(4));
+  bitWrite(buttons, 5, readSingleButton(5));
+  bitWrite(buttons, 6, readSingleButton(6));
+#else // use matrix button readout
+  // buttons 0-3 of are columns
+  // buttons 4-7 of are rows
+  // Matrix element is Bij
+  //     D4  A4  A5  D12
+  // D6 |b11 b12 b13 b14|
+  // D7 |b21 b22 b23 b24|
+  // D8 |b31 b32 b33 b34|
+  // D5 |b41 b42 b43 b44|
+  for (uint8_t i = 0; i < 4; i++) { // rows (along X), we set each row high, one at a time
+    setMatrixRow (i, LOW);
+    for (uint8_t j = 0; j < 4; j++) { // columns (along Y), read each button from that row by scanning over columns
+      bitWrite(buttons, i * 4 + j, readSingleButton(j));
+    }
+    setMatrixRow (i, HIGH);
+  }
+#endif // end of button matrix
 #endif //end of shift reg
-
-#ifdef USE_BTNMATRIX // milos, added
-  buttons = decodeMatrix(buttons);
-#endif
 
 #ifdef USE_HATSWITCH // milos, added
   buttons = decodeHat(buttons); //milos, decodes hat switch values into only 1st 4 buttons (button0-up, button1-right, button2-down, button3-left)
@@ -292,6 +328,42 @@ u32 readInputButtons() {
   //return (~buttons & 0b00000000000000001111111111111111); // milos, added to invert only first 16 bits
   //DEBUG_SERIAL.println(buttons, BIN);
   return (buttons); // milos, we send all 4 bytes
+}
+
+bool readSingleButton (uint8_t i) { // milos, added
+  bool temp;
+  if (i == 0) {
+    temp = !bitRead(digitalReadFast(BUTTON0), B0PORTBIT); // milos, read bit4 from PINF A3 (or bit4 from PIND when no lc) into buttons bit0
+  } else if (i == 1) {
+    temp = !bitRead(digitalReadFast(BUTTON1), B1PORTBIT); // milos, read bit1 from PINF A4 (or bit3 from PINB, pin14 on ProMicro) into buttons bit1
+  } else if (i == 2) {
+    temp = !bitRead(digitalReadFast(BUTTON2), B2PORTBIT); // milos, read bit0 from PINF A5 (or bit1 from PINB, pin15 on ProMicro) into buttons bit2
+  } else if (i == 3) {
+    temp = !bitRead(digitalReadFast(BUTTON3), B3PORTBIT); // milos, read bit6 from PIND D12 into buttons bit3
+  } else if (i == 4) {
+    temp = !bitRead(digitalReadFast(BUTTON4), B4PORTBIT); // milos, read bit7 from PIND D6 into buttons bit4
+  } else if (i == 5) {
+    temp = !bitRead(digitalReadFast(BUTTON5), B5PORTBIT); // milos, read bit6 from PINE D7 into buttons bit5
+  } else if (i == 6) {
+    temp = !bitRead(digitalReadFast(BUTTON6), B6PORTBIT); // milos, read bit4 from PINB D8 into buttons bit6
+  } else if (i == 7) {
+    temp = !bitRead(digitalReadFast(BUTTON7), B7PORTBIT); // milos, read bit6 from PINC D5 into buttons bit7
+  } else {
+    temp = false;
+  }
+  return temp;
+}
+
+void setMatrixRow (uint8_t j, uint8_t val) {
+  if (j == 0) {
+    digitalWrite(BUTTON4, val);
+  } else if (j == 1) {
+    digitalWrite(BUTTON5, val);
+  } else if (j == 2) {
+    digitalWrite(BUTTON6, val);
+  } else if (j == 3) {
+    digitalWrite(BUTTON7, val);
+  }
 }
 
 //--------------------------------------------------------------------------------------------------------

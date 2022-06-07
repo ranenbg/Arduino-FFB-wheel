@@ -30,7 +30,7 @@ Detailed documentation and more information about the firmware can be found in t
 ![plot](./brWheel_my/bts7960_wiring_diagram.png)
 
 ## Firmware option description
-Due to 32k memory limitation in Arduino Leonardo (ATmega32U4) each HEX file is compiled with a certain firmware options. A one letter abreviation for each option is encoded in the firmware version string and one needs to consider carefully which option to chose.
+Due to 32k memory limitation in Arduino Leonardo (ATmega32U4) each HEX file is compiled with a certain firmware option, because I could not fit them all at the same time. A one letter abreviation for each option is encoded in the firmware version string and one needs to consider carefully which option to chose.
 
 Firmware version string consits of 3 digits and some letters (example: fw-v180ahz). The first two digits (XX) are reserved for major firmware version, while the 3rd digit (0,1,2,3) stands for:
 - fw-vXX0 basic version (1 encoder, 4 pedals, 8 buttons)

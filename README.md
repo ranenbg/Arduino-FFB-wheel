@@ -36,7 +36,7 @@ Firmware version string consits of 3 digits and some letters (example: fw-v180ah
 - fw-vXX0 basic version (1 encoder, 4 pedals, 8 buttons, PWM output)
 - fw-vXX1 adds support for shift register 
 - fw-vXX2 adds support for shift register+HX711
-- fw-vXX3 adds support for shift register+HX711+MC4725 analog DAC
+- fw-vXX3 adds support for shift register+HX711+MC4725 analog DAC's
 
  Here is the complete list of all available options that may be added to any of the above firmware*:
 - "a" pedal axis autocalibration enabled

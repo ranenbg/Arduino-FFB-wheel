@@ -37,7 +37,7 @@ Detailed documentation and more information about the firmware can be found in t
 You can use **[XLoader](https://github.com/ranenbg/Arduino-FFB-wheel/tree/master/XLoader)**:
 - set 57600baud, ATMega32U4 microcontroler and select desired HEX
 - press reset button on Arduino (or shortly connect RST pin to GND)
-- select newly appeared COM port (Arduino in bootloader mode*) and press upload (you will only have a few seconds)
+- select newly appeared COM port (Arduino in bootloader mode*) and press upload, you will only have a few seconds
 
 *It is possible that some cheap chinese clones of Arduino Leonardo, Micro or ProMicro do not have a bootloader programmed. In that case you need to upload the original Arduino Leonardo bootloader first. You can find more details about it here: https://docs.arduino.cc/built-in-examples/arduino-isp/ArduinoISP
 

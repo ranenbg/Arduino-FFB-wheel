@@ -30,7 +30,8 @@ Detailed documentation and more information about the firmware can be found in t
 ![plot](./brWheel_my/bts7960_wiring_diagram.png)
 
 ## Firmware option description
-Due to 32k memory limitation in Arduino Leonardo (ATmega32U4) each HEX file is compiled with a certain firmware options. Their meaning is encoded in the firmware version and one needs to consider carefully which option to chose. Here is the complete list of available options:
+Due to 32k memory limitation in Arduino Leonardo (ATmega32U4) each HEX file is compiled with a certain firmware options. Their meaning is encoded in the firmware version string and one needs to consider carefully which option to chose. Here is the complete list of available options:
+
 a - pedal axis autocalibration enabled
 z - Z-index encoder support
 h - Hat Switch support

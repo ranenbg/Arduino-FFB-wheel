@@ -4,7 +4,7 @@
 
 //------------------------------------- Options ----------------------------------------------------------
 
-//#define USE_VNH5019				// Pololu dual 24V DC motor drive
+//#define USE_VNH5019				// Pololu dual 24V DC motor drive (partially inplemented)
 //#define USE_SM_RS485				// Granite devices simple motion protocol (not implemented yet)
 //#define USE_LCD					// milos, LCD via i2c (not implemented yet)
 //#define USE_ADS1105       // milos, uncomment for 12bit pedals (commented is 10bit from arduino inputs), can not be used with AVG_INPUTS
@@ -86,7 +86,7 @@
 
 #ifdef USE_SHIFT_REGISTER //milos, added
 #define SHIFTREG_PL			  8	  // PL SH/LD (Shift or Load input) // milos, was 4
-#define SHIFTREG_CLK		  7 	// CLOCK 8-bit Parallel shift // milos, was 5 //my was 12, temp set to 7
+#define SHIFTREG_CLK		  7 	// CLOCK 8-bit Parallel shift // milos, was 5
 #define SHIFTREG_DATA_SW	6		// DATA from Steering Wheel
 //#define SHIFTREG_DATA_H		7		// DATA from Shifter H (Dual 8-bit) //milos, not in use
 //#define SHIFTREG_DATA_OUT	13	// DATA Shift-Out LED (8-bit)   ###### NOT YET IMPLEMENTED ###### //milos, was 3
@@ -287,24 +287,5 @@ uint32_t decodeHat(uint32_t inbits) {
   }
   return ((inbits & 0b11111111111111111111111111110000) | (hat & 0b00001111)); // milos, put hat bits into first 4 bits of buttons and keep the rest unchanged
 }
-
-// milos, added - function for decoding 4x4 button matrix into 16 buttons
-/*uint32_t decodeMatrix(uint32_t btpin) {
-  // bits 0-3 of btpin are columns
-  // bits 4-7 of btpin are rows
-  // Matrix element is Bij
-  //     D4  A4  A5  D12
-  // D6 |b11 b12 b13 b14|
-  // D7 |b21 b22 b23 b24|
-  // D8 |b31 b32 b33 b34|
-  // D5 |b41 b42 b43 b44|
-  uint16_t matrix = 0;
-  for (uint8_t i = 0; i < 4; i++) { // rows (along X)
-    for (uint8_t j = 0; j < 4; j++) { // columns (along Y)
-      bitWrite(matrix, i * 4 + j, readBtn(j));
-    }
-  }
-  return ((btpin & 0b11111111111111110000000000000000) | (matrix & 0b00000000000000001111111111111111)); // milos, put matrix bits into first 16 bits of buttons and keep the rest unchanged
-}*/
 
 #endif // _CONFIG_H_

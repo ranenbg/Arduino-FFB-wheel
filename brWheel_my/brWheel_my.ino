@@ -138,8 +138,7 @@ void stopIfFault()
 //-------------------------------------------- SETUP -----------------------------------------------------
 //--------------------------------------------------------------------------------------------------------
 
-void setup()
-{
+void setup() {
   CONFIG_SERIAL.begin(115200);
 
   //last_nextShift = micros();
@@ -262,8 +261,8 @@ void loop() {
 
 #ifdef USE_QUADRATURE_ENCODER
     if ((now_micros - last_refresh) >= CONTROL_PERIOD) {
-      //SYNC_LED_HIGH(); //milos
       last_refresh = now_micros;
+      //SYNC_LED_HIGH(); //milos
 
       if (zIndexFound) {
         turn = myEnc.Read() - ROTATION_MID + brWheelFFB.offset; //milos, only apply z-index offset if z-index pulse is found

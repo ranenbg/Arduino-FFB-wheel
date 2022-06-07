@@ -138,12 +138,12 @@ void InitInputs() {
 //--------------------------------------------------------------------------------------------------------
 
 short int SHIFTREG_STATE;
-//unsigned int bytesVal = 0;
 u16 bytesVal_SW;		// Temporary variables for read input Shift Steering Wheel (8-bit)
 u16 bytesVal_H;			// Temporary variables for read input Shift H-Shifter (Dual 8-bit)
-u16 btnVal_SW = 0;
-u16 btnVal_H = 0;
-u8 i = 0;
+//u16 btnVal_SW; // milos, commented
+//u16 btnVal_H; // milos, commented
+u8 i;
+u8 bitVal; // milos, added - current bit readout from shift register
 
 #ifdef USE_SHIFT_REGISTER
 void InitShiftRegister() {
@@ -153,6 +153,11 @@ void InitShiftRegister() {
   pinModeFast(SHIFTREG_PL, OUTPUT); //milos, changed to fast
   SHIFTREG_STATE = 0;
   bytesVal_SW = 0;
+  bytesVal_H = 0;
+  //btnVal_SW = 0;
+  //btnVal_H = 0;
+  i = 0;
+  bitVal = 0; // milos, added
 }
 #else // no shift reg
 void InitButtons() { // milos, added - if not using shift register, allocate some free pins for buttons
@@ -174,14 +179,14 @@ void InitButtons() { // milos, added - if not using shift register, allocate som
   pinMode(BUTTON7, INPUT_PULLUP);
 #endif // end of load cell
 #else // if use button matrix
-  pinMode(BUTTON4, OUTPUT);
-  pinMode(BUTTON5, OUTPUT);
-  pinMode(BUTTON6, OUTPUT);
+  pinModeFast(BUTTON4, OUTPUT);
+  pinModeFast(BUTTON5, OUTPUT);
+  pinModeFast(BUTTON6, OUTPUT);
   setMatrixRow(BUTTON4, HIGH);
   setMatrixRow(BUTTON5, HIGH);
   setMatrixRow(BUTTON6, HIGH);
 #ifndef USE_LOAD_CELL
-  pinMode(BUTTON7, OUTPUT);
+  pinModeFast(BUTTON7, OUTPUT);
   setMatrixRow(BUTTON7, HIGH);
 #endif // end of load cell
 #endif // end of button matrix
@@ -190,48 +195,36 @@ void InitButtons() { // milos, added - if not using shift register, allocate som
 
 #ifdef USE_SHIFT_REGISTER
 void nextInputState() {
-  u8 bitVal = 0;
-  if (SHIFTREG_STATE > SHIFTS_NUM) {	// SINGLE SHIFT = 25 states  DUAL SHIFT = 49 states (both zero include), 33 for 16 shifts //milos, 49 for 24 shifts or 3 bytes, 65 for 32 shifts or 4 bytes
-    SHIFTREG_STATE = 0;       //milos, we only read first 4bytes since those contain button values on thrustmaster wheel rims (rim sends total of 8bytes due to headroom for more buttons)
-    btnVal_SW = bytesVal_SW; //milos, these were originaly designed for G29, where SW is 8bit shift register from steering wheel
-    btnVal_H = bytesVal_H; //milos, these were originaly designed for G29, where H is dual 8bit (16bit) shift register from H-shifter
+  bitVal = 0;
+  if (SHIFTREG_STATE > SHIFTS_NUM) {	// SINGLE SHIFT = 25 states  DUAL SHIFT = 49 states (both zero include), 33 for 16 shifts // milos, 49 for 24 shifts or 3 bytes, 65 for 32 shifts or 4 bytes
+    SHIFTREG_STATE = 0;       // milos, we only read first 4 bytes since those contain button values on thrustmaster wheel rims (rim sends total of 8 bytes due to headroom for more buttons)
+    //btnVal_SW = bytesVal_SW; // milos, these were originaly designed for G29, where SW is 8bit shift register from steering wheel
+    //btnVal_H = bytesVal_H; // milos, these were originaly designed for G29, where H is dual 8bit (16bit) shift register from H-shifter
     bytesVal_SW = 0;
     bytesVal_H = 0;
     i = 0;
   }
-
   if (SHIFTREG_STATE < 2) {
-    //DEBUG_SERIAL.println("PL");
-    if (SHIFTREG_STATE == 0) {
-      //Serial.println("PL low");
-      digitalWriteFast(SHIFTREG_PL, HIGH); //milos, changed to fast, was LOW
-    }
-    else {
-      //Serial.println("PL high");
-      digitalWriteFast(SHIFTREG_PL, LOW); //milos, changed to fast, was HIGH
-    }
-  }
-  else {
+    if (SHIFTREG_STATE == 0) digitalWriteFast(SHIFTREG_PL, HIGH); //milos, changed to fast, was LOW
+    if (SHIFTREG_STATE == 1) digitalWriteFast(SHIFTREG_PL, LOW); //milos, changed to fast, was HIGH
+  } else {
     if (SHIFTREG_STATE % 2 == 0) {
       bitVal = digitalRead(SHIFTREG_DATA_SW);
-      bytesVal_SW |= (bitVal << ((16 - 1) - i)); //milos, was 8 (we read first 2 bytes)
+      //if (i < 16) bytesVal_SW |= (bitVal << ((16 - 1) - i)); //milos, was 8 (we read first 2 bytes) // milos, commented old
+      if (i < 16) bitWrite(bytesVal_SW, i, bitVal); // milos, added
 
-      //bitVal = digitalReadFast(SHIFTREG_DATA_SW); //milos, was _H (commented)
-      //bytesVal_H |= (bitVal << ((24 - 1) - i)); //milos, was 16 (we read 3rd byte only)
-      bytesVal_H |= (bitVal << ((32 - 1) - i)); //milos, we read 3rd and 4th byte
+      //bitVal = digitalRead(SHIFTREG_DATA_H); //milos, commented
+      //if (i > 15) bytesVal_H |= (bitVal << ((32 - 1) - i)); //milos, we read 3rd and 4th byte // milos, commented old
+      if (i > 15) bitWrite(bytesVal_H, i - 16, bitVal); // milos, added
 
       i++;
       digitalWriteFast(SHIFTREG_CLK, HIGH); //milos, changed to fast
-      //Serial.println("CLK high"); // milos, added
     }
     else if (SHIFTREG_STATE % 2 == 1) {
       digitalWriteFast(SHIFTREG_CLK, LOW); //milos, changed to fast
-      //Serial.println("CLK low"); // milos, added
     }
   }
-
   SHIFTREG_STATE++;
-  //Serial.println(SHIFTREG_STATE); // milos, added
 }
 #endif
 
@@ -257,16 +250,11 @@ u32 readInputButtons() {
     bmask <<= 1;
     }*/
 
-  //milos, my version
-  for (u8 i = 0; i < 16; i++) { //milos, write 2 bytes from btnVal_SW into first 2 bytes of buttons
-    bitWrite(buttons, i, bitRead(btnVal_SW, 15 - i));
+  //milos, my version - write 2B from btnVal_SW into first 2B of buttons and 2B from btnVal_H into last 2B of buttons
+  for (u8 i = 0; i < 16; i++) {
+    bitWrite(buttons, i, bitRead(bytesVal_SW, i));
+    bitWrite(buttons, i + 16, bitRead(bytesVal_H, i));
   }
-  for (u8 j = 0; j < 16; j++) { //milos, write 2 bytes from btnVal_H into last 2 bytes of buttons
-    bitWrite(buttons, j + 16, bitRead(btnVal_H, 15 - j));
-  }
-  /*Serial.print(btnVal_SW, BIN); // milos
-    Serial.print(" "); // milos
-    Serial.println(btnVal_H, BIN); // milos*/
 
 #else  // milos, when no shift reg, use Arduino Leonardo for 3 or 4 buttons
 #ifndef USE_BTNMATRIX // milos, added - read all buttons only if we are not using button matrix
@@ -320,11 +308,11 @@ u32 readInputButtons() {
 bool readSingleButton (uint8_t i) { // milos, added
   bool temp;
   if (i == 0) {
-    temp = !bitRead(digitalReadFast(BUTTON0), B0PORTBIT); // milos, read bit4 from PINF A3 (or bit4 from PIND when no lc) into buttons bit0
+    temp = !bitRead(digitalReadFast(BUTTON0), B0PORTBIT); // milos, read bit4 from PINF A3 (or bit4 from PIND D4 when no LC) into buttons bit0
   } else if (i == 1) {
-    temp = !bitRead(digitalReadFast(BUTTON1), B1PORTBIT); // milos, read bit1 from PINF A4 (or bit3 from PINB, pin14 on ProMicro) into buttons bit1
+    temp = !bitRead(digitalReadFast(BUTTON1), B1PORTBIT); // milos, read bit1 from PINF A4 (or bit3 from PINB D14 on ProMicro) into buttons bit1
   } else if (i == 2) {
-    temp = !bitRead(digitalReadFast(BUTTON2), B2PORTBIT); // milos, read bit0 from PINF A5 (or bit1 from PINB, pin15 on ProMicro) into buttons bit2
+    temp = !bitRead(digitalReadFast(BUTTON2), B2PORTBIT); // milos, read bit0 from PINF A5 (or bit1 from PINB D15 on ProMicro) into buttons bit2
   } else if (i == 3) {
     temp = !bitRead(digitalReadFast(BUTTON3), B3PORTBIT); // milos, read bit6 from PIND D12 into buttons bit3
   } else if (i == 4) {
@@ -345,20 +333,20 @@ bool readSingleButton (uint8_t i) { // milos, added
 #ifdef USE_BTNMATRIX
 void setMatrixRow (uint8_t j, uint8_t val) { // milos, added
   if (j == 0) {
-    digitalWrite(BUTTON4, val);
+    digitalWriteFast(BUTTON4, val);
   } else if (j == 1) {
-    digitalWrite(BUTTON5, val);
+    digitalWriteFast(BUTTON5, val);
   } else if (j == 2) {
-    digitalWrite(BUTTON6, val);
+    digitalWriteFast(BUTTON6, val);
   } else if (j == 3) {
-    digitalWrite(BUTTON7, val);
+    digitalWriteFast(BUTTON7, val);
   }
 }
 #endif // end of button matrix
 
 //--------------------------------------------------------------------------------------------------------
 
-#ifdef AVG_INPUTS //milos, includes this only if it is used
+#ifdef AVG_INPUTS //milos, include this only if it is used
 void ClearAnalogInputs () {
   for (u8 i = 0; i < sizeof(analog_inputs_pins); i++) {
     analog_inputs[i] = 0;

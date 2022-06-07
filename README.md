@@ -33,16 +33,16 @@ Detailed documentation and more information about the firmware can be found in t
 Due to 32k memory limitation in Arduino Leonardo (ATmega32U4) each HEX file is compiled with a certain firmware options. A one letter abreviation for each option is encoded in the firmware version string and one needs to consider carefully which option to chose.
 
 Firmware naming consits of 3 digits and some letters (example: fw-v180ahz). The first two digits (XX) are main firmware version, while the 3rd digit (0,1,2,3) stands for:
-- fw-vXX0 basic version (encoder, pedals, buttons)
-- fw-vXX1 adds shift register support
-- fw-vXX2 adds shift register+HX711 support
-- fw-vXX3 adds shift register+HX711+MC7425 analog DAC support
+- fw-vXX0 basic version (1 encoder, 4 pedals, 8 buttons)
+- fw-vXX1 adds support for shift register 
+- fw-vXX2 adds support for shift register+HX711
+- fw-vXX3 adds support for shift register+HX711+MC7425 analog DAC
 
  Here is the complete list of all available options that may be added to any of the above firmware:
 - "a" pedal axis autocalibration enabled
 - "z" Z-index encoder support
 - "h" Hat Switch support
-- "s" exernal ADC support for pedals with ADS1015
+- "s" external ADC support for pedals with ADS1015
 - "i" averaging of analog inputs
 - "t" 4x4 button matrix support
 - "m" replacement pinouts for Arduino ProMicro

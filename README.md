@@ -4,13 +4,13 @@ Stand alone USB device recognized as a joystick with force feedback functionalit
 Firmware features:
 - supported Arduino boards: Leonardo, Micro and ProMicro (5V, 16MHz)
 - 4 analog axis + 1 for optical encoder, 2 FFB axis (only 1 has pwm or dac output)
-- up to 16 buttons via by 4x4 matrix or by button box firmware uploaded to Arduino Nano/Uno
+- up to 16 buttons via by 4x4 matrix or by **[button box firmware](https://github.com/ranenbg/Arduino-FFB-wheel)** uploaded to Arduino Nano/Uno
 - fully supported 16bit FFB effects (custom force effect not implemented)
 - envelope and conditional block effects, start delay, durration, deadband
 - FFB calculation and axis/button update rate is 500Hz (2ms period)
-- many options available (external 12bit ADC/DAC, pedal autocalibration, z-index, hatswitch)
+- many options available (external 12bit ADC/DAC, pedal autocalibration, z-index, hatswitch, button matrix)
 - RS232 serial interface for configuration of all wheel parameters
-- fully adjustable FFB output in the form of 2channel digital PWM or analog DAC signals
+- fully adjustable FFB output in the form of 2 channel digital PWM or analog DAC signals
 - load cell support for HX711 chip (for brake pedal axis only)
 - all wheel parameters are stored in EEPROM (and automatically loaded at each powerup)
 - wheel control **[Arduino FFB gui](https://github.com/ranenbg/Arduino-FFB-gui)** for an easy configuration and monitoring of all inputs/outputs 

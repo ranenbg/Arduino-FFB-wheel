@@ -30,15 +30,15 @@ Detailed documentation and more information about the firmware can be found in t
 ![plot](./brWheel_my/bts7960_wiring_diagram.png)
 
 ## Firmware option description
-Due to 32k memory limitation in Arduino Leonardo (ATmega32U4) each HEX file is compiled with a certain firmware options. Their meaning is encoded in the firmware version string and one needs to consider carefully which option to chose.
+Due to 32k memory limitation in Arduino Leonardo (ATmega32U4) each HEX file is compiled with a certain firmware options. A one letter abreviation for each option is encoded in the firmware version string and one needs to consider carefully which option to chose.
 
-Each firmware consits of 3 digits, where first two are firmware version (XX) and the 3rd digit (0,1,2,3) is their explanation:
-- XX0 basic version (encoder, pedals, buttons)
-- XX1 shift register
-- XX2 shift register+HX711
-- XX3 shift register+HX711+MC7425 analog DAC
+Firmware naming consits of 3 digits and some letters (example: fw-v180ahz). The first two digits (XX) are main firmware version, while the 3rd digit (0,1,2,3) stands for:
+- fw-vXX0 basic version (encoder, pedals, buttons)
+- fw-vXX1 shift register
+- fw-vXX2 shift register+HX711
+- fw-vXX3 shift register+HX711+MC7425 analog DAC
 
- Here is the complete list of available options:
+ Here is the complete list of all available options that may be added to any of the above firmware:
 - "a" pedal axis autocalibration enabled
 - "z" Z-index encoder support
 - "h" Hat Switch support

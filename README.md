@@ -26,6 +26,8 @@ Detailed documentation and more information about the firmware can be found in t
 ## External i2C device pinouts
 ![plot](./brWheel_my/ads1015_wiring_diagram.png)
 ![plot](./brWheel_my/mcp4725_wiring_diagram.png)
+## Motor driver wiring
+![plot](./brWheel_my/bts7960_wiring_diagram.png)
 
 
 ## Firmware download

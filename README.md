@@ -29,6 +29,15 @@ Detailed documentation and more information about the firmware can be found in t
 ## Motor driver wiring
 ![plot](./brWheel_my/bts7960_wiring_diagram.png)
 
+## Firmware option description
+Due to 32k memory limitation in Arduino Leonardo (ATmega32U4) each HEX file is compiled with a certain firmware options. Their meaning is encoded in the firmware version and one needs to consider carefully which option to chose. Here is the complete list of available options:
+a - pedal axis autocalibration enabled
+z - Z-index encoder support
+h - Hat Switch support
+s - exernal ADC support for pedals with ADS1015
+i - averaging of analog inputs
+t - 4x4 button matrix support
+m - replacement pinouts for Arduino ProMicro
 
 ## Firmware download
 

@@ -34,7 +34,7 @@ Detailed documentation and more information about the firmware can be found in t
 + ***[Past Versions](https://github.com/ranenbg/Arduino-FFB-wheel/releases)***
 
 ## Firmware upload procedure
-You can use **[XLoader](https://github.com/ranenbg/Arduino-FFB-wheel/tree/master/XLoader)** https://github.com/xinabox/xLoader:
+You can use **[XLoader](https://github.com/ranenbg/Arduino-FFB-wheel/tree/master/XLoader)**:
 - set 57600baud, ATMega32U4 microcontroler and select desired HEX
 - press reset button on Arduino (or shortly connect RST pin to GND)
 - select newly appeared COM port (Arduino in bootloader mode*) and press upload (you will only have a few seconds)

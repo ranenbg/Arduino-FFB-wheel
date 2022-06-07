@@ -38,7 +38,7 @@ Firmware version string consits of 3 digits and some letters (example: fw-v180ah
 - fw-vXX2 adds support for shift register+HX711
 - fw-vXX3 adds support for shift register+HX711+MC7425 analog DAC
 
- Here is the complete list of all available options that may be added to any of the above firmware:
+ Here is the complete list of all available options that may be added to any of the above firmware*:
 - "a" pedal axis autocalibration enabled
 - "z" Z-index encoder support
 - "h" Hat Switch support
@@ -46,6 +46,7 @@ Firmware version string consits of 3 digits and some letters (example: fw-v180ah
 - "i" averaging of analog inputs
 - "t" 4x4 button matrix support
 - "m" replacement pinouts for Arduino ProMicro
+*some combinations are not possible at the same time like "z" and "s", beacause they both use the same Arduino pin
 
 ## Firmware download
 

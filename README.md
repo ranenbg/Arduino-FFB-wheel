@@ -4,7 +4,7 @@ Stand alone USB device recognized as a joystick with force feedback functionalit
 Firmware features:
 - supported Arduino boards: Leonardo, Micro and ProMicro (5V, 16MHz)
 - 4 analog axis + 1 for optical encoder, 2 FFB axis (only 1 has pwm or dac output)
-- up to 16 buttons via by 4x4 matrix or by **[button box firmware](https://github.com/ranenbg/Arduino-FFB-wheel/tx_rw_ferrari_458_wheel_emu_16buttons)** uploaded to Arduino Nano/Uno
+- up to 16 buttons via by 4x4 matrix or by **[button box firmware]([https://github.com/ranenbg/Arduino-FFB-wheel/tx_rw_ferrari_458_wheel_emu_16buttons](https://github.com/ranenbg/Arduino-FFB-wheel/tree/master/tx_rw_ferrari_458_wheel_emu_16buttons))** uploaded to Arduino Nano/Uno
 - fully supported 16bit FFB effects (custom force effect not implemented)
 - envelope and conditional block effects, start delay, durration, deadband
 - FFB calculation and axis/button update rate is 500Hz (2ms period)

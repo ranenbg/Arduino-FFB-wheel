@@ -47,7 +47,7 @@ Firmware version string consits of 3 digits and some letters (example: fw-v180ah
 - "t" 4x4 button matrix support
 - "m" replacement pinouts for Arduino ProMicro
 
-* some combinations are not possible at the same time like "z" and "s", beacause they both use the same Arduino pin
+note* some combinations are not possible at the same time like "z" and "s", beacause they both use the same Arduino pin
 
 ## Firmware download
 

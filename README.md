@@ -34,9 +34,9 @@ Due to 32k memory limitation in Arduino Leonardo (ATmega32U4) each HEX file is c
 
 Firmware naming consits of 3 digits and some letters (example: fw-v180ahz). The first two digits (XX) are main firmware version, while the 3rd digit (0,1,2,3) stands for:
 - fw-vXX0 basic version (encoder, pedals, buttons)
-- fw-vXX1 shift register
-- fw-vXX2 shift register+HX711
-- fw-vXX3 shift register+HX711+MC7425 analog DAC
+- fw-vXX1 adds shift register support
+- fw-vXX2 adds shift register+HX711 support
+- fw-vXX3 adds shift register+HX711+MC7425 analog DAC support
 
  Here is the complete list of all available options that may be added to any of the above firmware:
 - "a" pedal axis autocalibration enabled

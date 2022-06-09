@@ -49,7 +49,7 @@ Firmware version string consists out of 3 digits and some letters (example: fw-v
 - "t" 4x4 button matrix support
 - "m" replacement pinouts for Arduino ProMicro
 
-note* some combinations are not possible at the same time, like "zs", beacause they both use the same hardware interrupt pin which can not be moved elsewhere
+note* some combinations are not possible at the same time, like "fw-vXXXzs", or "fw-v183z" beacause they use the same hardware interrupt pin for more than 1 function
 
 ## Firmware download
 

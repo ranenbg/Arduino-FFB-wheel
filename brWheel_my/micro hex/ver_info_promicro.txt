@@ -3,12 +3,13 @@ version		features
 - firmware HEX versions bellow require wheel control v2.0 or newer (these are only for Arduino ProMicro that use replacement pinouts)
 
 
-180m		encoder, 4 axis, 8 buttons, 2 FFB axis, periodic effects timing fix, duration and start delay fix, 16bit direction, new HX711 library, debug FFB optimizations, 16x less strong spring
+180m		encoder, 4 axis, 8 buttons, 2 FFB axis, shift register fix, button matrix, periodic effects timing fix, duration and start delay fix, 16bit direction, new HX711 library, debug FFB optimizations, 16x less strong spring
 180zm		the same as v180m, but has support for encoder Z-index
-180asm		the same as v180m, with pedal autocalib and support for ADS1015 external ADC for pedals
+180asm		the same as v180m, with pedal autocalibration and support for ADS1015 external ADC for pedals
 180azm		the same as v180zm, with pedal autocalib
 180aztm		the same as v180az, with 4x4 button matrix support
 180azhtm	the same as v180azt, with hat switch support (1st 4 buttons from a matrix are used)
 181zm		the same as v180m, but has shift register support for 16 buttons
-182azhm		the same as v181zm, with pedal autocalib and load cell support with HX711
-183azhm		the same as v182azhm, but has analog FFB output with 2x12bit DAC MCP4275
+181azhm		the same as v181zm, with pedal autocalibration and hat switch support
+182azhm		the same as v181azhm, with load cell support for HX711
+183ahm		the same as v182azhm, but does not have z-index support and has analog FFB output with 2x12bit DAC MCP4275

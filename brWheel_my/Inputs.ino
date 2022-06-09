@@ -138,24 +138,26 @@ void InitInputs() {
 //--------------------------------------------------------------------------------------------------------
 
 short int SHIFTREG_STATE;
-u16 bytesVal_SW;		// Temporary variables for read input Shift Steering Wheel (8-bit)
-u16 bytesVal_H;			// Temporary variables for read input Shift H-Shifter (Dual 8-bit)
+//u16 bytesVal_SW;		// Temporary variables for read input Shift Steering Wheel (8-bit)
+//u16 bytesVal_H;			// Temporary variables for read input Shift H-Shifter (Dual 8-bit)
 //u16 btnVal_SW; // milos, commented
 //u16 btnVal_H; // milos, commented
+u32 bytesVal_SHR; // milos, added - 32bit shift register input buffer for buttons
 u8 i;
 u8 bitVal; // milos, added - current bit readout from shift register
 
 #ifdef USE_SHIFT_REGISTER
 void InitShiftRegister() {
   pinModeFast(SHIFTREG_CLK, OUTPUT); //milos, changed to fast
-  pinMode(SHIFTREG_DATA_SW, INPUT_PULLUP); //milos, added pullup
-  //pinMode(SHIFTREG_DATA_H, INPUT_PULLUP);  //milos, added pullup
+  pinMode(SHIFTREG_DATA_SW, INPUT);
+  //pinMode(SHIFTREG_DATA_H, INPUT);  //milos, commented
   pinModeFast(SHIFTREG_PL, OUTPUT); //milos, changed to fast
   SHIFTREG_STATE = 0;
-  bytesVal_SW = 0;
-  bytesVal_H = 0;
+  //bytesVal_SW = 0; // milos, commented
+  //bytesVal_H = 0;
   //btnVal_SW = 0;
   //btnVal_H = 0;
+  bytesVal_SHR = 0; // milos, added
   i = 0;
   bitVal = 0; // milos, added
 }
@@ -200,8 +202,9 @@ void nextInputState() {
     SHIFTREG_STATE = 0;       // milos, we only read first 4 bytes since those contain button values on thrustmaster wheel rims (rim sends total of 8 bytes due to headroom for more buttons)
     //btnVal_SW = bytesVal_SW; // milos, these were originaly designed for G29, where SW is 8bit shift register from steering wheel
     //btnVal_H = bytesVal_H; // milos, these were originaly designed for G29, where H is dual 8bit (16bit) shift register from H-shifter
-    bytesVal_SW = 0;
-    bytesVal_H = 0;
+    //bytesVal_SW = 0;
+    //bytesVal_H = 0;
+    bytesVal_SHR = 0; // milos, added - 32bit shift register
     i = 0;
   }
   if (SHIFTREG_STATE < 2) {
@@ -209,18 +212,18 @@ void nextInputState() {
     if (SHIFTREG_STATE == 1) digitalWriteFast(SHIFTREG_PL, LOW); //milos, changed to fast, was HIGH
   } else {
     if (SHIFTREG_STATE % 2 == 0) {
-      bitVal = digitalRead(SHIFTREG_DATA_SW);
+      bitVal = bitRead(digitalReadFast(SHIFTREG_DATA_SW), 7); // milos, faster reading
       //if (i < 16) bytesVal_SW |= (bitVal << ((16 - 1) - i)); //milos, was 8 (we read first 2 bytes) // milos, commented old
-      if (i < 16) bitWrite(bytesVal_SW, i, bitVal); // milos, added
+      //if (i < 16) bitWrite(bytesVal_SW, i, bitVal); // milos, added
 
       //bitVal = digitalRead(SHIFTREG_DATA_H); //milos, commented
       //if (i > 15) bytesVal_H |= (bitVal << ((32 - 1) - i)); //milos, we read 3rd and 4th byte // milos, commented old
-      if (i > 15) bitWrite(bytesVal_H, i - 16, bitVal); // milos, added
+      //if (i > 15) bitWrite(bytesVal_H, i - 16, bitVal); // milos, added
 
+      if (i < 32) bitWrite(bytesVal_SHR, i, bitVal); // milos, added
       i++;
       digitalWriteFast(SHIFTREG_CLK, HIGH); //milos, changed to fast
-    }
-    else if (SHIFTREG_STATE % 2 == 1) {
+    } else if (SHIFTREG_STATE % 2 == 1) {
       digitalWriteFast(SHIFTREG_CLK, LOW); //milos, changed to fast
     }
   }
@@ -250,11 +253,17 @@ u32 readInputButtons() {
     bmask <<= 1;
     }*/
 
-  //milos, my version - write 2B from btnVal_SW into first 2B of buttons and 2B from btnVal_H into last 2B of buttons
-  for (u8 i = 0; i < 16; i++) {
+  //milos, my version - write 2B from bytesVal_SW into first 2B of buttons and 2B from btnVal_H into last 2B of buttons
+  /*for (u8 i = 0; i < 16; i++) {
     bitWrite(buttons, i, bitRead(bytesVal_SW, i));
     bitWrite(buttons, i + 16, bitRead(bytesVal_H, i));
-  }
+  }*/
+
+  //milos, my version - write bytesVal_SHR into buttons
+  /*for (u8 j = 0; j < 32; j++) {
+    bitWrite(buttons, j, bitRead(bytesVal_SHR, j));
+  }*/
+  buttons = bytesVal_SHR;
 
 #else  // milos, when no shift reg, use Arduino Leonardo for 3 or 4 buttons
 #ifndef USE_BTNMATRIX // milos, added - read all buttons only if we are not using button matrix

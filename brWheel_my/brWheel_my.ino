@@ -247,11 +247,6 @@ void loop() {
 #ifdef AVG_INPUTS //milos, added option see config.h
   ReadAnalogInputs();        // Some reading to take an average
 #endif
-#ifdef  USE_SHIFT_REGISTER
-  for (uint8_t i = 0; i <= SHIFTS_NUM; i++) { //milos, added (read all states in one pass)
-    nextInputState();           // Refresh all states of shift-register
-  }
-#endif
 
   now_micros = micros();
   {
@@ -262,8 +257,12 @@ void loop() {
 #ifdef USE_QUADRATURE_ENCODER
     if ((now_micros - last_refresh) >= CONTROL_PERIOD) {
       last_refresh = now_micros;
-      //SYNC_LED_HIGH(); //milos
-
+      //SYNC_LED_HIGH(); // milos
+#ifdef  USE_SHIFT_REGISTER
+      for (uint8_t i = 0; i <= SHIFTS_NUM; i++) { // milos, added (read all states in one pass)
+        nextInputState();           // milos, refresh state of shift-register and read incoming bit
+      }
+#endif
       if (zIndexFound) {
         turn = myEnc.Read() - ROTATION_MID + brWheelFFB.offset; //milos, only apply z-index offset if z-index pulse is found
       } else {

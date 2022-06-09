@@ -1,6 +1,7 @@
 /*
   Ver. 1.01 - 2015-06-17
   Ver. 1.02 - 2018-06-17, modified by Milos Rankovic
+  Ver. 1.03 - 2022-06-08, modified by Milos Rankovic - button at D8 flicker fix
 
   This sketch emulates Thrustmaster TX RW 458 Italia wheel
   allowing to connect arduino to TX RW wheelbase (may work for T500/T300 as well)
@@ -98,6 +99,7 @@ void setup () {
   pinMode(MISO, OUTPUT); // arduino is a slave device
   SPCR |= _BV(SPE);      // Enables the SPI when 1
   SPCR |= _BV(SPIE);     // Enables the SPI interrupt when 1
+  SPCR |= _BV(CPHA);     // milos, added - sample data on rising edge of the clock
 
   // interrupt for SS rising edge. Arduino Uno Pin10 must be connected to Pin2!!!
   attachInterrupt (0, ss_rising, RISING);

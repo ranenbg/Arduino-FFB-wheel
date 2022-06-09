@@ -1,6 +1,6 @@
 ﻿Milos Rankovic, ranenbg@gmail.com
 first created 25.03.2020.
-last updated 19.04.2022.
+last updated 08.06.2022.
 
 This txt file contains details for connecting a second Arduino Uno or Nano board,
 that will act as a shift register (button box) inside a custom wheel rim
@@ -12,6 +12,7 @@ http://rr-m.org/blog/hacking-a-thrustmaster-tx-rw-wheelbase-with-arduino-uno-par
 
 Ver. 1.01 - 2015-06-17
 Ver. 1.02 - 2018-06-17, modified by Milos Rankovic
+Ver. 1.03 - 2022-06-08, modified by Milos Rankovic
 
 This sketch emulates Thrustmaster TX RW 458 Italia wheel
 allowing to connect arduino to TX RW wheelbase (may work for T500/T300 as well)

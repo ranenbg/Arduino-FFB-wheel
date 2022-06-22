@@ -15,10 +15,9 @@ void readSerial() {
   {
     u8 c = toUpper(CONFIG_SERIAL.read());
     //DEBUG_SERIAL.println(c);
-    s16 temp, temp1;
+    s32 temp, temp1;
     f32 wheelAngle;
     u8 ffb_temp;
-    String fwprefix;
     switch (c) {
       case 'U': // milos, show all FFB parameters
         //CONFIG_SERIAL.println("Command      FFB parameters"); // milos
@@ -127,7 +126,7 @@ void readSerial() {
         break;
       case 'O': // milos, added to adjust optical encoder CPR
         temp = CONFIG_SERIAL.parseInt();
-        temp = constrain(temp, 4, 32767);
+        temp = constrain(temp, 4, 600000); //milos, extended to 32bit (100000*6)
         temp1 = myEnc.Read() - ROTATION_MID + brWheelFFB.offset; // milos
         wheelAngle = float(temp1) * float(ROTATION_DEG) / float(ROTATION_MAX); // milos, current wheel angle
         CPR = temp; // milos, update CPR
@@ -136,7 +135,7 @@ void readSerial() {
         //brWheelFFB.offset = 0; //milos
         temp1 = int32_t(wheelAngle * float(ROTATION_MAX) / float(ROTATION_DEG)); // milos, here we recover the old wheel angle
         myEnc.Write(ROTATION_MID + temp1 - brWheelFFB.offset); // milos
-        //CONFIG_SERIAL.print("encoder CPR[4-32767]: ");
+        //CONFIG_SERIAL.print("encoder CPR[4-600000]: ");
         //CONFIG_SERIAL.println(temp);
         CONFIG_SERIAL.println(1);
         //SetParam(PARAM_ADDR_ENC_CPR, CPR);//milos, update EEPROM

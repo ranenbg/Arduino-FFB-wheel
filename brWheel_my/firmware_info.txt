@@ -1,6 +1,6 @@
 Milos Rankovic, ranenbg@gmail.com
 first created 21.11.2018.
-last updated 05.04.2022.
+last updated 22.06.2022.
 
 This txt file contains details about Arduino wheel firmware capabilities and features:
 
@@ -8,7 +8,7 @@ Arduino boards supported - Leonardo, Micro or Pro Micro (16MHz clock)
 
 firmware	pwm freq	pwm mode	pwm res		steering	brake		throttle	clutch		handbrake	buttons		HAT Switch
 
-ver17x		16KHz*		pwm+-*		500*		16bit	        16bit(LC,a,s)	12bit(a,s)	12bit(a,s)	12bit(a,s)	24(used 16)	1
+ver17x		16KHz*		pwm+-*		500*		16bit	        16bit(LC,a,s)	12bit(a,s)	12bit(a,s)	12bit(a,s)	24(16 used)	1
 
 *fully configurable through RS232 or control panel v2.0
 LC - load cell module HX711 24bit for brake, 2 samples runing average, (0-65535, limited by microsoft FFB driver to 16bits max)
@@ -36,10 +36,10 @@ fully implemented condition and envelope block effects, effect duration, start d
 
 Internal FFB effects: auto centering spring, damper, inertia, friction and end stop spring (can be turned on/off through serial interface)
 
-Firmware features: RS232 interface for adjusting all FFB coefitients, LC brake pressure, pedal autocalibration, minimal PWM value, rotation angle, recenter wheel,
-recalibrate wheel, recalibrate pedals, wheel version info, truning various desktop effects on/off, turn on/off ffb signal monitor, save ffb config to EEPROM, adjustment of encoder CPR, fully adjustable PWM settings that are stored in EEPROM, FFB clip LED indicator (ligts up gradually from last 10% of FFB signal level)
+Firmware features: RS232 interface for adjusting all FFB parameters, LC brake pressure, pedal autocalibration, minimal PWM value, rotation angle, recenter wheel,
+recalibrate wheel, recalibrate pedals, wheel version info, truning various desktop effects on/off, turn on/off ffb signal monitor, save ffb config to EEPROM, adjustment of encoder CPR, fully adjustable PWM settings that are stored in EEPROM, FFB clip LED indicator (ligts up gradually from last 10% of FFB signal level), 4x4 button matrix, CPR range is 100k, wheel angle used as metric for spring, damper, inertia and friction effects
 
-Control panel: made in Processing 3.5.4, visualises all axis and buttons including serial commands sent and received from Arduino, full adjustment of FFB effect gains, ffb signal monitor, save and load defaults settings from EEPROM, recenter wheel, recalibrate pedals, encoder CPR adjustment, pwm adjustment, COM port cfg via dialog, FFB setting profiles, autodetection of firmware version, control panel version v2.0
+Control panel: made in Processing 3.5.4, visualises all axis and buttons including serial commands sent and received from Arduino, full adjustment of FFB effect gains, ffb signal monitor, load/save last settings from EEPROM, recenter wheel, recalibrate pedals, encoder CPR adjustment, pwm adjustment, COM port cfg via dialog, Axis colors cfg txt, storing/loading FFB parameter profiles to/from PC, autodetection of firmware version, control panel version v2.1
 
 FFB output: fully configurable PWM settings, PWM frequency (tied to PWM resolution), PWM types (phase correct or fast TOP), PWM modes (pwm+- or pwm+dir), changes require restarting Arduino, analog 2ch external 12bit DAC MCP4725 available (requires recompiling)
 

@@ -170,22 +170,23 @@ s32 ConstrainEffect (s32 val) {
   return (constrain(val, -MM_MAX_MOTOR_TORQUE, MM_MAX_MOTOR_TORQUE));
 }
 
+f32 wDegScl() { // milos, added - scaling factor to convert encoder position to wheel angle units
+  return (f32(ROTATION_DEG) / f32(ROTATION_MAX));
+}
+
 s16 DamperEffect (f32 spd, s16 mag) {
-  //   s32 abs_spd = abs(spd);
-  //  if (abs_spd > SPD_THRESHOLD)
-  //    return(-ConstrainEffect((spd*abs_spd*mag) / 400));
+  //milos, speed in the units of wheel_angle/time_step
   if (spd > SPD_THRESHOLD)
-    //return (-ConstrainEffect(((spd - SPD_THRESHOLD) * mag) / EffectDivider() * gSpeedSet * 5.5)); //milos
-    return (-ConstrainEffect(((spd - SPD_THRESHOLD) * mag) * DAMPER_COEF / 512)); //milos
+    return (-ConstrainEffect(((spd - SPD_THRESHOLD) * mag * wDegScl()) * DAMPER_COEF * 10 / 512)); //milos
   if (spd < -SPD_THRESHOLD)
-    //return (-ConstrainEffect(((spd + SPD_THRESHOLD) * mag) / EffectDivider() * gSpeedSet * 5.5)); //milos
-    return (-ConstrainEffect(((spd + SPD_THRESHOLD) * mag) * DAMPER_COEF / 512)); //milos
+    return (-ConstrainEffect(((spd + SPD_THRESHOLD) * mag * wDegScl()) * DAMPER_COEF * 10 / 512)); //milos
   return (0);
 }
 
 s16 InertiaEffect(f32 acl, s16 mag) { //milos, modified
-  //s32 cmd = constrain((abs(acl) - SPD_THRESHOLD)*FRICTION_RAMP*gSpeedSet * 5, -mag * 7, mag * 7);
-  s16 cmd = ConstrainEffect(mag * abs(acl) * INERTIA_COEF / 32); //milos, my new
+  //milos, acceleration in the units of wheel_angle/time_step^2
+  //s16 cmd = ConstrainEffect(mag * abs(acl) * INERTIA_COEF / 32); //milos, my new
+  s16 cmd = ConstrainEffect(mag * abs(acl) * wDegScl() * INERTIA_COEF * 10 / 32); //milos
   if (acl > ACL_THRESHOLD)
     return (-cmd);
   if (acl < -ACL_THRESHOLD)
@@ -195,19 +196,20 @@ s16 InertiaEffect(f32 acl, s16 mag) { //milos, modified
 
 s16 FrictionEffect (f32 spd, s16 mag) { //milos, modified
   //milos, simplified friction force model (constant above treshold, otherwise linear)
+  //milos, speed in the units of wheel_angle/time_step
   s16 cmd = mag * FRICTION_COEF / 32;
-  if (spd > FRC_THRESHOLD)
+  if (spd * wDegScl() * 10 > FRC_THRESHOLD)
     return (-ConstrainEffect(cmd));
-  if (spd < -FRC_THRESHOLD)
+  if (spd * wDegScl() * 10 < -FRC_THRESHOLD)
     return (ConstrainEffect(cmd));
-  return (-ConstrainEffect(spd * cmd / FRC_THRESHOLD));
+  return (-ConstrainEffect(spd * cmd * wDegScl() * 10 / FRC_THRESHOLD));
 }
 
-s32 SpringEffect (s32 err, s16 mag) { //milos, modified
-  return (-ConstrainEffect((s32)((s32)mag * err * SPRING_COEF / 256)));
+s32 SpringEffect (s32 err, s16 mag) { //milos, modified - normalized to wheel angle
+  //return (-ConstrainEffect((s32)((s32)mag * err * SPRING_COEF / 256)));
+  return (-ConstrainEffect((s32)((s32)mag * err * wDegScl() * SPRING_COEF * 10 / 256))); //milos, added - with wheel angle as metric
 }
 
-//s32 SineEffect (f32 freq, f32 t, s32 mag) //milos, commented
 s16 SineEffect (s16 mag, u16 period, u8 phase, u16 t) { //milos
   t %= period; //milos, reset timer after period reached
   return ((s16)(((f32)mag) * sin(TWO_PI * (1.0 / (((f32)period) / 1000.0) * (((f32)t) / 1000.0) + (((f32)phase) / 256.0))))); //milos, t increments in each cycle

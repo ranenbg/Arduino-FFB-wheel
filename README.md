@@ -22,7 +22,7 @@ Detailed documentation and more information about the firmware can be found in t
 ## Encoder and LED wiring
 ![plot](./brWheel_my/encoder_ffb_clip_led_wiring_diagram.png)
 ## Motor driver wiring
-
+![plot](./brWheel_my/bts7960_wiring_diagram.png)
 ## Button box firmware pinouts - for Arduino Nano/Uno
 ![plot](./brWheel_my/Firmware-vXX1%20button%20box%20pinout.png)
 ## Button matrix pinouts

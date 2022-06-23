@@ -191,7 +191,7 @@ void setup() {
   MM_MIN_MOTOR_TORQUE = 0;
   minTorquePP = 0;
 #endif
-  ROTATION_MAX = uint16_t(float(CPR) / 360.0 * float(ROTATION_DEG)); // milos
+  ROTATION_MAX = int32_t(float(CPR) / 360.0 * float(ROTATION_DEG)); // milos
   ROTATION_MID = ROTATION_MAX / 2; // milos
 
   //myEnc.Init(ROTATION_MID + brWheelFFB.offset, true); //ROTATION_MID + gCalibrator.mOffset); // milos, pullups enabled

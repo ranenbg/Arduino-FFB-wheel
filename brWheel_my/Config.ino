@@ -59,8 +59,8 @@ void SetDefaultConfig () { //milos - sets default values
   SetParam(PARAM_ADDR_BRK_PRES, val); //milos, added
   ffb = 0b00000001; //milos, added, autocenter spring on
   SetParam(PARAM_ADDR_DSK_EFFC, ffb); //milos, added
-  val = 2400; //milos, default CPR value (here you can set a new one)
-  SetParam(PARAM_ADDR_ENC_CPR, val); //milos, added
+  val32 = 2400; //milos, default CPR value (here you can set a new one)
+  SetParam(PARAM_ADDR_ENC_CPR, val32); //milos, added
 #ifndef USE_MCP4725
   ffb = 0b00001001; // milos, PWM out enabled, phase correct, pwm+-, 16kHz, TOP 500
 #else
@@ -135,5 +135,3 @@ void ClearEEPROMConfig() { //milos, added - clears EEPROM (1KB on ATmega32U4)
     SetParam(i, zero);
   }
 }
-
-

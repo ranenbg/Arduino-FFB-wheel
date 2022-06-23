@@ -18,7 +18,7 @@ Firmware features:
 Detailed documentation and more information about the firmware can be found in txt files inside brWheel_my folder.
 
 # Firmware pinouts and wiring diagrams
-![plot](./brWheel_my/Firmware-v18x%20pinout.png)
+![plot](./brWheel_my/Firmware-v19x%20pinout.png)
 ## Encoder and LED wiring
 ![plot](./brWheel_my/encoder_ffb_clip_led_wiring_diagram.png)
 ## Motor driver wiring

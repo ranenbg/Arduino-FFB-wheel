@@ -31,6 +31,10 @@ Detailed documentation and more information about the firmware can be found in t
 ## External i2C device pinouts
 ![plot](./brWheel_my/ads1015_wiring_diagram.png)
 ![plot](./brWheel_my/mcp4725_wiring_diagram.png)
+## HX711 and load cell wiring
+![plot](./brWheel_my/HX711_load_cell_wiring_diagram.png)
+## XY shifter wiring
+![plot](./brWheel_my/XY_shifter_wiring_diagram.png)
 
 ## Firmware option description
 Due to 32k flash memory limitation in Arduino Leonardo (ATmega32U4), each HEX file is compiled with a certain firmware option. A one letter abreviation for each option is placed in the firmware version string and one needs to consider carefully which one to chose. In the release, I've compiled for you a few most often used firmware option combinations.
@@ -48,9 +52,10 @@ Firmware version string consists out of 3 digits and some letters (example: fw-v
 - "s" external ADC support for pedals with ADS1015
 - "i" averaging of analog inputs
 - "t" 4x4 button matrix support
+- "f" analog XY shifter support
 - "m" replacement pinouts for Arduino ProMicro
 
-note* some combinations are not possible at the same time, like "fw-vXXXzs", or "fw-v183z" beacause they use the same hardware interrupt pin for more than 1 function
+note* some combinations are not possible at the same time, like "fw-vXXXzs", or "fw-v183z" beacause they would use the same hardware interrupt pin for more than 1 function
 
 ## Firmware download
 

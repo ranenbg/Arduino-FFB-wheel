@@ -41,9 +41,13 @@ u8 analog_inputs_pins[] = // milos, changed to u8, from u16
   BRAKE_PIN,
   CLUTCH_PIN,
 #endif
+#ifdef USE_XY_SHIFTER // milos
+  HBRAKE_PIN,
+  SHIFTER_X_PIN, // milos
+  SHIFTER_Y_PIN // milos
+#else
   HBRAKE_PIN
-  //SHIFTER_X_PIN, // milos, commented
-  //SHIFTER_Y_PIN // milos, commented
+#endif
 };
 
 u8 axis_shift_n_bits[] =  // milos, changed to u8, from u16
@@ -113,8 +117,9 @@ void InitLoadCell () { // milos, added
 
 void InitInputs() {
   //analogReference(INTERNAL); // sets 2.56V on AREF pin for Leonardo or Micro, can be EXTERNAL
-  for (u8 i = 0; i < sizeof(analog_inputs_pins); i++)
+  for (u8 i = 0; i < sizeof(analog_inputs_pins); i++) {
     pinMode(analog_inputs_pins[i], INPUT);
+  }
 
 #ifdef USE_SHIFT_REGISTER
   InitShiftRegister();
@@ -164,8 +169,10 @@ void InitShiftRegister() {
 #else // no shift reg
 void InitButtons() { // milos, added - if not using shift register, allocate some free pins for buttons
   pinMode(BUTTON0, INPUT_PULLUP);
+#ifndef USE_XY_SHIFTER // milos, only when no XY shifter configure buttons
   pinMode(BUTTON1, INPUT_PULLUP);
   pinMode(BUTTON2, INPUT_PULLUP);
+#endif
 #ifndef USE_PROMICRO
   pinMode(BUTTON3, INPUT_PULLUP); // for Leonardo and Micro, we can use button3 even with z-index
 #else // if use proMicro
@@ -257,12 +264,12 @@ u32 readInputButtons() {
   /*for (u8 i = 0; i < 16; i++) {
     bitWrite(buttons, i, bitRead(bytesVal_SW, i));
     bitWrite(buttons, i + 16, bitRead(bytesVal_H, i));
-  }*/
+    }*/
 
   //milos, my version - write bytesVal_SHR into buttons
   /*for (u8 j = 0; j < 32; j++) {
     bitWrite(buttons, j, bitRead(bytesVal_SHR, j));
-  }*/
+    }*/
   buttons = bytesVal_SHR;
 
 #else  // milos, when no shift reg, use Arduino Leonardo for 3 or 4 buttons
@@ -319,9 +326,17 @@ bool readSingleButton (uint8_t i) { // milos, added
   if (i == 0) {
     temp = !bitRead(digitalReadFast(BUTTON0), B0PORTBIT); // milos, read bit4 from PINF A3 (or bit4 from PIND D4 when no LC) into buttons bit0
   } else if (i == 1) {
+#ifndef USE_XY_SHIFTER
     temp = !bitRead(digitalReadFast(BUTTON1), B1PORTBIT); // milos, read bit1 from PINF A4 (or bit3 from PINB D14 on ProMicro) into buttons bit1
+#else
+    temp = false; // milos, we can't use this pin for button if we use XY shifter
+#endif
   } else if (i == 2) {
+#ifndef USE_XY_SHIFTER
     temp = !bitRead(digitalReadFast(BUTTON2), B2PORTBIT); // milos, read bit0 from PINF A5 (or bit1 from PINB D15 on ProMicro) into buttons bit2
+#else
+    temp = false; // milos, we can't use this pin for button if we use XY shifter
+#endif
   } else if (i == 3) {
     temp = !bitRead(digitalReadFast(BUTTON3), B3PORTBIT); // milos, read bit6 from PIND D12 into buttons bit3
   } else if (i == 4) {

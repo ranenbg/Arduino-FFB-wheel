@@ -10,14 +10,15 @@
 //#define USE_ADS1105       // milos, uncomment for 12bit pedals (commented is 10bit from arduino inputs), can not be used with AVG_INPUTS
 //#define USE_DSP56ADC16S			// 16 bits Stereo ADC (milos, can not be used if USE_SHIFT_REGISTER is uncommented)
 #define USE_QUADRATURE_ENCODER		// Position Quadrature encoder
-#define USE_ZINDEX          // milos, use Z-index encoder channel (warning, can not be used with USE_ADS1105 or USE_MCP4725)
-#define USE_LOAD_CELL				// Load cell shield // milos, new library for LC
-#define USE_SHIFT_REGISTER			// 8-bit Parallel-load shift registers G27 board steering wheel (milos, this one is modified for 16 buttons)
+//#define USE_ZINDEX          // milos, use Z-index encoder channel (warning, can not be used with USE_ADS1105 or USE_MCP4725)
+//#define USE_LOAD_CELL				// Load cell shield // milos, new library for LC
+//#define USE_SHIFT_REGISTER			// 8-bit Parallel-load shift registers G27 board steering wheel (milos, this one is modified for 16 buttons)
 //#define USE_DUAL_SHIFT_REGISTER		// Dual 8-bit Parallel-load shift registers G27 board shifter  (milos, not available curently)
-#define USE_HATSWITCH        //milos, uncomment to use first 4 buttons for hat switch instead (can not be used if no load cell or shift register)
+#define USE_XY_SHIFTER    //milos, uncomment to use XY analog shifter (can not be used with USE_BTNMATRIX)
+//#define USE_HATSWITCH        //milos, uncomment to use first 4 buttons for hat switch instead (can not be used if no load cell or shift register)
 //#define USE_BTNMATRIX        //milos, uncomment to use 8 pins as a 4x4 button matrix for total of 16 buttons (can not be used with USE_LOAD_CELL or shift register)
 //#define AVG_INPUTS        // milos, uncomment this to use averaging of arduino analog inputs (if readings can be done faster than CONTROL_PERIOD)
-#define USE_AUTOCALIB        // milos, uncomment this to use autocalibration for pedal axis
+//#define USE_AUTOCALIB        // milos, uncomment this to use autocalibration for pedal axis
 //#define USE_MCP4725      // milos, 12bit DAC (0-5V), uncomment to enable output of FFB signal as DAC voltage output
 //#define USE_PROMICRO    // milos, uncomment if you are using Arduino ProMicro board (leave commented for Leonardo or Micro variants)
 #define USE_EEPROM // milos, uncomment this to enable loading/saving settings from EEPROM
@@ -28,7 +29,7 @@
 
 //#define LED_PIN				12
 //#define	LCSYNC_LED_PIN		12
-//#define	SYNC_LED_PIN		12 //milos, USB polling clock
+#define	SYNC_LED_PIN		12 //milos, USB polling clock
 
 //milos, added - ffb clip LED indicator
 #ifndef USE_PROMICRO
@@ -54,8 +55,6 @@
 #define CLUTCH_PIN    A2
 #define HBRAKE_PIN    A3
 #endif
-//#define SHIFTER_X_PIN		A4 // milos, commented
-//#define SHIFTER_Y_PIN		A5 // milos, commented
 
 // milos, added - for alternate button0 options
 #ifdef USE_LOAD_CELL //milos
@@ -69,10 +68,15 @@
 #endif
 
 #ifndef USE_PROMICRO // milos, added - for Leonardo or Micro
+#ifndef USE_XY_SHIFTER // milos, when no XY shifter buttons are available on analog pins
 #define BUTTON1 A4 // A4, used for button1 instead
 #define B1PORTBIT 1 // read bit1
 #define BUTTON2 A5 // A5, used for button2 instead
 #define B2PORTBIT 0 // read bit0
+#else
+#define SHIFTER_X_PIN A4 // milos
+#define SHIFTER_Y_PIN A5 // milos
+#endif
 #define BUTTON3 12 // used for button3
 #define B3PORTBIT 6 // read bit6 or D12
 #else // for Pro Micro
@@ -120,13 +124,19 @@
 #ifdef USE_LOAD_CELL //milos
 #define CLUTCH_INPUT 1
 #define HBRAKE_INPUT 2
+#ifdef USE_XY_SHIFTER
+#define SHIFTER_X_INPUT 3
+#define SHIFTER_Y_INPUT 4
+#endif
 #else
 #define BRAKE_INPUT 1
 #define CLUTCH_INPUT 2
 #define HBRAKE_INPUT 3
+#ifdef USE_XY_SHIFTER
+#define SHIFTER_X_INPUT 4
+#define SHIFTER_Y_INPUT 5
 #endif
-//#define SHIFTER_X_INPUT 3 // milos, commented
-//#define SHIFTER_Y_INPUT 4 // milos, commented
+#endif
 
 uint8_t LC_scaling; // milos, load cell scaling factor (affects brake pressure, but depends on your load cell's maximum specified load)
 // usage:   1 : min value, not recommended due to resolution loss
@@ -139,8 +149,8 @@ uint8_t LC_scaling; // milos, load cell scaling factor (affects brake pressure, 
 
 //#define	LCSYNC_LED_HIGH()		digitalWriteFast(LCSYNC_LED_PIN,HIGH)
 //#define	LCSYNC_LED_LOW()		digitalWriteFast(LCSYNC_LED_PIN,LOW)
-//#define	SYNC_LED_HIGH()			digitalWriteFast(SYNC_LED_PIN,HIGH)
-//#define	SYNC_LED_LOW()			digitalWriteFast(SYNC_LED_PIN,LOW)
+#define	SYNC_LED_HIGH()			digitalWriteFast(SYNC_LED_PIN,HIGH)
+#define	SYNC_LED_LOW()			digitalWriteFast(SYNC_LED_PIN,LOW)
 
 //------------------------------------- EEPROM Config -----------------------------------------------------
 
@@ -163,8 +173,14 @@ uint8_t LC_scaling; // milos, load cell scaling factor (affects brake pressure, 
 #define PARAM_ADDR_DSK_EFFC      0x18 //milos, desktop effects (byte contents is in effstate)
 #define PARAM_ADDR_ENC_CPR       0x19 //milos, encoder CPR
 #define PARAM_ADDR_PWM_SET       0x1D //milos, PWM settings and frequency (byte contents is in pwmstate)
+#define PARAM_ADDR_SHFT_X0       0x1E //milos, XY shifter limit x0
+#define PARAM_ADDR_SHFT_X1       0x20 //milos, XY shifter limit x1
+#define PARAM_ADDR_SHFT_X2       0x22 //milos, XY shifter limit x2
+#define PARAM_ADDR_SHFT_Y0       0x24 //milos, XY shifter limit y0
+#define PARAM_ADDR_SHFT_Y1       0x26 //milos, XY shifter limit y1
+#define PARAM_ADDR_SHFT_CFG      0x28 //milos, shifter configuration byte
 
-#define VERSION		0xC0 // milos, this is my version (previous was 8)
+#define VERSION		0xBE // milos, this is my version (previous was 8)
 
 #define GetParam(m_offset,m_data)	getParam((m_offset),(u8*)&(m_data),sizeof(m_data))
 #define SetParam(m_offset,m_data)	setParam((m_offset),(u8*)&(m_data),sizeof(m_data))
@@ -286,6 +302,67 @@ uint32_t decodeHat(uint32_t inbits) {
     hat = 0;
   }
   return ((inbits & 0b11111111111111111111111111110000) | (hat & 0b00001111)); // milos, put hat bits into first 4 bits of buttons and keep the rest unchanged
+}
+
+uint16_t sCal[5]; // milos, added - shifter calibration variables
+// i  cal gears_if_<=
+// 0  x0  1
+// 1  x1  3
+// 2  x2  5
+// 3  y0  2,4,6,8, R
+// 4  y1  N
+
+uint8_t sConfig; // milos, added - XY shifter configuration byte
+//bit0-H shifter, bit1-6 gears,bit2-,bit3-,bit4-,bit5-,bit6-,bit7-
+//if 1-sequential,if 1-8 gears
+// milos - added, function for decoding XY shifter analog values into last 8 buttons
+uint32_t decodeXYshifter (uint32_t inbits, int16_t sx, int16_t sy) {
+  uint32_t gears = 0;
+  uint8_t revButton = BUTTON0; // pin D4
+  // milos: to DO shifter decoding
+  if (sx < sCal[0] && sy >= sCal[4]) { // 1st gear
+    bitSet(gears, 16);
+  } else if (sx < sCal[0] && sy < sCal[3]) { // 2nd gear
+    bitSet(gears, 17);
+  } else if (sx >= sCal[0] && sx < sCal[1] && sy >= sCal[4]) { // 3rd gear
+    bitSet(gears, 18);
+  } else if (sx >= sCal[0] && sx < sCal[1] && sy < sCal[3]) { // 4th gear
+    bitSet(gears, 19);
+  } else if (sx >= sCal[1] && sx < sCal[2] && sy >= sCal[4]) { // 5th gear
+    bitSet(gears, 20);
+  } else if (sx >= sCal[1] && sx < sCal[2] && sy < sCal[3]) { // 6th gear
+    if (bitRead(sConfig, 1)) { // if 8 gear shifter
+      bitSet(gears, 21); // set 6th gear
+    } else { // if 6 gear shifter
+      if (bitRead(inbits, revButton)) {
+        bitSet(gears, 0); // reverse gear
+      } else {
+        bitSet(gears, 21); // still set 6th gear
+      }
+    }
+  } else if (sx >= sCal[2] && sy >= sCal[4]) { // 7th gear
+    bitSet(gears, 22);
+  } else if (sx >= sCal[2] && sy < sCal[3]) { // 8th gear
+    if (bitRead(sConfig, 1)) {  // if 8 gear shifter
+      if (bitRead(inbits, revButton)) {
+        bitSet(gears, 0); // reverse gear
+      } else {
+        bitSet(gears, 23); // set 8th gear
+      }
+    } else {  // if 6 gear shifter
+      bitSet(gears, 23); // still set 8th gear
+    }
+  }
+  /*if (bitRead(inbits, revButton)) { // reverse gear, button pressed
+    if (bitRead(sConfig, 1)) { // bit1=1 - 8 gear shifter
+      if (sx >= sCal[2] && sy < sCal[3]) bitSet(gears, 8); // 8th + button
+      bitSet(gears, 18);
+    } else {  // bit1=0 - 6 gear shifter
+      if (sx >= sCal[1] && sx < sCal[2] && sy < sCal[3]) bitSet(gears, 8); // 6th + button
+      bitSet(gears, 18);
+    }
+    }*/
+  return ((inbits & 0b11110000000011111111111111101111) | (gears << 4));
 }
 
 #endif // _CONFIG_H_

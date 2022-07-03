@@ -92,6 +92,9 @@ void readSerial() {
 #ifdef USE_BTNMATRIX
         CONFIG_SERIAL.print("t");
 #endif
+#ifdef USE_XY_SHIFTER
+        CONFIG_SERIAL.print("f");
+#endif
 #ifdef USE_PROMICRO
         CONFIG_SERIAL.print("m");
 #endif
@@ -196,6 +199,69 @@ void readSerial() {
 #endif
         CONFIG_SERIAL.println(calcTOP(pwmstate));
         //CONFIG_SERIAL.println(1);
+        break;
+      case 'H': // milos, added - configure the XY shifter calibration
+#ifdef USE_XY_SHIFTER
+        c = toUpper(CONFIG_SERIAL.read());
+        switch (c) {
+          case 'A':
+            temp = CONFIG_SERIAL.parseInt();
+            temp = constrain(temp, 0, 1023);
+            sCal[0] = temp;
+            CONFIG_SERIAL.println(1);
+            break;
+          case 'B':
+            temp = CONFIG_SERIAL.parseInt();
+            temp = constrain(temp, 0, 1023);
+            sCal[1] = temp;
+            CONFIG_SERIAL.println(1);
+            break;
+          case 'C':
+            temp = CONFIG_SERIAL.parseInt();
+            temp = constrain(temp, 0, 1023);
+            sCal[2] = temp;
+            CONFIG_SERIAL.println(1);
+            break;
+          case 'D':
+            temp = CONFIG_SERIAL.parseInt();
+            temp = constrain(temp, 0, 1023);
+            sCal[3] = temp;
+            CONFIG_SERIAL.println(1);
+            break;
+          case 'E':
+            temp = CONFIG_SERIAL.parseInt();
+            temp = constrain(temp, 0, 1023);
+            sCal[4] = temp;
+            CONFIG_SERIAL.println(1);
+            break;
+          case 'F':
+            temp = CONFIG_SERIAL.parseInt();
+            temp = constrain(temp, 0, 255);
+            sConfig = temp;
+            CONFIG_SERIAL.println(1);
+            break;
+          case 'G':
+            CONFIG_SERIAL.print(sCal[0]);
+            CONFIG_SERIAL.print(" ");
+            CONFIG_SERIAL.print(sCal[1]);
+            CONFIG_SERIAL.print(" ");
+            CONFIG_SERIAL.print(sCal[2]);
+            CONFIG_SERIAL.print(" ");
+            CONFIG_SERIAL.print(sCal[3]);
+            CONFIG_SERIAL.print(" ");
+            CONFIG_SERIAL.print(sCal[4]);
+            CONFIG_SERIAL.print(" ");
+            CONFIG_SERIAL.println(sConfig);
+            break;
+          case 'R':
+            CONFIG_SERIAL.print(shifterX);
+            CONFIG_SERIAL.print(" ");
+            CONFIG_SERIAL.println(shifterY);
+            break;
+        }
+#else
+        CONFIG_SERIAL.println(0);
+#endif
         break;
       /*case 'Q': //milos, read and print out EEPROM contents
         uint8_t temp;

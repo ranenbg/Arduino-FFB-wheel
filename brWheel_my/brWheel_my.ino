@@ -62,7 +62,10 @@ extern u8 valueglobal;
 
 b8 fault;
 s16 accel, clutch, hbrake;
-s32 brake; //milos, we need 32bit due to 24 bits on LC ADC
+#ifdef USE_XY_SHIFTER
+s16 shifterX, shifterY;
+#endif
+s32 brake; //milos, we need 32bit due to 24 bits on load cell ADC
 s32 turn;
 u16 accelMin = Z_AXIS_LOG_MAX, accelMax = 0; // milos
 s16 brakeMin = s16(Z_AXIS_LOG_MAX), brakeMax = 0; // milos, must be signed
@@ -151,7 +154,7 @@ void setup() {
   turn = 0;
 
   //pinModeFast(LCSYNC_LED_PIN,OUTPUT);
-  //pinModeFast(SYNC_LED_PIN, OUTPUT);
+  pinModeFast(SYNC_LED_PIN, OUTPUT);
   //pinModeFast(LED_PIN, OUTPUT);
 
   //pinMode(SCK,INPUT); //11,INPUT);
@@ -257,7 +260,7 @@ void loop() {
 #ifdef USE_QUADRATURE_ENCODER
     if ((now_micros - last_refresh) >= CONTROL_PERIOD) {
       last_refresh = now_micros;
-      //SYNC_LED_HIGH(); // milos
+      SYNC_LED_HIGH(); // milos
 #ifdef  USE_SHIFT_REGISTER
       for (uint8_t i = 0; i <= SHIFTS_NUM; i++) { // milos, added (read all states in one pass)
         nextInputState();           // milos, refresh state of shift-register and read incoming bit
@@ -274,7 +277,7 @@ void loop() {
       turn = constrain(turn, -MID_REPORT_X, MID_REPORT_X); //milos
 
       SetPWM(command); // milos, FFB signal generated as PWM (or DAC) output
-      //SYNC_LED_LOW(); //milos
+      SYNC_LED_LOW(); //milos
       // USB Report
       {
         //last_send = now_micros;
@@ -283,9 +286,7 @@ void loop() {
 #endif
         /*accel = analog_inputs[ACCEL_INPUT]; // milos, commented
           brake = analog_inputs[BRAKE_INPUT];
-          clutch = analog_inputs[CLUTCH_INPUT];
-          shifterX = analog_inputs[SHIFTER_X_INPUT];
-          shifterY = analog_inputs[SHIFTER_Y_INPUT];*/
+          clutch = analog_inputs[CLUTCH_INPUT];*/
 
         /*ads0 = ads.readADC_Differential_0_1();  // milos, diff input between A0 and A1
           ads1 = ads.readADC_Differential_2_3();  // milos, diff input between A2 and A3
@@ -303,10 +304,16 @@ void loop() {
         accel = analog_inputs[ACCEL_INPUT];
         clutch = analog_inputs[CLUTCH_INPUT];
         hbrake = analog_inputs[HBRAKE_INPUT];
+        shifterX = analog_inputs[SHIFTER_X_INPUT]; // milos
+        shifterY = analog_inputs[SHIFTER_Y_INPUT]; // milos
 #else //if no avg
         accel = analogRead(ACCEL_PIN) * 4; // milos, Z axis
         clutch = analogRead(CLUTCH_PIN) * 4; // milos, RX axis
         hbrake = analogRead(HBRAKE_PIN) * 4; // milos, RY axis
+#ifdef USE_XY_SHIFTER // milos
+        shifterX = analogRead(SHIFTER_X_PIN); // milos
+        shifterY = analogRead(SHIFTER_Y_PIN); // milos
+#endif // end of xy shifter
 #endif //end of avg
 #endif //end of ads
 
@@ -373,12 +380,11 @@ void loop() {
 
 #endif //milos, end of USE_LOAD_CELL
 
-        //milos, commented
-        //shifterX = map(shifterX, 0, 1024, 0, 255);
-        //shifterY = map(shifterY, 0, 1024, 0, 255);	// DEBUG H-SHIFTER
-
-        button = readInputButtons();
-
+        button = readInputButtons(); // milos, reads all buttons including matrix and hat switch
+        
+#ifdef USE_XY_SHIFTER // milos, added
+        button = decodeXYshifter(button, shifterX, shifterY); // milos, added - convert analog XY shifter values into last 8 buttons
+#endif
         //SendInputReport((s16)turn, (u16)accel, (u16)brake, (u16)clutch, button);
         //SendInputReport((s16)turn, (u16)accel, (u16)brake, (u16)clutch, (u16)shifterX, (u16)shifterY, buttons); // original
         //SendInputReport((s32)turn, (u16)brake, (u16)accel, (u16)clutch, button); // milos, X, Y, Z, RX, button

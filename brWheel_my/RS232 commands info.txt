@@ -1,6 +1,6 @@
 Milos Rankovic, ranenbg@gmail.com
 first created 25.03.2020.
-last update 22.06.2022.
+last update 03.07.2022.
 
 This txt file contains a list of all available RS232 serial interface commands implemented in my latest Arduino Leonardo FFB wheel firmware version (you can use this info to make your own control UI)
 
@@ -76,8 +76,8 @@ B 45		1			1-255
 will reset pedal axis auto-calibration
 if load cell is used for brake it will not affect its calibration factor and will only reset throttle and clutch
 if no load cell is used reset will be done for brake axis as well
-command		example response
-P		1
+command		example response	range
+P		1			null
 
 [7] optical encoder CPR (PPR) adjustment
 sent and received number is CPR - counts per revolution of optical encoder shaft
@@ -92,7 +92,7 @@ use this command to reset 0deg position of your wheel rim (after you manualy cen
 this will be required each time arduino is powered on or reset, but it's very quick and easy to do
 for HEX firmware with "z" option enabled, the response is the value of z-index offset in the units of encoder CPR
 command		example response	range
-C		1			from -CPR to +CPR
+C		from -CPR to +CPR	null
 
 [9] adjust wheel rotation angle 
 sent and received number is in degrees (lock-to-lock)
@@ -161,3 +161,46 @@ received number is x0.1%
 range corresponds to (0.0-20.0)% of max PWM value
 command		example response	range
 FJ 100		1			0-200
+
+[23] XY analog shifter calibration "a" limit
+sets the X pos limit between 1,2 and 3,4 gears
+command		example response	range
+HA 255		1			0-1023
+
+[24] XY analog shifter calibration "b" limit
+sets the X pos limit between 3,4 and 5,6 gears
+command		example response	range
+HB 511		1			0-1023
+
+[25] XY analog shifter calibration "c" limit
+sets the X pos limit between 5,6 and 7,8 gears
+command		example response	range
+HC 767		1			0-1023
+
+[26] XY analog shifter calibration "d" limit
+sets the Y pos limit between gears 1,3,5,7 and neutral
+command		example response	range
+HD 255		1			0-1023
+
+[27] XY analog shifter calibration "e" limit
+sets the Y pos limit between neutral and gears 2,4,6,8
+command		example response	range
+HE 511		1			0-1023
+
+[28] XY analog shifter gear configuration byte
+sets where a reverse gear is, can be at 6th or 8th
+input is a decimal representation of a byte where
+bit1=HIGH - reverse at 8th+button0
+bit1=LOW - reverse at 6th+button0
+command		example response	range
+HF 2		1			0-255
+
+[29] XY analog shifter calibration and config readout
+returns shifter config and limits a, b, c, d, e
+command		example response	range
+HG		0 255 511 767 255 511	null
+
+[30] XY analog shifter position readout
+returns current shifter X and Y position
+command		example response	range
+HR		123 456			null

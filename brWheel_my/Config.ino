@@ -67,6 +67,20 @@ void SetDefaultConfig () { //milos - sets default values
   ffb = 0b10000000; //milos, DAC out enabled, DAC+- mode
 #endif
   SetParam(PARAM_ADDR_PWM_SET, ffb); //milos, added
+#ifdef USE_XY_SHIFTER
+  val = 255;
+  SetParam(PARAM_ADDR_SHFT_X0, val); //milos, added
+  val = 511;
+  SetParam(PARAM_ADDR_SHFT_X1, val); //milos, added
+  val = 767;
+  SetParam(PARAM_ADDR_SHFT_X2, val); //milos, added
+  val = 255;
+  SetParam(PARAM_ADDR_SHFT_Y0, val); //milos, added
+  val = 511;
+  SetParam(PARAM_ADDR_SHFT_Y1, val); //milos, added
+  val = 0; // milos, 0b00000000 - default is 6 gear H shifter 
+  SetParam(PARAM_ADDR_SHFT_CFG, val); //milos, added
+#endif
 }
 
 void SetEEPROMConfig () { //milos, changed VERSION to 16bit from 32bit
@@ -103,6 +117,14 @@ void LoadEEPROMConfig () { //milos, added - updates all ffb parameters from EEPR
 #endif
   minTorquePP = (f32)MM_MIN_MOTOR_TORQUE / (f32)MM_MAX_MOTOR_TORQUE;
   GetParam(PARAM_ADDR_PWM_SET, pwmstate);
+#ifdef USE_XY_SHIFTER
+  GetParam(PARAM_ADDR_SHFT_X0, sCal[0]); //milos, added
+  GetParam(PARAM_ADDR_SHFT_X1, sCal[1]); //milos, added
+  GetParam(PARAM_ADDR_SHFT_X2, sCal[2]); //milos, added
+  GetParam(PARAM_ADDR_SHFT_Y0, sCal[3]); //milos, added
+  GetParam(PARAM_ADDR_SHFT_Y1, sCal[4]); //milos, added
+  GetParam(PARAM_ADDR_SHFT_CFG, sConfig); //milos, added
+#endif
 }
 
 void SaveEEPROMConfig () { //milos, added - saves all ffb parameters in EEPROM
@@ -126,6 +148,14 @@ void SaveEEPROMConfig () { //milos, added - saves all ffb parameters in EEPROM
   SetParam(PARAM_ADDR_MAX_TORQ, MM_MAX_MOTOR_TORQUE);
   SetParam(PARAM_ADDR_MAX_DAC, MAX_DAC);
   //SetParam(PARAM_ADDR_PWM_SET, pwmstate); // milos, do not save it with command A (we do it with W instead)
+#ifdef USE_XY_SHIFTER
+  SetParam(PARAM_ADDR_SHFT_X0, sCal[0]); //milos, added
+  SetParam(PARAM_ADDR_SHFT_X1, sCal[1]); //milos, added
+  SetParam(PARAM_ADDR_SHFT_X2, sCal[2]); //milos, added
+  SetParam(PARAM_ADDR_SHFT_Y0, sCal[3]); //milos, added
+  SetParam(PARAM_ADDR_SHFT_Y1, sCal[4]); //milos, added
+  SetParam(PARAM_ADDR_SHFT_CFG, sConfig); //milos, added
+#endif
 }
 
 void ClearEEPROMConfig() { //milos, added - clears EEPROM (1KB on ATmega32U4)

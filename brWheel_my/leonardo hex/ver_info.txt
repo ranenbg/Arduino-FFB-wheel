@@ -63,6 +63,7 @@ version		features
 190		encoder, 4 axis, 8 buttons, 100k CPR, wheel angle as metric for conditional effects, shift register fix, button matrix, 2 FFB axis, periodic effects timing fix, duration and start delay fix, 16bit direction, new HX711 library, debug FFB optimizations, 16x less strong spring
 190as		the same as v190, with pedal autocalib and support for ADS1015 external ADC for pedals
 190azht		the same as v190, with pedal autocalib, encoder Z-index channel, 4x4 button matrix and hat switch support
+190azf		the same as v190, with pedal autocalib, encoder Z-index channel and XY analog shifter support
 191azh		the same as v190, with pedal autocalib, shift register, encoder Z-index channel and hat switch support	
 192azh		the same as v191, with load cell support with HX711
 193ah		the same as v192azh, but without z-index support and has analog FFB output with 2x12bit DAC MCP4275	

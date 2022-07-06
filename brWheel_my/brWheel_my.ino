@@ -154,7 +154,7 @@ void setup() {
   turn = 0;
 
   //pinModeFast(LCSYNC_LED_PIN,OUTPUT);
-  pinModeFast(SYNC_LED_PIN, OUTPUT);
+  //pinModeFast(SYNC_LED_PIN, OUTPUT);
   //pinModeFast(LED_PIN, OUTPUT);
 
   //pinMode(SCK,INPUT); //11,INPUT);
@@ -260,7 +260,7 @@ void loop() {
 #ifdef USE_QUADRATURE_ENCODER
     if ((now_micros - last_refresh) >= CONTROL_PERIOD) {
       last_refresh = now_micros;
-      SYNC_LED_HIGH(); // milos
+      //SYNC_LED_HIGH(); // milos
 #ifdef  USE_SHIFT_REGISTER
       for (uint8_t i = 0; i <= SHIFTS_NUM; i++) { // milos, added (read all states in one pass)
         nextInputState();           // milos, refresh state of shift-register and read incoming bit
@@ -277,7 +277,7 @@ void loop() {
       turn = constrain(turn, -MID_REPORT_X, MID_REPORT_X); //milos
 
       SetPWM(command); // milos, FFB signal generated as PWM (or DAC) output
-      SYNC_LED_LOW(); //milos
+      //SYNC_LED_LOW(); //milos
       // USB Report
       {
         //last_send = now_micros;

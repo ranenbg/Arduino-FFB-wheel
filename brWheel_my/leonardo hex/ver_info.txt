@@ -66,4 +66,6 @@ version		features
 190azf		the same as v190, with pedal autocalib, encoder Z-index channel and XY analog shifter support
 191azh		the same as v190, with pedal autocalib, shift register, encoder Z-index channel and hat switch support	
 192azh		the same as v191, with load cell support with HX711
+192af		the same as v190, with pedal autocalib, XY shiffter and HX711 support (no shift register)	
+192azf		the same as v191af, with z-index support
 193ah		the same as v192azh, but without z-index support and has analog FFB output with 2x12bit DAC MCP4275	

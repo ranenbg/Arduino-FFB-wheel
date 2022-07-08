@@ -346,7 +346,11 @@ bool readSingleButton (uint8_t i) { // milos, added
   } else if (i == 6) {
     temp = !bitRead(digitalReadFast(BUTTON6), B6PORTBIT); // milos, read bit4 from PINB D8 into buttons bit6
   } else if (i == 7) {
+#ifndef USE_LOAD_CELL
     temp = !bitRead(digitalReadFast(BUTTON7), B7PORTBIT); // milos, read bit6 from PINC D5 into buttons bit7
+#else
+    temp = false; // milos, we can't use this pin for button if we use load cell
+#endif
   } else {
     temp = false;
   }
@@ -389,8 +393,7 @@ uint16_t ReadAnalogInputs () {
 
 void AverageAnalogInputs () {
   for (u8 i = 0; i < sizeof(analog_inputs_pins); i++) {
-    //analog_inputs[i] = (analog_inputs[i]) / nb_mes; //milos, commented
-    analog_inputs[i] = (analog_inputs[i] << axis_shift_n_bits[i]) / nb_mes; //milos, fixed now
+    analog_inputs[i] = (analog_inputs[i] << axis_shift_n_bits[i]) / nb_mes; //milos, fixed
   }
 }
 #endif

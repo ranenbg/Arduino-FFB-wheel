@@ -11,10 +11,10 @@
 //#define USE_DSP56ADC16S			// 16 bits Stereo ADC (milos, can not be used if USE_SHIFT_REGISTER is uncommented)
 #define USE_QUADRATURE_ENCODER		// Position Quadrature encoder
 #define USE_ZINDEX          // milos, use Z-index encoder channel (warning, can not be used with USE_ADS1105 or USE_MCP4725)
-//#define USE_LOAD_CELL				// Load cell shield // milos, new library for LC
-//#define USE_SHIFT_REGISTER			// 8-bit Parallel-load shift registers G27 board steering wheel (milos, this one is modified for 16 buttons)
+#define USE_LOAD_CELL				// Load cell shield // milos, new library for LC
+#define USE_SHIFT_REGISTER			// 8-bit Parallel-load shift registers G27 board steering wheel (milos, this one is modified for 16 buttons)
 //#define USE_DUAL_SHIFT_REGISTER		// Dual 8-bit Parallel-load shift registers G27 board shifter  (milos, not available curently)
-#define USE_XY_SHIFTER    //milos, uncomment to use XY analog shifter (can not be used with USE_BTNMATRIX)
+//#define USE_XY_SHIFTER    //milos, uncomment to use XY analog shifter (can not be used with USE_BTNMATRIX)
 //#define USE_HATSWITCH        //milos, uncomment to use first 4 buttons for hat switch instead (can not be used if no load cell or shift register)
 //#define USE_BTNMATRIX        //milos, uncomment to use 8 pins as a 4x4 button matrix for total of 16 buttons (can not be used with USE_LOAD_CELL or shift register)
 //#define AVG_INPUTS        // milos, uncomment this to use averaging of arduino analog inputs (if readings can be done faster than CONTROL_PERIOD)
@@ -29,7 +29,7 @@
 
 //#define LED_PIN				12
 //#define	LCSYNC_LED_PIN		12
-#define	SYNC_LED_PIN		12 //milos, USB polling clock
+//#define	SYNC_LED_PIN		12 //milos, USB polling clock
 
 //milos, added - ffb clip LED indicator
 #ifndef USE_PROMICRO
@@ -180,7 +180,7 @@ uint8_t LC_scaling; // milos, load cell scaling factor (affects brake pressure, 
 #define PARAM_ADDR_SHFT_Y1       0x26 //milos, XY shifter limit y1
 #define PARAM_ADDR_SHFT_CFG      0x28 //milos, shifter configuration byte
 
-#define VERSION		0xBE // milos, this is my version (previous was 8)
+#define VERSION		0xC0 // milos, this is my version (previous was 8)
 
 #define GetParam(m_offset,m_data)	getParam((m_offset),(u8*)&(m_data),sizeof(m_data))
 #define SetParam(m_offset,m_data)	setParam((m_offset),(u8*)&(m_data),sizeof(m_data))
@@ -318,8 +318,7 @@ uint8_t sConfig; // milos, added - XY shifter configuration byte
 // milos - added, function for decoding XY shifter analog values into last 8 buttons
 uint32_t decodeXYshifter (uint32_t inbits, int16_t sx, int16_t sy) {
   uint32_t gears = 0;
-  uint8_t revButton = BUTTON0; // pin D4
-  // milos: to DO shifter decoding
+  uint8_t revButtonBit = 0; // reverse gear button bit number (normal buttons start from bit4, bit0-bit3 are for hat switch)
   if (sx < sCal[0] && sy >= sCal[4]) { // 1st gear
     bitSet(gears, 16);
   } else if (sx < sCal[0] && sy < sCal[3]) { // 2nd gear
@@ -334,8 +333,8 @@ uint32_t decodeXYshifter (uint32_t inbits, int16_t sx, int16_t sy) {
     if (bitRead(sConfig, 1)) { // if 8 gear shifter
       bitSet(gears, 21); // set 6th gear
     } else { // if 6 gear shifter
-      if (bitRead(inbits, revButton)) {
-        bitSet(gears, 0); // reverse gear
+      if (bitRead(inbits, revButtonBit + 4)) {
+        bitSet(gears, revButtonBit); // reverse gear
       } else {
         bitSet(gears, 21); // still set 6th gear
       }
@@ -344,8 +343,8 @@ uint32_t decodeXYshifter (uint32_t inbits, int16_t sx, int16_t sy) {
     bitSet(gears, 22);
   } else if (sx >= sCal[2] && sy < sCal[3]) { // 8th gear
     if (bitRead(sConfig, 1)) {  // if 8 gear shifter
-      if (bitRead(inbits, revButton)) {
-        bitSet(gears, 0); // reverse gear
+      if (bitRead(inbits, revButtonBit + 4)) {
+        bitSet(gears, revButtonBit); // reverse gear
       } else {
         bitSet(gears, 23); // set 8th gear
       }
@@ -353,15 +352,6 @@ uint32_t decodeXYshifter (uint32_t inbits, int16_t sx, int16_t sy) {
       bitSet(gears, 23); // still set 8th gear
     }
   }
-  /*if (bitRead(inbits, revButton)) { // reverse gear, button pressed
-    if (bitRead(sConfig, 1)) { // bit1=1 - 8 gear shifter
-      if (sx >= sCal[2] && sy < sCal[3]) bitSet(gears, 8); // 8th + button
-      bitSet(gears, 18);
-    } else {  // bit1=0 - 6 gear shifter
-      if (sx >= sCal[1] && sx < sCal[2] && sy < sCal[3]) bitSet(gears, 8); // 6th + button
-      bitSet(gears, 18);
-    }
-    }*/
   return ((inbits & 0b11110000000011111111111111101111) | (gears << 4));
 }
 

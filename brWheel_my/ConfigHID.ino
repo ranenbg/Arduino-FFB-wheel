@@ -37,7 +37,7 @@ void configHID(USB_ConfigReport *data) {
   } else if (data->Info == 255) {
     /*uint8_t ReportId;
       uint16_t Rotation;
-      int16_t Offset; //milos, added
+      int32_t Offset; //milos, added
       uint8_t GeneralGain;
       uint8_t ConstantGain;
       uint8_t DamperGain;

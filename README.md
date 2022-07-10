@@ -19,22 +19,22 @@ Firmware features:
 Detailed documentation and more information about the firmware can be found in txt files inside brWheel_my folder.
 
 # Firmware pinouts and wiring diagrams
-![plot](./brWheel_my/Firmware-v19x%20pinout.png)
+![plot](./brWheel_my/wirings/Firmware-v19x%20pinout.png)
 ## Encoder and LED wiring
-![plot](./brWheel_my/encoder_ffb_clip_led_wiring_diagram.png)
+![plot](./brWheel_my/wirings/encoder_ffb_clip_led_wiring_diagram.png)
 ## Motor driver wiring
-![plot](./brWheel_my/bts7960_wiring_diagram.png)
+![plot](./brWheel_my/wirings/bts7960_wiring_diagram.png)
 ## Button box firmware pinouts - for Arduino Nano/Uno
-![plot](./brWheel_my/Firmware-vXX1%20button%20box%20pinout.png)
+![plot](./brWheel_my/wirings/Firmware-vXX1%20button%20box%20pinout.png)
 ## Button matrix pinouts
-![plot](./brWheel_my/button_matrix_wiring_diagram.png)
+![plot](./brWheel_my/wirings/button_matrix_wiring_diagram.png)
 ## External i2C device pinouts
-![plot](./brWheel_my/ads1015_wiring_diagram.png)
-![plot](./brWheel_my/mcp4725_wiring_diagram.png)
+![plot](./brWheel_my/wirings/ads1015_wiring_diagram.png)
+![plot](./brWheel_my/wirings/mcp4725_wiring_diagram.png)
 ## HX711 and load cell wiring
-![plot](./brWheel_my/HX711_load_cell_wiring_diagram.png)
+![plot](./brWheel_my/wirings/HX711_load_cell_wiring_diagram.png)
 ## XY shifter wiring
-![plot](./brWheel_my/XY_shifter_wiring_diagram.png)
+![plot](./brWheel_my/wirings/XY_shifter_wiring_diagram.png)
 
 ## Firmware option description
 Due to 32k flash memory limitation in Arduino Leonardo (ATmega32U4), each HEX file is compiled with a certain firmware option. A one letter abreviation for each option is placed in the firmware version string and one needs to consider carefully which one to chose. In the release, I've compiled for you a few most often used firmware option combinations.

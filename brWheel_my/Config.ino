@@ -78,8 +78,26 @@ void SetDefaultConfig () { //milos - sets default values
   SetParam(PARAM_ADDR_SHFT_Y0, val); //milos, added
   val = 511;
   SetParam(PARAM_ADDR_SHFT_Y1, val); //milos, added
-  val = 0; // milos, 0b00000000 - default is 6 gear H shifter 
+  val = 0; // milos, 0b00000000 - default is 6 gear H shifter
   SetParam(PARAM_ADDR_SHFT_CFG, val); //milos, added
+#endif
+#ifndef USE_AUTOCALIB //milos, added - load default min/max manual cal values for pedals
+  val = 0;
+  SetParam(PARAM_ADDR_ACEL_LO, val);
+  val = Z_AXIS_PHYS_MAX;
+  SetParam(PARAM_ADDR_ACEL_HI, val);
+  val = 0;
+  SetParam(PARAM_ADDR_BRAK_LO, val);
+  val = Z_AXIS_PHYS_MAX; //milos, when no LC brake cal limit is 4095
+  SetParam(PARAM_ADDR_BRAK_HI, val);
+  val = 0;
+  SetParam(PARAM_ADDR_CLUT_LO, val);
+  val = RX_AXIS_PHYS_MAX;
+  SetParam(PARAM_ADDR_CLUT_HI, val);
+  val = 0;
+  SetParam(PARAM_ADDR_HBRK_LO, val);
+  val = RY_AXIS_PHYS_MAX;
+  SetParam(PARAM_ADDR_HBRK_HI, val);
 #endif
 }
 
@@ -125,6 +143,25 @@ void LoadEEPROMConfig () { //milos, added - updates all ffb parameters from EEPR
   GetParam(PARAM_ADDR_SHFT_Y1, sCal[4]); //milos, added
   GetParam(PARAM_ADDR_SHFT_CFG, sConfig); //milos, added
 #endif
+#ifdef USE_AUTOCALIB //milos, added - reset limits for autocalibration of pedals
+  accelMin = Z_AXIS_LOG_MAX;
+  accelMax = 0;
+  brakeMin = s16(Z_AXIS_LOG_MAX);
+  brakeMax = 0;
+  clutchMin = RX_AXIS_LOG_MAX;
+  clutchMax = 0;
+  hbrakeMin = RY_AXIS_LOG_MAX;
+  hbrakeMax = 0;
+#else //milos, load min/max manual cal values from EEPROM
+  GetParam(PARAM_ADDR_ACEL_LO, accelMin);
+  GetParam(PARAM_ADDR_ACEL_HI, accelMax);
+  GetParam(PARAM_ADDR_BRAK_LO, brakeMin);
+  GetParam(PARAM_ADDR_BRAK_HI, brakeMax);
+  GetParam(PARAM_ADDR_CLUT_LO, clutchMin);
+  GetParam(PARAM_ADDR_CLUT_HI, clutchMax);
+  GetParam(PARAM_ADDR_HBRK_LO, hbrakeMin);
+  GetParam(PARAM_ADDR_HBRK_HI, hbrakeMax);
+#endif
 }
 
 void SaveEEPROMConfig () { //milos, added - saves all ffb parameters in EEPROM
@@ -155,6 +192,16 @@ void SaveEEPROMConfig () { //milos, added - saves all ffb parameters in EEPROM
   SetParam(PARAM_ADDR_SHFT_Y0, sCal[3]); //milos, added
   SetParam(PARAM_ADDR_SHFT_Y1, sCal[4]); //milos, added
   SetParam(PARAM_ADDR_SHFT_CFG, sConfig); //milos, added
+#endif
+#ifndef USE_AUTOCALIB //milos, added - save curent limits for manual calibration of pedals
+  SetParam(PARAM_ADDR_ACEL_LO, accelMin);
+  SetParam(PARAM_ADDR_ACEL_HI, accelMax);
+  SetParam(PARAM_ADDR_BRAK_LO, brakeMin);
+  SetParam(PARAM_ADDR_BRAK_HI, brakeMax);
+  SetParam(PARAM_ADDR_CLUT_LO, clutchMin);
+  SetParam(PARAM_ADDR_CLUT_HI, clutchMax);
+  SetParam(PARAM_ADDR_HBRK_LO, hbrakeMin);
+  SetParam(PARAM_ADDR_HBRK_HI, hbrakeMax);
 #endif
 }
 

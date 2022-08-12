@@ -107,20 +107,35 @@ void SetPWM (s16 torque)  { // torque between -MM_MAX_MOTOR and +MM_MAX_MOTOR
 
   if (bitRead(pwmstate, 0)) { // if phase correct PWM mode (pwmstate bit0=1)
     if (!bitRead(pwmstate, 1)) { // if PWM+- mode (pwmstate bit1=0)
-      // milos, new variant of the original just with PWM+- mode
-      if (torque > 0) {
-        torque = map (torque, 0, MM_MAX_MOTOR_TORQUE, MM_MIN_MOTOR_TORQUE, (u16)((f32)MM_MAX_MOTOR_TORQUE * R_bal));
-        OCR1A = 0;
-        OCR1B = torque;
-      } else if (torque < 0) {
-        torque = map (-torque, 0, MM_MAX_MOTOR_TORQUE, MM_MIN_MOTOR_TORQUE, (u16)((f32)MM_MAX_MOTOR_TORQUE * L_bal));
-        OCR1A = torque;
-        OCR1B = 0;
-      } else {
-        OCR1A = 0;
-        OCR1B = 0;
+      if (!bitRead(pwmstate, 6)) { // if pwmstate bit1=0 and bit6=0
+        // milos, new variant of the original just with PWM+- mode
+        if (torque > 0) {
+          torque = map (torque, 0, MM_MAX_MOTOR_TORQUE, MM_MIN_MOTOR_TORQUE, (u16)((f32)MM_MAX_MOTOR_TORQUE * R_bal));
+          OCR1A = 0;
+          OCR1B = torque;
+        } else if (torque < 0) {
+          torque = map (-torque, 0, MM_MAX_MOTOR_TORQUE, MM_MIN_MOTOR_TORQUE, (u16)((f32)MM_MAX_MOTOR_TORQUE * L_bal));
+          OCR1A = torque;
+          OCR1B = 0;
+        } else {
+          OCR1A = 0;
+          OCR1B = 0;
+        }
+      } else { // if PWM0.50.100 mode (pwmstate bit1=0 and bit6=1)
+        if (torque > 0) {
+          torque = map (torque, 0, MM_MAX_MOTOR_TORQUE, MM_MAX_MOTOR_TORQUE / 2 + MM_MIN_MOTOR_TORQUE, MM_MAX_MOTOR_TORQUE);
+          OCR1A = torque;
+          OCR1B = 0;
+        } else if (torque < 0) {
+          torque = map (-torque, 0, MM_MAX_MOTOR_TORQUE, MM_MAX_MOTOR_TORQUE / 2 - MM_MIN_MOTOR_TORQUE, 0);
+          OCR1A = torque;
+          OCR1B = 0;
+        } else {
+          OCR1A = MM_MAX_MOTOR_TORQUE / 2;
+          OCR1B = 0;
+        }
       }
-    } else { // if PWM+dir mode (pwmstate bit1=1)
+    } else if (bitRead(pwmstate, 1)) { // if PWM+dir mode (pwmstate bit1=1)
       if (torque >= 0) {
         digitalWriteFast(DIR_PIN, HIGH);
       } else {
@@ -131,22 +146,37 @@ void SetPWM (s16 torque)  { // torque between -MM_MAX_MOTOR and +MM_MAX_MOTOR
       OCR1B = 0; // milos, this becomes unused
     }
 
-  } else { // if fast PWM mode (pwmstate bit0=0)
+  } else { // if fast top PWM mode (pwmstate bit0=0)
 
     if (!bitRead(pwmstate, 1)) { // if PWM+- mode (pwmstate bit1=0)
-      if (torque > 0) {
-        torque = map (torque, 0, MM_MAX_MOTOR_TORQUE, MM_MIN_MOTOR_TORQUE, (u16)((f32)MM_MAX_MOTOR_TORQUE * R_bal));
-        PWM16A(0);
-        PWM16B(torque);
-      } else if (torque < 0) {
-        torque = map (-torque, 0, MM_MAX_MOTOR_TORQUE, MM_MIN_MOTOR_TORQUE, (u16)((f32)MM_MAX_MOTOR_TORQUE * L_bal));
-        PWM16A(torque);
-        PWM16B(0);
-      } else {
-        PWM16A(0);
-        PWM16B(0);
+      if (!bitRead(pwmstate, 6)) { // if pwmstate bit1=0 and bit6=0
+        if (torque > 0) {
+          torque = map (torque, 0, MM_MAX_MOTOR_TORQUE, MM_MIN_MOTOR_TORQUE, (u16)((f32)MM_MAX_MOTOR_TORQUE * R_bal));
+          PWM16A(0);
+          PWM16B(torque);
+        } else if (torque < 0) {
+          torque = map (-torque, 0, MM_MAX_MOTOR_TORQUE, MM_MIN_MOTOR_TORQUE, (u16)((f32)MM_MAX_MOTOR_TORQUE * L_bal));
+          PWM16A(torque);
+          PWM16B(0);
+        } else {
+          PWM16A(0);
+          PWM16B(0);
+        }
+      } else { // if PWM0.50.100 mode (pwmstate bit1=0 and bit6=1)
+        if (torque > 0) {
+          torque = map (torque, 0, MM_MAX_MOTOR_TORQUE, MM_MAX_MOTOR_TORQUE / 2 + MM_MIN_MOTOR_TORQUE, MM_MAX_MOTOR_TORQUE);
+          PWM16A(torque);
+          PWM16B(0);
+        } else if (torque < 0) {
+          torque = map (-torque, 0, MM_MAX_MOTOR_TORQUE, MM_MAX_MOTOR_TORQUE / 2 - MM_MIN_MOTOR_TORQUE, 0);
+          PWM16A(torque);
+          PWM16B(0);
+        } else {
+          PWM16A(MM_MAX_MOTOR_TORQUE / 2);
+          PWM16B(0);
+        }
       }
-    } else { // if PWM+dir mode (pwmstate bit1=1)
+    } else if (bitRead(pwmstate, 1)) { // if PWM+dir mode (pwmstate bit1=1)
       if (torque >= 0) {
         digitalWriteFast(DIR_PIN, HIGH);
       } else {

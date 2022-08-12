@@ -1,5 +1,5 @@
 
-/* Force Feedback Wheel
+/* Arduino Leonardo Force Feedback Wheel firmware
 
   Copyright 2015  Etienne Saint-Paul  (esaintpaul [at] gameseed [dot] fr)
   Copyright 2017  Fernando Igor  (fernandoigor [at] msn [dot] com)
@@ -67,10 +67,14 @@ s16 shifterX, shifterY;
 #endif
 s32 brake; //milos, we need 32bit due to 24 bits on load cell ADC
 s32 turn;
-u16 accelMin = Z_AXIS_LOG_MAX, accelMax = 0; // milos
-s16 brakeMin = s16(Z_AXIS_LOG_MAX), brakeMax = 0; // milos, must be signed
-u16 clutchMin = RX_AXIS_LOG_MAX, clutchMax = 0; // milos
-u16 hbrakeMin = RY_AXIS_LOG_MAX, hbrakeMax = 0; // milos
+/*u16 accelMin = Z_AXIS_LOG_MAX, accelMax = 0; // milos
+  s16 brakeMin = s16(Z_AXIS_LOG_MAX), brakeMax = 0; // milos, must be signed
+  u16 clutchMin = RX_AXIS_LOG_MAX, clutchMax = 0; // milos
+  u16 hbrakeMin = RY_AXIS_LOG_MAX, hbrakeMax = 0; // milos*/
+u16 accelMin, accelMax; // milos
+s16 brakeMin, brakeMax; // milos, must be signed
+u16 clutchMin, clutchMax; // milos
+u16 hbrakeMin, hbrakeMax; // milos
 u32 button = 0; //milos, added
 
 //milos, added
@@ -222,7 +226,11 @@ void setup() {
   lcd.print(VERSION, DEC);
 #endif
 
+#ifdef USE_AUTOCALIB
   dz = 8; // milos, set the accel, brake and clutch pedal dead zones that will be taken from min and max axis val (default is 8 out of 4095)
+#else
+  dz = 0; // milos, we can set min/max cal limits manualy so we do not need this
+#endif
   bdz = 2047; // milos, set the brake pedal dead zone taken from min axis val, when using load cell (default is 2047 out of 65535)
   last_LC_scaling = LC_scaling; // milos
 
@@ -339,7 +347,8 @@ void loop() {
 #endif //end of ads
 #endif //end of lc
 
-        // milos, update limits for autocalibration
+
+#ifdef  USE_AUTOCALIB // milos, update limits for autocalibration
         if (accel < accelMin) accelMin = accel;
         if (accel > accelMax) accelMax = accel;
         if (brake < brakeMin) brakeMin = brake;
@@ -348,18 +357,17 @@ void loop() {
         if (clutch > clutchMax) clutchMax = clutch;
         if (hbrake < hbrakeMin) hbrakeMin = hbrake;
         if (hbrake > hbrakeMax) hbrakeMax = hbrake;
-
-        // milos, rescale all axis according to new calibration
-#ifdef  USE_AUTOCALIB
+#endif //end of autocalib
+        // milos, rescale all axis according to a new calibration
         accel = map(accel, accelMin + dz, accelMax - dz, 0, Z_AXIS_PHYS_MAX);  // milos, with autocalibration
         clutch = map(clutch, clutchMin + dz, clutchMax - dz, 0, RX_AXIS_PHYS_MAX);
         hbrake = map(hbrake, hbrakeMin + dz, hbrakeMax - dz, 0, RY_AXIS_PHYS_MAX);
-#else //if no autocalib
-        accel = map(accel, 0 + dz, Z_AXIS_PHYS_MAX - dz, 0, Z_AXIS_PHYS_MAX); // milos, no autocalibration
-        clutch = map(clutch, 0 + dz, RX_AXIS_PHYS_MAX - dz, 0, RX_AXIS_PHYS_MAX);
-        hbrake = map(hbrake, 0 + dz, RY_AXIS_PHYS_MAX - dz, 0, RY_AXIS_PHYS_MAX);
-#endif //end of autocalib
-        accel = constrain(accel, 0, Z_AXIS_PHYS_MAX); // milos, limit axis ranges
+        /*#else //if no autocalib
+                accel = map(accel, 0 + dz, Z_AXIS_PHYS_MAX - dz, 0, Z_AXIS_PHYS_MAX); // milos, no autocalibration
+                clutch = map(clutch, 0 + dz, RX_AXIS_PHYS_MAX - dz, 0, RX_AXIS_PHYS_MAX);
+                hbrake = map(hbrake, 0 + dz, RY_AXIS_PHYS_MAX - dz, 0, RY_AXIS_PHYS_MAX);
+          #endif //end of autocalib*/
+        accel = constrain(accel, 0, Z_AXIS_PHYS_MAX); // milos, constrain axis ranges
         clutch = constrain(clutch, 0, RX_AXIS_PHYS_MAX);
         hbrake = constrain(hbrake, 0, RY_AXIS_PHYS_MAX);
 
@@ -368,20 +376,18 @@ void loop() {
           brake = 0;
         } else {
           brake = map(brake, bdz, Y_AXIS_PHYS_MAX + bdz, 0, Y_AXIS_PHYS_MAX); // milos, no autocalibration
-          brake = constrain(brake, 0, Y_AXIS_PHYS_MAX); // milos
         }
 #else // milos, when no LC
-#ifdef  USE_AUTOCALIB
+        //#ifdef  USE_AUTOCALIB
         brake = map(brake, brakeMin + dz, brakeMax - dz, 0, Y_AXIS_PHYS_MAX); // milos, with autocalibration
-#else
-        brake = map(brake, 0 + dz, 4095 - dz, 0, Y_AXIS_PHYS_MAX); // milos, no autocalibration
-#endif
-        brake = constrain(brake, 0, Y_AXIS_PHYS_MAX);
-
+        //#else
+        //brake = map(brake, 0 + dz, 4095 - dz, 0, Y_AXIS_PHYS_MAX); // milos, no autocalibration
+        //#endif
 #endif //milos, end of USE_LOAD_CELL
+        brake = constrain(brake, 0, Y_AXIS_PHYS_MAX); // milos
 
         button = readInputButtons(); // milos, reads all buttons including matrix and hat switch
-        
+
 #ifdef USE_XY_SHIFTER // milos, added
         button = decodeXYshifter(button, shifterX, shifterY); // milos, added - convert analog XY shifter values into last 8 buttons
 #endif

@@ -11,14 +11,14 @@
 //#define USE_DSP56ADC16S			// 16 bits Stereo ADC (milos, can not be used if USE_SHIFT_REGISTER is uncommented)
 #define USE_QUADRATURE_ENCODER		// Position Quadrature encoder
 #define USE_ZINDEX          // milos, use Z-index encoder channel (warning, can not be used with USE_ADS1105 or USE_MCP4725)
-#define USE_LOAD_CELL				// Load cell shield // milos, new library for LC
-#define USE_SHIFT_REGISTER			// 8-bit Parallel-load shift registers G27 board steering wheel (milos, this one is modified for 16 buttons)
+//#define USE_LOAD_CELL				// Load cell shield // milos, new library for LC
+//#define USE_SHIFT_REGISTER			// 8-bit Parallel-load shift registers G27 board steering wheel (milos, this one is modified for 16 buttons)
 //#define USE_DUAL_SHIFT_REGISTER		// Dual 8-bit Parallel-load shift registers G27 board shifter  (milos, not available curently)
-//#define USE_XY_SHIFTER    //milos, uncomment to use XY analog shifter (can not be used with USE_BTNMATRIX)
-//#define USE_HATSWITCH        //milos, uncomment to use first 4 buttons for hat switch instead (can not be used if no load cell or shift register)
+#define USE_XY_SHIFTER    //milos, uncomment to use XY analog shifter (can not be used with USE_BTNMATRIX)
+//#define USE_HATSWITCH        //milos, uncomment to use first 4 buttons for hat switch instead (can not be used if no load cell or with shift register)
 //#define USE_BTNMATRIX        //milos, uncomment to use 8 pins as a 4x4 button matrix for total of 16 buttons (can not be used with USE_LOAD_CELL or shift register)
 //#define AVG_INPUTS        // milos, uncomment this to use averaging of arduino analog inputs (if readings can be done faster than CONTROL_PERIOD)
-#define USE_AUTOCALIB        // milos, uncomment this to use autocalibration for pedal axis
+//#define USE_AUTOCALIB        // milos, uncomment this to use autocalibration for pedal axis
 //#define USE_MCP4725      // milos, 12bit DAC (0-5V), uncomment to enable output of FFB signal as DAC voltage output
 //#define USE_PROMICRO    // milos, uncomment if you are using Arduino ProMicro board (leave commented for Leonardo or Micro variants)
 #define USE_EEPROM // milos, uncomment this to enable loading/saving settings from EEPROM
@@ -179,8 +179,16 @@ uint8_t LC_scaling; // milos, load cell scaling factor (affects brake pressure, 
 #define PARAM_ADDR_SHFT_Y0       0x24 //milos, XY shifter limit y0
 #define PARAM_ADDR_SHFT_Y1       0x26 //milos, XY shifter limit y1
 #define PARAM_ADDR_SHFT_CFG      0x28 //milos, shifter configuration byte
+#define PARAM_ADDR_ACEL_LO       0x2A //milos, accelerator pedal cal min
+#define PARAM_ADDR_ACEL_HI       0x2C //milos, accelerator pedal cal max
+#define PARAM_ADDR_BRAK_LO       0x2E //milos, brake pedal cal min
+#define PARAM_ADDR_BRAK_HI       0x30 //milos, brake pedal cal max
+#define PARAM_ADDR_CLUT_LO       0x32 //milos, clutch pedal cal min
+#define PARAM_ADDR_CLUT_HI       0x34 //milos, clutch pedal cal max
+#define PARAM_ADDR_HBRK_LO       0x36 //milos, hand brake pedal cal min
+#define PARAM_ADDR_HBRK_HI       0x38 //milos, hand brake pedal cal max
 
-#define VERSION		0xC0 // milos, this is my version (previous was 8)
+#define VERSION		0xC8 // milos, this is my version (previous was 8)
 
 #define GetParam(m_offset,m_data)	getParam((m_offset),(u8*)&(m_data),sizeof(m_data))
 #define SetParam(m_offset,m_data)	setParam((m_offset),(u8*)&(m_data),sizeof(m_data))
@@ -198,7 +206,9 @@ uint8_t LC_scaling; // milos, load cell scaling factor (affects brake pressure, 
 u8 effstate; // = 0b00000001; //milos, added - turn on/off desktop effects through serial interface
 //bit0-autocentering spring, bit1-damper, bit2-inertia, bit3-friction, bit4-ffb monitor (sends ffb signal data to com port), bits 5-7 are unused
 u8 pwmstate; // =0b00000101; //milos, added - configures the PWM settings
-//bit0-phase correct (or fast mode), bit1-dir enabled, bits 2-5 are frequency select, bits 6-7 are unused
+//bit0-phase correct (1 is fast top), bit1-dir enabled (0 is pwm+-), bits 2-5 are frequency select, bit6-enable pwm0.50.100, bit7 is unused
+//if USE_MCP4725 is defined then pwmstate has a following meaning
+//bits 0-5 unused, bit6-enable dac+dir (0 is dac+-), bit7-enable dac (0 is no output)
 
 //milos, changed these from f32 to u8 (loaded from EEPROM)
 u8 configGeneralGain;  // = 1.0f;  //was 1.0f

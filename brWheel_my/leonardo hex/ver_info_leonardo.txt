@@ -66,6 +66,15 @@ version		features
 190azf		the same as v190, with pedal autocalib, encoder Z-index channel and XY analog shifter support
 191azh		the same as v190, with pedal autocalib, shift register, encoder Z-index channel and hat switch support	
 192azh		the same as v191, with load cell support with HX711
-192af		the same as v190, with pedal autocalib, XY shiffter and HX711 support (no shift register)	
+192af		the same as v190, with pedal autocalib, XY analog shiffter and HX711 support (no shift register)	
 192azf		the same as v191af, with z-index support
-193ah		the same as v192azh, but without z-index support and has analog FFB output with 2x12bit DAC MCP4275	
+193ah		the same as v192azh, but without z-index support and has analog FFB output with 2x12bit DAC MCP4275
+
+- firmware HEX versions bellow require wheel control v2.3 or newer
+
+200		encoder, 4 axis, 8 buttons, 100k CPR, wheel angle as metric for conditional effects, shift register fix, button matrix, 2 FFB axis, periodic effects timing fix, duration and start delay fix, 16bit direction, new HX711 library, debug FFB optimizations, 16x less strong spring, manual pedal axis calibration, pwm0.50.100 mode
+200a		the same as v200, with pedal autocalib instead of manual calib
+200z		the same as v200, with z-index support
+200f		the same as v200, with XY analog shiffter support
+200zf		the same as v200, with z-index and XY analog shiffter support
+200azf		the same as v200zf, with pedal autocalib instead of manual calib

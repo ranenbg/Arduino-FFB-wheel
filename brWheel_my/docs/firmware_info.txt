@@ -1,6 +1,6 @@
 Milos Rankovic, ranenbg@gmail.com
 first created 21.11.2018.
-last updated 03.07.2022.
+last updated 12.08.2022.
 
 This txt file contains details about Arduino wheel firmware capabilities and features:
 
@@ -39,12 +39,13 @@ Internal FFB effects: auto centering spring, damper, inertia, friction and end s
 Firmware features: RS232 interface for adjusting all FFB parameters, LC brake pressure, pedal autocalibration, minimal PWM value, rotation angle, recenter wheel,
 recalibrate wheel, recalibrate pedals, wheel version info, truning various desktop effects on/off, turn on/off ffb signal monitor, save ffb config to EEPROM, adjustment of encoder CPR, fully adjustable PWM settings that are stored in EEPROM, FFB clip LED indicator (ligts up gradually from last 10% of FFB signal level), 4x4 button matrix, CPR range is 100k, wheel angle used as metric for spring, damper, inertia and friction effects
 
-Control panel: made in Processing 3.5.4, visualises all axis and buttons including serial commands sent and received from Arduino, full adjustment of FFB effect gains, ffb signal monitor, load/save last settings from EEPROM, recenter wheel, recalibrate pedals, encoder CPR adjustment, pwm adjustment, COM port cfg via dialog, Axis colors cfg txt, storing/loading FFB parameter profiles to/from PC, autodetection of firmware version, XY analog shifter support, control panel version v2.2
+Control panel: made in Processing 3.5.4, visualises all axis and buttons including serial commands sent and received from Arduino, full adjustment of FFB effect gains, ffb signal monitor, load/save last settings from EEPROM, recenter wheel, recalibrate pedals, encoder CPR adjustment, pwm adjustment, COM port cfg via dialog, Axis colors cfg txt, storing/loading FFB parameter profiles to/from PC, autodetection of firmware version, XY analog shifter support, manual pedal axis calibration, added pwm0.50.100 mode, control panel version v2.3
 
-FFB output: fully configurable PWM settings, PWM frequency (tied to PWM resolution), PWM types (phase correct or fast TOP), PWM modes (pwm+- or pwm+dir), changes require restarting Arduino, analog 2ch external 12bit DAC MCP4725 available (requires recompiling)
+FFB output: fully configurable PWM settings, PWM frequency (tied to PWM resolution), PWM types (phase correct or fast TOP), PWM modes (pwm+-, pwm+dir or pwm0.50.100), changes require restarting Arduino, analog 2ch external 12bit DAC MCP4725 available (requires recompiling)
 
 Available PWM frequencies: 40kHz, 20kHz, 16kHz, 8kHz, 4kHz, 3.2kHz, 1.6kHz, 976Hz, 800Hz, 488Hz
-Available PWM resolutions: 400, 800, 1000, 2000, 4000, 5000, 10000, 16383, 20000, 32767 (for fast TOP)
-                           200, 400,  500, 1000, 2000, 2500,  5000,  8191, 10000, 16383 (for phase correct)
+Available PWM resolutions: 400, 800, 1000, 2000, 4000, 5000, 10000, 16383, 20000, 32767 (for fast top pwm type)
+                           200, 400,  500, 1000, 2000, 2500,  5000,  8191, 10000, 16383 (for phase correct pwm type)
+Available PWM modes: pwm+- (H-bridge usage), pwm+dir (bldc or ac servo drive usage), pwm0.50.100 (various 3phace bldc motor drivers, use fast top pwm type with this mode, 0-full left force, 50-zero force, 100-full left force)
 
 	

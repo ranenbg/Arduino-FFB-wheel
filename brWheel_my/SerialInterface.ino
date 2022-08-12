@@ -198,6 +198,10 @@ void readSerial() {
         SetParam(PARAM_ADDR_MIN_TORQ, temp);//milos, update min torque in EEPROM
 #endif
         CONFIG_SERIAL.println(calcTOP(pwmstate));
+        /*for (uint8_t i = 0; i < 8; i++) { //milos, decode incomming number into individual bits
+          CONFIG_SERIAL.print(bitRead(pwmstate, 7-i),BIN);
+        }
+        CONFIG_SERIAL.println("");*/
         //CONFIG_SERIAL.println(1);
         break;
       case 'H': // milos, added - configure the XY shifter calibration
@@ -257,6 +261,80 @@ void readSerial() {
             CONFIG_SERIAL.print(shifterX);
             CONFIG_SERIAL.print(" ");
             CONFIG_SERIAL.println(shifterY);
+            break;
+        }
+#else
+        CONFIG_SERIAL.println(0);
+#endif
+        break;
+      case 'Y': // milos, added - configure manual calibration for pedals
+#ifndef USE_AUTOCALIB
+        c = toUpper(CONFIG_SERIAL.read());
+        switch (c) {
+          case 'A':
+            temp = CONFIG_SERIAL.parseInt();
+            temp = constrain(temp, 0, 4095);
+            brakeMin = temp;
+            CONFIG_SERIAL.println(1);
+            break;
+          case 'B':
+            temp = CONFIG_SERIAL.parseInt();
+            temp = constrain(temp, 0, 4095);
+            brakeMax = temp;
+            CONFIG_SERIAL.println(1);
+            break;
+          case 'C':
+            temp = CONFIG_SERIAL.parseInt();
+            temp = constrain(temp, 0, 4095);
+            accelMin = temp;
+            CONFIG_SERIAL.println(1);
+            break;
+          case 'D':
+            temp = CONFIG_SERIAL.parseInt();
+            temp = constrain(temp, 0, 4095);
+            accelMax = temp;
+            CONFIG_SERIAL.println(1);
+            break;
+          case 'E':
+            temp = CONFIG_SERIAL.parseInt();
+            temp = constrain(temp, 0, 4095);
+            clutchMin = temp;
+            CONFIG_SERIAL.println(1);
+            break;
+          case 'F':
+            temp = CONFIG_SERIAL.parseInt();
+            temp = constrain(temp, 0, 4095);
+            clutchMax = temp;
+            CONFIG_SERIAL.println(1);
+            break;
+          case 'G':
+            temp = CONFIG_SERIAL.parseInt();
+            temp = constrain(temp, 0, 4095);
+            hbrakeMin = temp;
+            CONFIG_SERIAL.println(1);
+            break;
+          case 'H':
+            temp = CONFIG_SERIAL.parseInt();
+            temp = constrain(temp, 0, 4095);
+            hbrakeMax = temp;
+            CONFIG_SERIAL.println(1);
+            break;
+          case 'R':
+            CONFIG_SERIAL.print(brakeMin);
+            CONFIG_SERIAL.print(" ");
+            CONFIG_SERIAL.print(brakeMax);
+            CONFIG_SERIAL.print(" ");
+            CONFIG_SERIAL.print(accelMin);
+            CONFIG_SERIAL.print(" ");
+            CONFIG_SERIAL.print(accelMax);
+            CONFIG_SERIAL.print(" ");
+            CONFIG_SERIAL.print(clutchMin);
+            CONFIG_SERIAL.print(" ");
+            CONFIG_SERIAL.print(clutchMax);
+            CONFIG_SERIAL.print(" ");
+            CONFIG_SERIAL.print(hbrakeMin);
+            CONFIG_SERIAL.print(" ");
+            CONFIG_SERIAL.println(hbrakeMax);
             break;
         }
 #else

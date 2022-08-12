@@ -106,13 +106,13 @@ f32 cSpeedObs::Update (s32 new_pos) {
     mLastSpeeds[mCurrentLS] = speed;
     u8 fls = mCurrentLS;
     f32 avg_speed = 0;
-    for (u8 i = 0; i < NB_TAPS; i++)
-    {
+    for (u8 i = 0; i < NB_TAPS; i++) {
       avg_speed += mLastSpeeds[fls]; //* fir_coefs[i];
-      if (fls == 0)
+      if (fls == 0) {
         fls = NB_TAPS - 1;
-      else
+      } else {
         fls--;
+      }
     }
     avg_speed /= NB_TAPS;
     mCurrentLS++;
@@ -130,8 +130,9 @@ void cAccelObs::Init () { //milos, added
   mLastAccel = 0;
   mLastValueValid = false;
   mCurrentLA = 0;
-  for (u8 i = 0; i < NB_TAPS_A; i++)
+  for (u8 i = 0; i < NB_TAPS_A; i++) {
     mLastAccels[i] = 0;
+  }
 }
 
 f32 cAccelObs::Update (f32 new_spd) { //milos, added, was s32 new_spd
@@ -141,13 +142,13 @@ f32 cAccelObs::Update (f32 new_spd) { //milos, added, was s32 new_spd
     mLastAccels[mCurrentLA] = accel;
     u8 fla = mCurrentLA;
     f32 avg_accel = 0;
-    for (u8 i = 0; i < NB_TAPS_A; i++)
-    {
+    for (u8 i = 0; i < NB_TAPS_A; i++) {
       avg_accel += mLastAccels[fla]; // * fir_coefs[i];
-      if (fla == 0)
+      if (fla == 0) {
         fla = NB_TAPS_A - 1;
-      else
+      } else {
         fla--;
+      }
     }
     avg_accel /= NB_TAPS_A;
     mCurrentLA++;

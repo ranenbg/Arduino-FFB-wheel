@@ -19,7 +19,7 @@ Firmware features:
 - all wheel parameters are stored in EEPROM (and automatically loaded at each powerup)
 - original wheel control user interface **[Arduino FFB gui](https://github.com/ranenbg/Arduino-FFB-gui)** for an easy configuration and monitoring of all inputs/outputs 
 
-Detailed documentation and more information about the firmware can be found in txt files inside **[docs](https://github.com/ranenbg/Arduino-FFB-wheel/tree/master/docs)** folder.
+Detailed documentation and more information about the firmware can be found in txt files inside **[docs](https://github.com/ranenbg/Arduino-FFB-wheel/tree/master/brWheel_my/docs)** folder.
 
 # Firmware pinouts and wiring diagrams
 ![plot](./brWheel_my/wirings/Firmware-v19x%20pinout.png)

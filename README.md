@@ -6,20 +6,20 @@ Firmware features:
 - 4 analog axis + 1 for optical encoder, 2 FFB axis (only 1 has pwm or dac output)
 - automatic or manual analog axis calibration
 - up to 16 buttons by 4x4 matrix or via **[button box firmware](https://github.com/ranenbg/Arduino-FFB-wheel/tree/master/tx_rw_ferrari_458_wheel_emu_16buttons)** uploaded to Arduino Nano/Uno
-- analog XY shifter with up to 8 gears + reverse
+- analog XY H-pattern shifter, configurable to 6/8 gears + reverse
 - fully supported 16bit FFB effects (custom force effect not implemented)
 - envelope and conditional block effects, start delay, durration, deadband, direction enable
 - FFB calculation and axis/button update rate is 500Hz (2ms period)
-- many options available (external 12bit ADC/DAC, pedal autocalibration, z-index, hatswitch, button matrix)
+- many options available (external 12bit ADC/DAC, pedal autocalibration, manual calibration, z-index, hatswitch, button matrix, external shift register)
 - RS232 serial interface for configuration of all wheel parameters
-- fully adjustable FFB output in the form of 2 channel digital PWM or analog DAC signals
-- pwm modes: pwm+-, pwm+dir, pwm0.50.100
-- dac modes: dac+-, dac+dir
+- fully adjustable FFB output in the form of 2 channel digital 15bit PWM or analog 12bit DAC signals
+- available pwm modes: pwm+-, pwm+dir, pwm0.50.100
+- available dac modes: dac+-, dac+dir
 - load cell support for HX711 chip (for brake pedal axis only)
 - all wheel parameters are stored in EEPROM (and automatically loaded at each powerup)
 - original wheel control user interface **[Arduino FFB gui](https://github.com/ranenbg/Arduino-FFB-gui)** for an easy configuration and monitoring of all inputs/outputs 
 
-Detailed documentation and more information about the firmware can be found in txt files inside brWheel_my folder.
+Detailed documentation and more information about the firmware can be found in txt files inside **[docs](https://github.com/ranenbg/Arduino-FFB-wheel/tree/master/docs)** folder.
 
 # Firmware pinouts and wiring diagrams
 ![plot](./brWheel_my/wirings/Firmware-v19x%20pinout.png)

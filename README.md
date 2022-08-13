@@ -58,7 +58,7 @@ Firmware version string consists out of 3 digits and some letters (example: fw-v
 - "f" analog XY shifter support
 - "m" replacement pinouts for Arduino ProMicro
 
-note* some combinations are not possible at the same time, like "fw-vXXXzs", or "fw-v193z" beacause they would use the same hardware interrupt pin for more than 1 function, while some are not possible due to arduino memory limit
+note* some combinations are not possible at the same time, like "fw-vXXXzs", or "fw-v193z" beacause they would use the same hardware interrupt pin for more than 1 function, while some are not possible due to ATmega32U4 32k memory limit
 
 ## Firmware download
 

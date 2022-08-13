@@ -1,6 +1,6 @@
 Milos Rankovic, ranenbg@gmail.com
 first created 25.03.2020.
-last update 12.08.2022.
+last update 13.08.2022.
 
 This txt file contains a list of all available RS232 serial interface commands implemented in my latest Arduino Leonardo FFB wheel firmware version (you can use this info to make your own control UI)
 
@@ -110,13 +110,14 @@ command		example response	range
 E 1		1			0-31
 
 [11] adjust PWM settings - requires Arduino restart in order to apply changes (press reset button, or just re-plug Arduino to USB port)
-byte, bit0-phase correct (or fast mode), bit1-dir enabled (or pwm+-), bits 2-5 are frequency select, bits 6-7 are unused
+byte, bit0-phase correct (or fast mode), bit1-dir enabled (or pwm+-), bits 2-5 are frequency select, bits6-pwm0.50.100 mode enable, bit7 is unused
+pwm0.50.100. mode selection is done by setting bit1 LOW and bit6 HIGH
 for available frequency selection see firmware info.txt
 sent number is a decimal equivalent (form) of this byte
-received number is PWM resolution (max number of PWM steps, for this PWM frequency and PWM type)
+received number is PWM resolution (max number of PWM steps, for given PWM frequency and PWM type)
 the settings will be stored in EEPROM right away (no additional saving is neccesary with command A)
 command		example response	range
-W 5		400			0-39
+W 5		400			0-255
 
 [12] store all FFB parameter settings in EEPROM (stores everything except for PWM settings)
 command		example response

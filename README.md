@@ -5,7 +5,7 @@ Firmware features:
 - supported Arduino boards: Leonardo, Micro and ProMicro (5V, 16MHz)
 - 4 analog axis + 1 for optical encoder, 2 FFB axis (only 1 has pwm or dac output)
 - automatic or manual analog axis calibration
-- up to 16 buttons via by 4x4 matrix or by **[button box firmware](https://github.com/ranenbg/Arduino-FFB-wheel/tree/master/tx_rw_ferrari_458_wheel_emu_16buttons)** uploaded to Arduino Nano/Uno
+- up to 16 buttons by 4x4 matrix or via **[button box firmware](https://github.com/ranenbg/Arduino-FFB-wheel/tree/master/tx_rw_ferrari_458_wheel_emu_16buttons)** uploaded to Arduino Nano/Uno
 - analog XY shifter with up to 8 gears + reverse
 - fully supported 16bit FFB effects (custom force effect not implemented)
 - envelope and conditional block effects, start delay, durration, deadband, direction enable

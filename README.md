@@ -4,17 +4,20 @@ Stand alone USB device recognized as a joystick with force feedback functionalit
 Firmware features:
 - supported Arduino boards: Leonardo, Micro and ProMicro (5V, 16MHz)
 - 4 analog axis + 1 for optical encoder, 2 FFB axis (only 1 has pwm or dac output)
+- automatic or manual analog axis calibration
 - up to 16 buttons via by 4x4 matrix or by **[button box firmware](https://github.com/ranenbg/Arduino-FFB-wheel/tree/master/tx_rw_ferrari_458_wheel_emu_16buttons)** uploaded to Arduino Nano/Uno
 - analog XY shifter with up to 8 gears + reverse
 - fully supported 16bit FFB effects (custom force effect not implemented)
-- envelope and conditional block effects, start delay, durration, deadband
+- envelope and conditional block effects, start delay, durration, deadband, direction enable
 - FFB calculation and axis/button update rate is 500Hz (2ms period)
 - many options available (external 12bit ADC/DAC, pedal autocalibration, z-index, hatswitch, button matrix)
 - RS232 serial interface for configuration of all wheel parameters
 - fully adjustable FFB output in the form of 2 channel digital PWM or analog DAC signals
+- pwm modes: pwm+-, pwm+dir, pwm0.50.100
+- dac modes: dac+-, dac+dir
 - load cell support for HX711 chip (for brake pedal axis only)
 - all wheel parameters are stored in EEPROM (and automatically loaded at each powerup)
-- wheel control **[Arduino FFB gui](https://github.com/ranenbg/Arduino-FFB-gui)** for an easy configuration and monitoring of all inputs/outputs 
+- original wheel control user interface **[Arduino FFB gui](https://github.com/ranenbg/Arduino-FFB-gui)** for an easy configuration and monitoring of all inputs/outputs 
 
 Detailed documentation and more information about the firmware can be found in txt files inside brWheel_my folder.
 
@@ -46,7 +49,7 @@ Firmware version string consists out of 3 digits and some letters (example: fw-v
 - fw-vXX3 adds support for shift register+HX711+MCP4725 analog DAC's
 
  Here is the complete list of all available options that may be added to any of the above firmware*:
-- "a" pedal axis autocalibration enabled
+- "a" pedal axis autocalibration enabled (otherwise a manual calibration is enabled)
 - "z" Z-index encoder support
 - "h" Hat Switch support
 - "s" external ADC support for pedals with ADS1015
@@ -55,7 +58,7 @@ Firmware version string consists out of 3 digits and some letters (example: fw-v
 - "f" analog XY shifter support
 - "m" replacement pinouts for Arduino ProMicro
 
-note* some combinations are not possible at the same time, like "fw-vXXXzs", or "fw-v183z" beacause they would use the same hardware interrupt pin for more than 1 function
+note* some combinations are not possible at the same time, like "fw-vXXXzs", or "fw-v193z" beacause they would use the same hardware interrupt pin for more than 1 function, some other combination are not possible due to arduino memory limit
 
 ## Firmware download
 

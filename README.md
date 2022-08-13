@@ -67,7 +67,7 @@ note* some combinations are not possible at the same time, like "fw-vXXXzs", or 
 
 ## Firmware upload procedure
 You can use **[XLoader](https://github.com/ranenbg/Arduino-FFB-wheel/tree/master/XLoader)**:
-- set 57600baud, ATMega32U4 microcontroler and select desired HEX
+- set 57600baud, ATmega32U4 microcontroler and select desired HEX
 - press reset button on Arduino (or shortly connect RST pin to GND)
 - select newly appeared COM port (Arduino in bootloader mode*) and press upload, you will only have a few seconds
 

@@ -132,7 +132,17 @@ void cQuadEncoder::Init (s32 position, b8 pullups)
   pinMode(QUAD_ENC_PIN_B, it);
 #ifdef USE_ZINDEX // milos, added
   pinMode(QUAD_ENC_PIN_I, it);
-#endif
+#else
+  //milos, added - wheel recenter button
+#ifndef USE_ADS1015
+#ifndef USE_MCP4725
+#ifdef USE_CENTERBTN
+  pinMode(QUAD_ENC_PIN_I, INPUT_PULLUP);
+  EnableInterrupt(CORE_PIN2_INT, RISING); // digital interrupt pin D2
+#endif // end of centerbtn
+#endif // end of ads
+#endif // end of mcp
+#endif // end of zindex
 
   gIndexFound = false;
   gPosition = position;
@@ -203,12 +213,26 @@ void cQuadEncoder::Update()
 #endif
 }
 
-ISR(INT2_vect)
-{
+ISR(INT2_vect) {
   gQuadEncoder.Update();
 }
 
-ISR(INT3_vect)
-{
+ISR(INT3_vect) {
   gQuadEncoder.Update();
 }
+
+#ifndef USE_ZINDEX
+#ifndef USE_ADS1015
+#ifndef USE_MCP4725
+#ifdef USE_CENTERBTN
+void recenter() {  // milos, added - interrupt function
+  myEnc.Write(ROTATION_MID); // set X-axis to 0deg
+}
+
+ISR(INT1_vect) { // milos, added - triger interrupt on D2
+  recenter();
+}
+#endif // end of centerbtn
+#endif // end of mcp
+#endif // end of ads
+#endif // end of zindex

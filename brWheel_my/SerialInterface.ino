@@ -79,7 +79,15 @@ void readSerial() {
 #endif
 #ifdef USE_ZINDEX
         CONFIG_SERIAL.print("z");
-#endif
+#else
+#ifndef USE_ADS1015
+#ifndef USE_MCP4725
+#ifdef USE_CENTERBTN
+        CONFIG_SERIAL.print("c");
+#endif // end of centerbtn
+#endif // end of mcp
+#endif // end of ads
+#endif // end of zindex
 #ifdef USE_HATSWITCH
         CONFIG_SERIAL.print("h");
 #endif
@@ -200,8 +208,8 @@ void readSerial() {
         CONFIG_SERIAL.println(calcTOP(pwmstate));
         /*for (uint8_t i = 0; i < 8; i++) { //milos, decode incomming number into individual bits
           CONFIG_SERIAL.print(bitRead(pwmstate, 7-i),BIN);
-        }
-        CONFIG_SERIAL.println("");*/
+          }
+          CONFIG_SERIAL.println("");*/
         //CONFIG_SERIAL.println(1);
         break;
       case 'H': // milos, added - configure the XY shifter calibration

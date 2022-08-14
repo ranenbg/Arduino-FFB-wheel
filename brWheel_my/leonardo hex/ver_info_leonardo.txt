@@ -75,6 +75,7 @@ version		features
 200		encoder, 4 axis, 8 buttons, 100k CPR, wheel angle as metric for conditional effects, shift register fix, button matrix, 2 FFB axis, periodic effects timing fix, duration and start delay fix, 16bit direction, new HX711 library, debug FFB optimizations, 16x less strong spring, manual pedal axis calibration, pwm0.50.100 mode
 200a		the same as v200, with pedal autocalib instead of manual calib
 200z		the same as v200, with z-index support
+200c		the same as v200, with hardware wheel recenter button on pin D2
 200f		the same as v200, with XY analog shiffter support
 200zf		the same as v200, with z-index and XY analog shiffter support
 200azf		the same as v200zf, with pedal autocalib instead of manual calib

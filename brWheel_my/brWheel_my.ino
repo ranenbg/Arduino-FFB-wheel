@@ -43,7 +43,7 @@
 #ifdef USE_LCD
 #include <LiquidCrystal_I2C.h> //milos, added
 #endif
-#ifdef USE_ADS1105
+#ifdef USE_ADS1015
 #include <Adafruit_ADS1015.h> //milos, added
 #endif
 #include "USBDesc.h"
@@ -78,7 +78,7 @@ u16 hbrakeMin, hbrakeMax; // milos
 u32 button = 0; //milos, added
 
 //milos, added
-#ifdef USE_ADS1105
+#ifdef USE_ADS1015
 //Adafruit_ADS1115 ads(0x48);     /* Use this for the 16-bit version */
 Adafruit_ADS1015 ads(0x48);    /* Use this for the 12-bit version */
 #endif
@@ -234,7 +234,7 @@ void setup() {
   bdz = 2047; // milos, set the brake pedal dead zone taken from min axis val, when using load cell (default is 2047 out of 65535)
   last_LC_scaling = LC_scaling; // milos
 
-#ifdef USE_ADS1105 // milos, added
+#ifdef USE_ADS1015 // milos, added
   // When using ADS1015 board, all inputs are 12 bits resolution (4096 total steps, 0-4095 range)
   // The ADC input range (or gain) can be changed via the following
   // functions, but be careful never to exceed VDD +0.3V max, or to
@@ -300,7 +300,7 @@ void loop() {
           ads1 = ads.readADC_Differential_2_3();  // milos, diff input between A2 and A3
           ads2 = ads.readADC_SingleEnded(0);  // milos, single input A0*/
 
-#ifdef USE_ADS1105 // milos, if you plan to use ADS1105 for all 3 pedals (no load cell), then change to readADC_SingleEnded
+#ifdef USE_ADS1015 // milos, if you plan to use ADS1105 for all 3 pedals (no load cell), then change to readADC_SingleEnded
         accel = constrain(ads.readADC_SingleEnded(ACCEL_INPUT) * 2, 0 , 4095); //milos, Z axis, 11bit
         clutch = constrain(ads.readADC_SingleEnded(CLUTCH_INPUT) * 2, 0 , 4095); //milos, RX axis, 11bit
         hbrake = constrain(ads.readADC_SingleEnded(HBRAKE_INPUT) * 2, 0 , 4095); //milos, RX axis, 11bit
@@ -336,7 +336,7 @@ void loop() {
         LoadCell.update(); //milos, I have configured mine for 80Hz reading by applying 5V at pin15 of HX711 chip (by default it's 10Hz, pin15 grounded)
         brake = LoadCell.getData(); // milos, read smoothed data from LC (running average of 1 samples, see HX711_ADC.h I modded it)
 #else // milos, when no LC
-#ifdef USE_ADS1105
+#ifdef USE_ADS1015
         brake = constrain(ads.readADC_SingleEnded(BRAKE_INPUT) * 2, 0 , 4095); //milos, Y axis, 11bit
 #else //if no ads
 #ifdef AVG_INPUTS //milos, added option
@@ -362,11 +362,6 @@ void loop() {
         accel = map(accel, accelMin + dz, accelMax - dz, 0, Z_AXIS_PHYS_MAX);  // milos, with autocalibration
         clutch = map(clutch, clutchMin + dz, clutchMax - dz, 0, RX_AXIS_PHYS_MAX);
         hbrake = map(hbrake, hbrakeMin + dz, hbrakeMax - dz, 0, RY_AXIS_PHYS_MAX);
-        /*#else //if no autocalib
-                accel = map(accel, 0 + dz, Z_AXIS_PHYS_MAX - dz, 0, Z_AXIS_PHYS_MAX); // milos, no autocalibration
-                clutch = map(clutch, 0 + dz, RX_AXIS_PHYS_MAX - dz, 0, RX_AXIS_PHYS_MAX);
-                hbrake = map(hbrake, 0 + dz, RY_AXIS_PHYS_MAX - dz, 0, RY_AXIS_PHYS_MAX);
-          #endif //end of autocalib*/
         accel = constrain(accel, 0, Z_AXIS_PHYS_MAX); // milos, constrain axis ranges
         clutch = constrain(clutch, 0, RX_AXIS_PHYS_MAX);
         hbrake = constrain(hbrake, 0, RY_AXIS_PHYS_MAX);
@@ -378,11 +373,7 @@ void loop() {
           brake = map(brake, bdz, Y_AXIS_PHYS_MAX + bdz, 0, Y_AXIS_PHYS_MAX); // milos, no autocalibration
         }
 #else // milos, when no LC
-        //#ifdef  USE_AUTOCALIB
-        brake = map(brake, brakeMin + dz, brakeMax - dz, 0, Y_AXIS_PHYS_MAX); // milos, with autocalibration
-        //#else
-        //brake = map(brake, 0 + dz, 4095 - dz, 0, Y_AXIS_PHYS_MAX); // milos, no autocalibration
-        //#endif
+        brake = map(brake, brakeMin + dz, brakeMax - dz, 0, Y_AXIS_PHYS_MAX); // milos, for both manual and auto cal
 #endif //milos, end of USE_LOAD_CELL
         brake = constrain(brake, 0, Y_AXIS_PHYS_MAX); // milos
 

@@ -51,6 +51,7 @@ Firmware version string consists out of 3 digits and some letters (example: fw-v
  Here is the complete list of all available options that may be added to any of the above firmware*:
 - "a" pedal axis autocalibration enabled (otherwise a manual calibration is enabled)
 - "z" Z-index encoder support
+- "c" hardware wheel re-center enabled
 - "h" Hat Switch support
 - "s" external ADC support for pedals with ADS1015
 - "i" averaging of analog inputs

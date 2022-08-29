@@ -10,18 +10,18 @@
 //#define USE_ADS1015       // milos, uncomment for 12bit pedals (commented is 10bit from arduino inputs), can not be used with AVG_INPUTS
 //#define USE_DSP56ADC16S			// 16 bits Stereo ADC (milos, can not be used if USE_SHIFT_REGISTER is uncommented)
 #define USE_QUADRATURE_ENCODER		// Position Quadrature encoder
-//#define USE_ZINDEX          // milos, use Z-index encoder channel (warning, can not be used with USE_ADS1105 or USE_MCP4725)
-//#define USE_LOAD_CELL				// Load cell shield // milos, new library for LC
-//#define USE_SHIFT_REGISTER			// 8-bit Parallel-load shift registers G27 board steering wheel (milos, this one is modified for 16 buttons)
+#define USE_ZINDEX          // milos, use Z-index encoder channel (warning, can not be used with USE_ADS1105 or USE_MCP4725)
+#define USE_LOAD_CELL				// Load cell shield // milos, new library for LC
+#define USE_SHIFT_REGISTER			// 8-bit Parallel-load shift registers G27 board steering wheel (milos, this one is modified for 16 buttons)
 //#define USE_DUAL_SHIFT_REGISTER		// Dual 8-bit Parallel-load shift registers G27 board shifter  (milos, not available curently)
-//#define USE_XY_SHIFTER    //milos, uncomment to use XY analog shifter (can not be used with USE_BTNMATRIX)
+//#define USE_XY_SHIFTER    //milos, uncomment to use XY analog shifter (can not be used with USE_BTNMATRIX or with proMicro)
 //#define USE_HATSWITCH        //milos, uncomment to use first 4 buttons for hat switch instead (can not be used if no load cell or with shift register)
-//#define USE_BTNMATRIX        //milos, uncomment to use 8 pins as a 4x4 button matrix for total of 16 buttons (can not be used with USE_LOAD_CELL or shift register)
+//#define USE_BTNMATRIX        //milos, uncomment to use 8 pins as a 4x4 button matrix for total of 16 buttons (can not be used with USE_LOAD_CELL, shift register or XY shifter)
 //#define AVG_INPUTS        // milos, uncomment to use averaging of arduino analog inputs (if readings can be done faster than CONTROL_PERIOD)
 //#define USE_AUTOCALIB        // milos, uncomment to use autocalibration for pedal axis (if left commented manual calibration is enabled)
-#define USE_CENTERBTN    // milos, ucomment to assign digital input pin D2 for hardware wheel recenter to 0deg (not available when USE_ZINDEX, USE_ADS1105 or USE_MCP4725)
+//#define USE_CENTERBTN    // milos, ucomment to assign digital input pin D2 for hardware wheel recenter to 0deg (not available when USE_ZINDEX, USE_ADS1105 or USE_MCP4725)
 //#define USE_MCP4725      // milos, 12bit DAC (0-5V), uncomment to enable output of FFB signal as DAC voltage output
-#define USE_PROMICRO    // milos, uncomment if you are using Arduino ProMicro board (leave commented for Leonardo or Micro variants)
+//#define USE_PROMICRO    // milos, uncomment if you are using Arduino ProMicro board (leave commented for Leonardo or Micro variants)
 #define USE_EEPROM // milos, uncomment this to enable loading/saving settings from EEPROM
 
 #define CALIBRATE_AT_INIT	0 //milos, was 1
@@ -189,7 +189,7 @@ uint8_t LC_scaling; // milos, load cell scaling factor (affects brake pressure, 
 #define PARAM_ADDR_HBRK_LO       0x36 //milos, hand brake pedal cal min
 #define PARAM_ADDR_HBRK_HI       0x38 //milos, hand brake pedal cal max
 
-#define VERSION		0xC8 // milos, this is my version (previous was 8)
+#define VERSION		0xD4 // milos, this is my version (previous was 8)
 
 #define GetParam(m_offset,m_data)	getParam((m_offset),(u8*)&(m_data),sizeof(m_data))
 #define SetParam(m_offset,m_data)	setParam((m_offset),(u8*)&(m_data),sizeof(m_data))
@@ -207,9 +207,24 @@ uint8_t LC_scaling; // milos, load cell scaling factor (affects brake pressure, 
 u8 effstate; // = 0b00000001; //milos, added - turn on/off desktop effects through serial interface
 //bit0-autocentering spring, bit1-damper, bit2-inertia, bit3-friction, bit4-ffb monitor (sends ffb signal data to com port), bits 5-7 are unused
 u8 pwmstate; // =0b00000101; //milos, added - configures the PWM settings
-//bit0-phase correct (1 is fast top), bit1-dir enabled (0 is pwm+-), bits 2-5 are frequency select, bit6-enable pwm0.50.100, bit7 is unused
+//bit0-phase correct (0 is fast top), bit1-dir enabled (0 is pwm+-), bits 2-5 are frequency select, bit6-enable pwm0.50.100, bit7 is unused
+
+// bit0 pwm_type
+// 0    fast pwm
+// 1    phase correct
+
+// bit1 bit6 pwm_mode
+// 0    0    pwm+-
+// 0    1    pwm0.50.100
+// 1    0    pwm+dir
+// 1    1    rcm
+
 //if USE_MCP4725 is defined then pwmstate has a following meaning
-//bits 0-5 unused, bit6-enable dac+dir (0 is dac+-), bit7-enable dac (0 is no output)
+//bits 0-5 unused, bit6-enable dac+dir (0 is dac+-), bit7-enable dac (0 is no dac output)
+
+// bit6 pwm_type
+// 0    dac+-
+// 1    dac+dir
 
 //milos, changed these from f32 to u8 (loaded from EEPROM)
 u8 configGeneralGain;  // = 1.0f;  //was 1.0f
@@ -225,44 +240,50 @@ u8 configStopGain; // = 1.0f;	//was 1.0f
 // milos, here we set the PWM resolution and frequency per channel (loaded from EEPROM)
 // there are 2 PWM channels - one for each direction, so the actual FFB resolution is doubled
 // Set 'TOP' for PWM resolution.  Assumes 16 MHz clock.
-// fast PWM mode (no phase correction), number in brackets is selection index (see pwmset.ino)
+// fast PWM mode (for phase correct mode num of pwm steps is halved), number in brackets are array index (see PWMtops, pwm.ino, InitPWM)
+// const unsigned int TOP = 0xFFFF; // 16-bit resolution,   244 Hz PWM (12)
+// const unsigned int TOP = 0x9C40; // 40000 pwm steps,     400 Hz PWM (11)
+// const unsigned int TOP = 0x7530; // 30000 pwm steps,     533 Hz PWM (10)
 // const unsigned int TOP = 0x7FFF; // 15-bit resolution,   488 Hz PWM (9)
-// const unsigned int TOP = 0x7FFF; // 20000 pwm steps,     800 Hz PWM (8)
+// const unsigned int TOP = 0x4E20; // 20000 pwm steps,     800 Hz PWM (8)
 // const unsigned int TOP = 0x3FFF; // 14-bit resolution,   976 Hz PWM (7)
-// const unsigned int TOP = 0x1FFF; // 10000 pwm steps,    1600 Hz PWM (6)
+// const unsigned int TOP = 0x2710; // 10000 pwm steps,    1600 Hz PWM (6)
 // const unsigned int TOP = 0x1FFF; // 13-bit resolution,  1953 Hz PWM (5)
 // const unsigned int TOP = 0x0FFF; // 12-bit resolution,  3907 Hz PWM (4)
 // const unsigned int TOP = 0x07FF; // 11-bit resolution,  7812 Hz PWM (3)
 // const unsigned int TOP = 0x03FF; // 10-bit resolution, 15624 Hz PWM (2)
 // const unsigned int TOP = 0x0320; // 800 pwm steps,     20000 Hz PWM (1)
-// const unsigned int TOP = 0x01FF; // 9-bit resolution,  31311 Hz PWM (0)
+// const unsigned int TOP = 0x0190; // 400 pwm steps,     40000 Hz PWM (0)
 // milos, the downside of using fast top PWM mode is that when you set pwm to 0, it is actualy not true zero, there still is a tiny 100ns pulse on both chanells at the same time apearing randomly
 // this might be a trouble for some very powerful H-bridges if you use PWM+- mode, but on most it will be just fine
 // in PWM+dir mode it does not matter since only one channel of PWM is used, dir pin is not on the same pin as the second PWM channel which is unused in dir mode
 
-// milos, added - here are available TOP selections (defines PWM resolution and frequency)
-uint16_t PWMtops [10] =
+// milos, added - available TOP selections (defines PWM resolution and frequency)
+uint16_t PWMtops [13] =
 {
-  400,
-  800,
-  1000,
-  2000,
-  4000,
-  5000,
-  10000,
-  16383,
-  20000,
-  32767
+  400,  // 0
+  800,  // 1
+  1000, // 2
+  2000, // 3
+  4000, // 4
+  5000, // 5
+  10000, // 6
+  16383, // 7
+  20000, // 8
+  32767, // 9
+  30000, // 10
+  40000, // 11
+  65535  // 12
 };
 
 uint16_t TOP; // milos, loaded from EEPROM
-int16_t MM_MIN_MOTOR_TORQUE; // milos, loaded from EEPROM
-int16_t MM_MAX_MOTOR_TORQUE; // milos, loaded from EEPROM
+uint16_t MM_MIN_MOTOR_TORQUE; // milos, loaded from EEPROM
+uint16_t MM_MAX_MOTOR_TORQUE; // milos, loaded from EEPROM
 uint16_t MAX_DAC; // milos, loaded from EEPROM
 
 uint16_t calcTOP(byte value) { // milos, added - function which returns TOP value from pwmstate byte
 #ifndef USE_MCP4725
-  byte index = 0b00000000; // index of frequency and PWM resolution selection (0-7)
+  byte index = 0b00000000; // index of frequency and PWM resolution selection (0-12)
   for (uint8_t i = 0; i < 4; i++) {
     bitWrite(index, i, bitRead(value, i + 2)); //milos, decode bits2-5 from pwmstate byte into index
   }
@@ -285,9 +306,22 @@ int32_t myMap (int32_t value, int32_t x0, int32_t x1, int32_t y0, int32_t y1) {
 f32 FFB_bal; // milos, FFB balance slider
 f32 L_bal; // milos, left PWM balance multiplier
 f32 R_bal; // milos, right PWM balance multiplier
-f32 minTorquePP; //milos, added - min torque percents
+f32 minTorquePP; //milos, added - min torque in percents
 
-boolean zIndexFound = false; //milos, added
+// milos, added - RCM pwm mode definitions
+f32 RCM_min = 1.0; // minimal force RCM pulse width in ms
+f32 RCM_zer = 1.5; // zero force RCM pulse width in ms
+f32 RCM_max = 2.0; // maximal force RCM pulse width in ms
+
+f32 RCMscaler (byte value) { // milos, added - scales correctly RCM pwm mode
+  if (bitRead(value, 0)) { // if pwmstate bit0=1
+    return 1000.0; // for phase correct pwm mode
+  } else {  // if pwmstate bit0=0
+    return 2000.0; // for fast pwm mode
+  }
+}
+
+boolean zIndexFound = false; //milos, added - keeps track if z-index pulse from encoder was found after powerup
 
 // milos, added - function for decoding hat switch bits
 uint32_t decodeHat(uint32_t inbits) {

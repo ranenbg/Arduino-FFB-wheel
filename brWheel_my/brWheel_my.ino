@@ -202,7 +202,7 @@ void setup() {
   ROTATION_MID = ROTATION_MAX / 2; // milos
 
   //myEnc.Init(ROTATION_MID + brWheelFFB.offset, true); //ROTATION_MID + gCalibrator.mOffset); // milos, pullups enabled
-  myEnc.Init(ROTATION_MID, true); // milos, pullups enabled, do not apply any encoder offset here
+  myEnc.Init(ROTATION_MID, true); // milos, pullups enabled, do not apply any encoder offset at this point
 
   InitInputs();
   FfbSetDriver(0);

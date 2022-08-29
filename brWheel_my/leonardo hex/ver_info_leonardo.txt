@@ -79,3 +79,17 @@ version		features
 200f		the same as v200, with XY analog shiffter support
 200zf		the same as v200, with z-index and XY analog shiffter support
 200azf		the same as v200zf, with pedal autocalib instead of manual calib
+
+- firmware HEX versions bellow require wheel control v2.4 or newer
+
+210		encoder, 4 axis, 8 buttons, 100k CPR, wheel angle as metric for conditional effects, shift register fix, button matrix, 2 FFB axis, periodic effects timing fix, duration and start delay fix, 16bit direction, new HX711 library, debug FFB optimizations, 16x less strong spring, manual pedal axis calibration, pwm0.50.100 mode, rcm pwm mode
+210a		the same as v210, with pedal autocalib instead of manual calib
+210z		the same as v210, with z-index support
+210c		the same as v210, with hardware wheel recenter button on pin D2
+210f		the same as v210, with XY analog shiffter support
+210zf		the same as v210, with z-index and XY analog shiffter support
+210azf		the same as v210zf, with pedal autocalib instead of manual calib
+210ht		the same as v210, with 4x4 button matrix and a hat switch support
+211ah		the same as 210a, with shifter register support
+212ah		the same as 211ah, with load cell support with HX711 
+213ah		the same as 211ah, but has analog FFB output with 2x12bit DAC MCP4275

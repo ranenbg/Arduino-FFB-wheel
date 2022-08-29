@@ -49,6 +49,7 @@ void SetDefaultConfig () { //milos - sets default values
   SetParam(PARAM_ADDR_MIN_TORQ, val); //milos, added
   val = 500; //milos, for PWM signals
   SetParam(PARAM_ADDR_MAX_TORQ, val); //milos, added
+  //minTorquePP = 0.0; //milos, added
   val = 4095; //milos, for 12bit DAC
   SetParam(PARAM_ADDR_MAX_DAC, val); //milos, added
 #ifdef USE_LOAD_CELL
@@ -133,7 +134,6 @@ void LoadEEPROMConfig () { //milos, added - updates all ffb parameters from EEPR
 #ifdef USE_MCP4725
   MM_MAX_MOTOR_TORQUE = MAX_DAC;
 #endif
-  minTorquePP = (f32)MM_MIN_MOTOR_TORQUE / (f32)MM_MAX_MOTOR_TORQUE;
   GetParam(PARAM_ADDR_PWM_SET, pwmstate);
 #ifdef USE_XY_SHIFTER
   GetParam(PARAM_ADDR_SHFT_X0, sCal[0]); //milos, added

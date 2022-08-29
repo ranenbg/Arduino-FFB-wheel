@@ -168,7 +168,7 @@ cFFB::cFFB() {
 //--------------------------------------- Effects --------------------------------------------------------
 
 s32 ConstrainEffect (s32 val) {
-  return (constrain(val, -MM_MAX_MOTOR_TORQUE, MM_MAX_MOTOR_TORQUE));
+  return (constrain(val, -((s32)MM_MAX_MOTOR_TORQUE), (s32)MM_MAX_MOTOR_TORQUE));
 }
 
 f32 wDegScl() { // milos, added - scaling factor to convert encoder position to wheel angle units
@@ -238,7 +238,7 @@ s16 TriangleEffect (s16 mag, u16 period, u8 phase, u16 t) { //milos, added
     return (linFunction(4.0 * ((f32)mag) / (((f32)period) / 1000.0), ((f32)t) / 1000.0, -mag));
   } else if ((((f32)t) / 1000.0) >= (((f32)period) / 1000.0) / 2.0 && (((f32)t) / 1000.0) < (((f32)period) / 1000.0)) {
     t -= period / 2;
-    return (linFunction(-4.0  * ((f32)mag) / (((f32)period) / 1000.0), ((f32)t) / 1000.0, mag));
+    return (linFunction(-4.0 * ((f32)mag) / (((f32)period) / 1000.0), ((f32)t) / 1000.0, mag));
   }
 }
 

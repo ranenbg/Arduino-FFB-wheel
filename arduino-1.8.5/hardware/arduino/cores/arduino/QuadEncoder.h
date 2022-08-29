@@ -5,10 +5,10 @@
 #define QUAD_ENC_PIN_B		1
 #define QUAD_ENC_PIN_I		2
 
-u16 ROTATION_DEG; //milos
-u16 CPR; //milos
-u16 ROTATION_MAX; //milos
-u16 ROTATION_MID; // milos
+s16 ROTATION_DEG; //milos
+s32 CPR; //milos
+s32 ROTATION_MAX; //milos
+s32 ROTATION_MID; // milos
 
 //-----------------------------------------------------------------------------------------------
 
@@ -29,4 +29,3 @@ class cQuadEncoder
 extern cQuadEncoder gQuadEncoder;
 
 #endif // _QUAD_ENCODER_H
-

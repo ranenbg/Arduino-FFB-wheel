@@ -1,6 +1,6 @@
 Milos Rankovic, ranenbg@gmail.com
 first created 25.03.2020.
-last update 13.08.2022.
+last update 29.08.2022.
 
 This txt file contains a list of all available RS232 serial interface commands implemented in my latest Arduino Leonardo FFB wheel firmware version (you can use this info to make your own control UI)
 
@@ -30,7 +30,6 @@ options, firmware version include some lettera after 2 or 3 digit number, here i
          z - encoder z-index support
          h - enabled Hat Switch (uses first 4 buttons from button box)
          s - enabled external 12bit ADC - ADS1105 (for analog inputs)
-         d - enabled external 12bit DAC - MCP4725 (for analog FFB output)
          t - enabled 4x4 button matrix
          f - enabled XY analog H-pattern shifter
          i - enabled averaging of analog inputs
@@ -45,7 +44,7 @@ U		1080 100 50 50 100 100 100 50 70 0 0 45 1 500 2400 9
 
 [2] show firmware version
 command		example response
-V		fw-v172ah
+V		fw-v212ah
 
 [3] show states for encoder
 0 - not calibrated or no z-index found
@@ -112,6 +111,18 @@ E 1		1			0-31
 [11] adjust PWM settings - requires Arduino restart in order to apply changes (press reset button, or just re-plug Arduino to USB port)
 byte, bit0-phase correct (or fast mode), bit1-dir enabled (or pwm+-), bits 2-5 are frequency select, bits6-pwm0.50.100 mode enable, bit7 is unused
 pwm0.50.100. mode selection is done by setting bit1 LOW and bit6 HIGH
+rcm mode selection is done by setting both bit1 and bit6 HIGH (please note that not all frequenciec are available, see firmware_info.txt for more details)
+
+bit0 pwm_type
+0    fast pwm
+1    phase correct
+
+bit1 bit6 pwm_mode
+0    0    pwm+-
+0    1    pwm0.50.100
+1    0    pwm+dir
+1    1    rcm
+
 for available frequency selection see firmware info.txt
 sent number is a decimal equivalent (form) of this byte
 received number is PWM resolution (max number of PWM steps, for given PWM frequency and PWM type)

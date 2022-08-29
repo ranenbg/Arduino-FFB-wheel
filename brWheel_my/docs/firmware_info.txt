@@ -1,6 +1,6 @@
 Milos Rankovic, ranenbg@gmail.com
 first created 21.11.2018.
-last updated 14.08.2022.
+last updated 29.08.2022.
 
 This txt file contains details about Arduino wheel firmware capabilities and features:
 
@@ -8,9 +8,9 @@ Arduino boards supported - Leonardo, Micro or Pro Micro (16MHz clock)
 
 firmware	pwm freq	pwm mode	pwm res		steering	brake		throttle	clutch		handbrake	buttons		HAT Switch	XYshifter
 
-ver17x		16KHz*		pwm+-*		500*		16bit	        16bit(LC,a,s)	12bit(a,s)	12bit(a,s)	12bit(a,s)	24(16 used)	1		10bit
+ver21x		16KHz*		pwm+-*		500*		16bit	        16bit(LC,a,s)	12bit(a,s)	12bit(a,s)	12bit(a,s)	24(16 used)	1		10bit
 
-*fully configurable through RS232 or control panel v2.0
+*fully configurable through RS232 or control panel v2.4
 LC - load cell module HX711 24bit for brake, 2 samples runing average, (0-65535, limited by microsoft FFB driver to 16bits max)
 a - Arduino analog input, 10bit (0-1023)
 s - ADS1105, external ADC, 12bit (0-4095)
@@ -23,7 +23,7 @@ Nano - with external Arduino Nano board acting as button box, up to 16 buttons c
 
 Axis readout adjustment (LC, a, s) and auto calibration (on/off) - requires recompiling
 
-Optical encoder: two channels, no pullup resistors required, CPR range which firmware support depends on selected deg of rotation. The limitation is that CPR*deg_rot/360 must be equal or less than 65535. 
+Optical encoder: two channels, 3.3k pullup resistors optional, CPR range which firmware support depends on selected deg of rotation. The limitation is that CPR*deg_rot/360 must be equal or less than 600000 
 
 USB poll. rate	FFB calc. rate	RS232 refresh	RS232 baud rate		axis update rate	LC update rate		buttons+HAT+XYshifter update rate
 
@@ -39,14 +39,18 @@ Internal FFB effects: auto centering spring, damper, inertia, friction and end s
 Firmware features: RS232 interface for adjusting all FFB parameters, LC brake pressure, pedal autocalibration, minimal PWM value, rotation angle, recenter wheel,
 recalibrate wheel, recalibrate pedals, wheel version info, truning various desktop effects on/off, turn on/off ffb signal monitor, save ffb config to EEPROM, adjustment of encoder CPR, fully adjustable PWM settings that are stored in EEPROM, FFB clip LED indicator (ligts up gradually from last 10% of FFB signal level), 4x4 button matrix, CPR range is 100k, wheel angle used as metric for spring, damper, inertia and friction effects
 
-Control panel: made in Processing 3.5.4, visualises all axis and buttons including serial commands sent and received from Arduino, full adjustment of FFB effect gains, ffb signal monitor, load/save last settings from EEPROM, recenter wheel, recalibrate pedals, encoder CPR adjustment, pwm adjustment, COM port cfg via dialog, Axis colors cfg txt, storing/loading FFB parameter profiles to/from PC, autodetection of firmware version, XY analog shifter support, manual pedal axis calibration, added pwm0.50.100 mode, hardware button wheel re-center, control panel version v2.3
+Control panel: made in Processing 3.5.4, visualises all axis and buttons including serial commands sent and received from Arduino, full adjustment of FFB effect gains, ffb signal monitor, load/save last settings from EEPROM, recenter wheel, recalibrate pedals, encoder CPR adjustment, pwm adjustment, COM port cfg via dialog, Axis colors cfg txt, storing/loading FFB parameter profiles to/from PC, autodetection of firmware version, XY analog shifter support, manual pedal axis calibration, added pwm0.50.100 mode, hardware button wheel re-center, added rcm pwm mode, control panel version v2.4
 
-FFB output: fully configurable PWM settings, PWM frequency (tied to PWM resolution), PWM types (phase correct or fast TOP), PWM modes (pwm+-, pwm+dir or pwm0.50.100), changes require restarting Arduino, analog 2ch external 12bit DAC MCP4725 available (requires recompiling)
+FFB output: fully configurable PWM settings, PWM frequency (tied to PWM resolution), PWM types (phase correct or fast TOP), PWM modes (pwm+-, pwm+dir, pwm0.50.100 or rcm), changes require restarting Arduino, analog 2ch external 12bit DAC MCP4725 available (requires recompiling)
 
-          PWM freq  index: 0,   , 1    , 2    , 3   , 4   , 5     , 6     , 7    , 8    , 9
-Available PWM frequencies: 40kHz, 20kHz, 16kHz, 8kHz, 4kHz, 3.2kHz, 1.6kHz, 976Hz, 800Hz, 488Hz
-Available PWM resolutions: 400, 800, 1000, 2000, 4000, 5000, 10000, 16383, 20000, 32767 (for fast top pwm type)
-                           200, 400,  500, 1000, 2000, 2500,  5000,  8191, 10000, 16383 (for phase correct pwm type)
-Available PWM modes: pwm+- (H-bridge usage), pwm+dir (bldc or ac servo drive usage), pwm0.50.100 (various 3phace bldc motor drivers, use fast top pwm type with this mode, 0-full left force, 50-zero force, 100-full left force)
+          PWM freq  index: 0,   , 1    , 2    , 3   , 4   , 5     , 6     , 7    , 8    , 9    , 10   , 11   , 12
+Available PWM frequencies: 40kHz, 20kHz, 16kHz, 8kHz, 4kHz, 3.2kHz, 1.6kHz, 976Hz, 800Hz, 488Hz, 533Hz, 400Hz, 244Hz
+Available PWM resolutions: 400  , 800  , 1000 , 2000, 4000, 5000  , 10000 , 16383, 20000, 32767, 30000, 40000, 65535 (for fast top pwm type)
+                           200  , 400  , 500  , 1000, 2000, 2500  ,  5000 ,  8191, 10000, 16383, 15000, 20000, 32767 (for phase correct pwm type)
+          PWM freq  index: 0,   , 1    , 2    , 3   , 4    , 5    , 6    , 7     , 8    , 9    , 10   , 11   , 12
+Available RCM frequencies: na   , na   , na   , na  , 500Hz, 400Hz, 200Hz, 122Hz , 100Hz, 61Hz , 67Hz , 50Hz , 31Hz (for both fast top and phase correct type)
+na - not available
+
+Available PWM modes: pwm+- (H-bridge usage), pwm+dir (bldc or ac servo drive usage), pwm0.50.100 (various 3phace bldc motor drivers, use fast top pwm type with this mode, 0-full left force, 50-zero force, 100-full left force), rcm mode (RC servo driver and some 3phase brushless drivers usage, 1.0ms pulse width - full left force, 1.5ms pulse width - zero force, 2.0ms pulse width - full right force)
 
 	

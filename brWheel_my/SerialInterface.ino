@@ -454,7 +454,7 @@ void readSerial() {
           case 'J':
             ffb_temp = CONFIG_SERIAL.parseInt();
             ffb_temp = constrain(ffb_temp, 0, 200); //milos
-            minTorquePP = (f32)ffb_temp / 1000.0;
+            minTorquePP = (f32)ffb_temp * 0.001; // milos, max is 20% or 0.2
             MM_MIN_MOTOR_TORQUE = (u16)(minTorquePP * (f32)MM_MAX_MOTOR_TORQUE); //milos
             //CONFIG_SERIAL.print("Min torque PWM [0-200]*0.1%: ");  // milos
             //CONFIG_SERIAL.println(MM_MIN_MOTOR_TORQUE);  // milos

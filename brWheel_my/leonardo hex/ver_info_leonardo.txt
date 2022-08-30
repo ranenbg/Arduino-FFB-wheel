@@ -91,5 +91,6 @@ version		features
 210azf		the same as v210zf, with pedal autocalib instead of manual calib
 210ht		the same as v210, with 4x4 button matrix and a hat switch support
 211ah		the same as 210a, with shifter register support
+211s		the same as v210, with support for ADS1015 external ADC for pedals and shift register
 212ah		the same as 211ah, with load cell support with HX711 
 213ah		the same as 211ah, but has analog FFB output with 2x12bit DAC MCP4275

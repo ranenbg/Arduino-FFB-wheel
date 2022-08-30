@@ -1,5 +1,5 @@
 # Arduino-FFB-wheel
-Stand alone USB device recognized in Windows as a joystick with force feedback functionality, based on BRWheel by Fernando Igor from 2017.
+Stand alone directInput USB device recognized in Windows as a joystick with force feedback functionality, based on BRWheel by Fernando Igor from 2017.
 
 Firmware features:
 - supported Arduino boards: Leonardo, Micro and ProMicro (ATmega32U4, 5V, 16MHz)

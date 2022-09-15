@@ -1,5 +1,5 @@
 # Arduino-FFB-wheel
-Stand alone USB device recognized in Windows as a joystick with force feedback functionality, based on BRWheel by Fernando Igor from 2017.
+Stand alone directInput USB device recognized in Windows as a joystick with force feedback functionality, based on BRWheel by Fernando Igor from 2017.
 
 Firmware features:
 - supported Arduino boards: Leonardo, Micro and ProMicro (ATmega32U4, 5V, 16MHz)
@@ -12,7 +12,7 @@ Firmware features:
 - FFB calculation and axis/button update rate is 500Hz (2ms period)
 - many options available (external 12bit ADC/DAC, pedal autocalibration, manual calibration, z-index, hatswitch, button matrix, external shift register)
 - RS232 serial interface for configuration of all wheel parameters
-- fully adjustable FFB output in the form of 2 channel digital 15bit PWM or analog 12bit DAC signals
+- fully adjustable FFB output in the form of 2 channel digital 16bit PWM or analog 12bit DAC signals
 - available pwm modes: pwm+-, pwm+dir, pwm0.50.100, rcm
 - available dac modes: dac+-, dac+dir
 - load cell support for HX711 chip (for brake pedal axis only)
@@ -42,7 +42,7 @@ Detailed documentation and more information about the firmware can be found in t
 ## Firmware option description
 Due to 32k flash memory limitation in Arduino Leonardo (ATmega32U4), each HEX file is compiled with a certain firmware option. A one letter abreviation for each option is placed in the firmware version string and one needs to consider carefully which one to chose. In the release, I've compiled for you a few most often used firmware option combinations.
 
-Firmware version string consists out of 3 digits and some letters (example: fw-v190ahz). The first two digits (XX) are reserved for major firmware version, while the 3rd digit (0,1,2,3) stands for:
+Firmware version string consists out of 3 digits and some letters (example: fw-v210ahz). The first two digits (XX) are reserved for major firmware version, while the 3rd digit (0,1,2,3) stands for:
 - fw-vXX0 basic version (1 optical encoder, 4 analog axis, 8 buttons, 2ch PWM output)
 - fw-vXX1 adds support for shift register 
 - fw-vXX2 adds support for shift register+HX711
@@ -59,7 +59,7 @@ Firmware version string consists out of 3 digits and some letters (example: fw-v
 - "f" analog XY shifter support
 - "m" replacement pinouts for Arduino ProMicro
 
-note* some combinations are not possible at the same time, like "fw-vXXXzs", or "fw-v193z" beacause they would use the same hardware interrupt pin for more than 1 function, while some are not possible due to ATmega32U4 32k memory limit
+note* some combinations are not possible at the same time, like "fw-vXXXzs", or "fw-v213z" beacause they would use the same hardware interrupt pin for more than 1 function, while some are not possible due to ATmega32U4 32k memory limit
 
 ## Firmware download
 

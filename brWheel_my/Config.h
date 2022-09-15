@@ -189,7 +189,7 @@ uint8_t LC_scaling; // milos, load cell scaling factor (affects brake pressure, 
 #define PARAM_ADDR_HBRK_LO       0x36 //milos, hand brake pedal cal min
 #define PARAM_ADDR_HBRK_HI       0x38 //milos, hand brake pedal cal max
 
-#define VERSION		0xD3 // milos, this is my version (previous was 8)
+#define VERSION		0xD4 // milos, this is my version (previous was 8)
 
 #define GetParam(m_offset,m_data)	getParam((m_offset),(u8*)&(m_data),sizeof(m_data))
 #define SetParam(m_offset,m_data)	setParam((m_offset),(u8*)&(m_data),sizeof(m_data))

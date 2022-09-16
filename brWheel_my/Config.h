@@ -14,9 +14,9 @@
 #define USE_LOAD_CELL				// Load cell shield // milos, new library for LC
 #define USE_SHIFT_REGISTER			// 8-bit Parallel-load shift registers G27 board steering wheel (milos, this one is modified for 16 buttons)
 //#define USE_DUAL_SHIFT_REGISTER		// Dual 8-bit Parallel-load shift registers G27 board shifter  (milos, not available curently)
-//#define USE_XY_SHIFTER    //milos, uncomment to use XY analog shifter (can not be used with USE_BTNMATRIX or with proMicro)
-//#define USE_HATSWITCH        //milos, uncomment to use first 4 buttons for hat switch instead (can not be used if no load cell or with shift register)
-//#define USE_BTNMATRIX        //milos, uncomment to use 8 pins as a 4x4 button matrix for total of 16 buttons (can not be used with USE_LOAD_CELL, shift register or XY shifter)
+//#define USE_XY_SHIFTER    // milos, uncomment to use XY analog shifter (can not be used with USE_BTNMATRIX, note that for proMicro clutch and handbrake will be unavailable)
+//#define USE_HATSWITCH        // milos, uncomment to use first 4 buttons for hat switch instead (can not be used if no load cell or with shift register)
+//#define USE_BTNMATRIX        // milos, uncomment to use 8 pins as a 4x4 button matrix for total of 16 buttons (can not be used with USE_LOAD_CELL, shift register or XY shifter)
 //#define AVG_INPUTS        // milos, uncomment to use averaging of arduino analog inputs (if readings can be done faster than CONTROL_PERIOD)
 //#define USE_AUTOCALIB        // milos, uncomment to use autocalibration for pedal axis (if left commented manual calibration is enabled)
 //#define USE_CENTERBTN    // milos, ucomment to assign digital input pin D2 for hardware wheel recenter to 0deg (not available when USE_ZINDEX, USE_ADS1105 or USE_MCP4725)
@@ -48,7 +48,7 @@
 #endif // of USE_PROMICRO
 
 #define ACCEL_PIN			A0
-#ifdef USE_LOAD_CELL //milos
+#ifdef USE_LOAD_CELL // milos
 #define CLUTCH_PIN		A1
 #define HBRAKE_PIN    A2
 #else
@@ -74,10 +74,10 @@
 #define B1PORTBIT 1 // read bit1
 #define BUTTON2 A5 // A5, used for button2 instead
 #define B2PORTBIT 0 // read bit0
-#else
+#else // if we use xy shifter
 #define SHIFTER_X_PIN A4 // milos
 #define SHIFTER_Y_PIN A5 // milos
-#endif
+#endif // end of xy shifter
 #define BUTTON3 12 // used for button3
 #define B3PORTBIT 6 // read bit6 or D12
 #else // for Pro Micro
@@ -87,6 +87,8 @@
 #define B2PORTBIT 1 // bit1
 #define BUTTON3 2 // pin2, used for button3 instead
 #define B3PORTBIT 1 // read bit1 of PIND
+#define SHIFTER_X_PIN A4 // milos, they are not on proMicro pcb
+#define SHIFTER_Y_PIN A5 // milos, they are not on proMicro pcb
 #endif
 
 #ifdef USE_SHIFT_REGISTER //milos, added

@@ -316,14 +316,26 @@ void loop() {
         shifterY = analog_inputs[SHIFTER_Y_INPUT]; // milos
 #else //if no avg
         accel = analogRead(ACCEL_PIN) * 4; // milos, Z axis
+#ifndef USE_PROMICRO // milos, when not proMicro
         clutch = analogRead(CLUTCH_PIN) * 4; // milos, RX axis
         hbrake = analogRead(HBRAKE_PIN) * 4; // milos, RY axis
 #ifdef USE_XY_SHIFTER // milos
         shifterX = analogRead(SHIFTER_X_PIN); // milos
         shifterY = analogRead(SHIFTER_Y_PIN); // milos
 #endif // end of xy shifter
-#endif //end of avg
-#endif //end of ads
+#else // if we use proMicro
+#ifdef USE_XY_SHIFTER // milos, compromize - for proMicro with XY shifter, we can't have clutch and handbrake
+        clutch = 0; // milos, RX axis
+        hbrake = 0; // milos, RY axis
+        shifterX = analogRead(CLUTCH_PIN); // milos, use clutch analog input instead
+        shifterY = analogRead(HBRAKE_PIN); // milos, use handbrake analog input instead
+#else // for proMicro, when no XY shifter
+        clutch = analogRead(CLUTCH_PIN) * 4; // milos, RX axis
+        hbrake = analogRead(HBRAKE_PIN) * 4; // milos, RY axis
+#endif // end of xy shifter
+#endif // end proMicro
+#endif // end of avg
+#endif // end of ads
 
 #ifdef USE_LOAD_CELL // milos, when use LC
         if (LC_scaling != last_LC_scaling) {

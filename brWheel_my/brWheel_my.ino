@@ -173,7 +173,7 @@ void setup() {
   // mine has PPR=600 and I use 10:1 GR (for 1 wheel rotation I have 10 rotaions of encoder's shaft)
   // each pulse has 4 states (counts), so final equation for CPR is:
   // CPR = 600*10*4 = 24000
-  ROTATION_DEG = 1080; // milos, here we set wheel's initial deg of rotation (can be changed latter through serial interface, or my program wheelControl.pde written in processing)
+  ROTATION_DEG = 1080; // milos, here we set wheel's initial deg of rotation (can be changed latter through serial interface, or my program wheel_control.pde written in processing)
   CPR = 2400; // milos, here we set our optical encoder's counts per (wheel shaft) revolution (this is a constant value - your hardware/mechanical parameter)
   configGeneralGain = 100;
   configDamperGain = 50;

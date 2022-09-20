@@ -88,6 +88,7 @@ version		features
 210c		the same as v210, with hardware wheel recenter button on pin D2
 210f		the same as v210, with XY analog shiffter support
 210cf		the same as v210c, with XY analog shiffter support
+210acf		the same as v210cf, with automatic pedal calibration
 210zf		the same as v210, with z-index and XY analog shiffter support
 210azf		the same as v210zf, with pedal autocalib instead of manual calib
 210ht		the same as v210, with 4x4 button matrix and a hat switch support

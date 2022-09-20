@@ -39,6 +39,7 @@ version		features
 210zm		the same as v210m, with z-index support
 210cm		the same as v210m, with hardware wheel recenter button on pin D2
 210cfm		the same as v210cm, with H-pattern analog XY shifter support, but it has no clutch and handbrake
+210acfm		the same as v210cfm, with automatic pedal calibration
 210azm		the same as v210am, with z-index support
 210htm		the same as v210m, with 4x4 button matrix and a hat switch support
 211ahm		the same as 210am, with shifter register and a hat switch support

@@ -18,24 +18,8 @@ void InitPWM() {
   dac1.begin(0x61); // initialize dac1
   dac0.setVoltage(0, true, 0); // set voltage on dac0 (save voltage after power down)
   dac1.setVoltage(0, true, 0); // set voltage on dac1 (save voltage after power down)
-#else
-  //pinModeFast(PWM_PIN_L, OUTPUT);
-  //pinModeFast(PWM_PIN_R, OUTPUT);
-
+#else // milos, for pwm output
 #if defined(__AVR_ATmega168__)|| defined(__AVR_ATmega328P__) || defined(__AVR_ATmega32U4__)
-
-  /*if (bitRead(pwmstate, 0)) { // if phase correct PWM mode (pwmstate bit0=1)
-
-    // Timer 1 configuration: prescaler: clockI/O / 1
-    // outputs enabled, phase-correct PWM, top of 400 or 1000
-    // PWM frequency calculation : 16MHz / 1 (prescaler) / 2 (phase-correct) / 1000 (top) = 8 kHz
-    // PWM frequency calculation : 16MHz / 1 (prescaler) / 2 (phase-correct) / 400 (top) = 20 kHz
-    TCCR1A = 0b10100000;
-    TCCR1B = 0b00010001;//0b00010001;
-    ICR1 = TOP;*/
-
-  //} else { // if fast PWM mode (pwmstate bit0=0)
-
   PWM16Begin(); // Timer1 configuration: fast pwm mode or phase correct, depending on pwmstate byte
   // On the Arduino UNO T1A is Pin 9 and T1B is Pin 10
   PWM16A(0);  // Set initial PWM value for Pin 9
@@ -55,8 +39,6 @@ void InitPWM() {
 }
 
 void SetPWM (s32 torque)  { // torque between -MM_MAX_MOTOR and +MM_MAX_MOTOR
-
-  //Serial.println(TCCR1A, BIN);
 
   //milos, added - turn on FFB clip LED if max FFB signal reached (shows 90-99% of FFB signal as linear increase from 0 to 1/4 of full brightness)
   float level = 0.01 * configGeneralGain;
@@ -110,65 +92,6 @@ void SetPWM (s32 torque)  { // torque between -MM_MAX_MOTOR and +MM_MAX_MOTOR
     }
   }
 #else // milos, otherwise output FFB as PWM signals
-
-  /*if (bitRead(pwmstate, 0)) { // if phase correct PWM mode (pwmstate bit0=1)
-    if (!bitRead(pwmstate, 1)) { // if PWM+- mode (pwmstate bit1=0)
-      if (!bitRead(pwmstate, 6)) { // if pwmstate bit1=0 and bit6=0
-        // milos, new variant of the original just with PWM+- mode
-        if (torque > 0) {
-          torque = map (torque, 0, MM_MAX_MOTOR_TORQUE, MM_MIN_MOTOR_TORQUE, R_bal * MM_MAX_MOTOR_TORQUE);
-          OCR1A = 0;
-          OCR1B = torque;
-        } else if (torque < 0) {
-          torque = map (-torque, 0, MM_MAX_MOTOR_TORQUE, MM_MIN_MOTOR_TORQUE, L_bal * MM_MAX_MOTOR_TORQUE);
-          OCR1A = torque;
-          OCR1B = 0;
-        } else {
-          OCR1A = 0;
-          OCR1B = 0;
-        }
-      } else { // if PWM0.50.100 mode (pwmstate bit1=0 and bit6=1)
-        if (torque > 0) {
-          torque = map (torque, 0, MM_MAX_MOTOR_TORQUE, MM_MAX_MOTOR_TORQUE / 2 + MM_MIN_MOTOR_TORQUE, MM_MAX_MOTOR_TORQUE);
-          OCR1A = torque;
-          OCR1B = 0;
-        } else if (torque < 0) {
-          torque = map (-torque, 0, MM_MAX_MOTOR_TORQUE, MM_MAX_MOTOR_TORQUE / 2 - MM_MIN_MOTOR_TORQUE, 0);
-          OCR1A = torque;
-          OCR1B = 0;
-        } else {
-          OCR1A = MM_MAX_MOTOR_TORQUE / 2;
-          OCR1B = 0;
-        }
-      }
-    } else if (bitRead(pwmstate, 1)) { // if pwmstate bit1=1
-      if (!bitRead(pwmstate, 6)) { // if PWM+dir mode (pwmstate bit1=1, bit6=0)
-        if (torque >= 0) {
-          digitalWriteFast(DIR_PIN, HIGH);
-        } else {
-          digitalWriteFast(DIR_PIN, LOW);
-        }
-        torque = map (abs(torque), 0, MM_MAX_MOTOR_TORQUE, MM_MIN_MOTOR_TORQUE, MM_MAX_MOTOR_TORQUE);
-        OCR1A = torque;
-        OCR1B = 0; // milos, this becomes unused
-      } else { // if RCM mode (pwmstate bit1=1, bit6=1)
-        if (torque > 0) {
-          torque = map (torque, 0, MM_MAX_MOTOR_TORQUE, RCMscaler(RCM_zer) * (MM_MAX_MOTOR_TORQUE + MM_MIN_MOTOR_TORQUE), RCMscaler(RCM_max) * MM_MAX_MOTOR_TORQUE);
-          OCR1A = torque;
-          OCR1B = 0;
-          } else if (torque < 0) {
-          torque = map (-torque, 0, MM_MAX_MOTOR_TORQUE, RCMscaler(RCM_zer) * (MM_MAX_MOTOR_TORQUE - MM_MIN_MOTOR_TORQUE), RCMscaler(RCM_min) * MM_MAX_MOTOR_TORQUE);
-          OCR1A = torque;
-          OCR1B = 0;
-          } else {
-          OCR1A = RCMscaler(RCM_zer) * MM_MAX_MOTOR_TORQUE;
-          OCR1B = 0;
-          }
-      }
-    }
-
-    } else {*/ // if fast top PWM mode (pwmstate bit0=0)
-
   if (!bitRead(pwmstate, 1)) { // if pwmstate bit1=0
     if (!bitRead(pwmstate, 6)) { // if PWM+- mode (pwmstate bit1=0, bit6=0)
       if (torque > 0) {
@@ -210,16 +133,13 @@ void SetPWM (s32 torque)  { // torque between -MM_MAX_MOTOR and +MM_MAX_MOTOR
     } else { // if RCM mode (pwmstate bit1=1, bit6=1)
       if (torque > 0) {
         torque = map (torque, 0, MM_MAX_MOTOR_TORQUE, RCM_zer * (1.0 + minTorquePP), RCM_max);
-        //Serial.println(torque);
         PWM16A(torque);
         PWM16B(0);
       } else if (torque < 0) {
         torque = map (-torque, 0, MM_MAX_MOTOR_TORQUE, RCM_zer * (1.0 - minTorquePP), RCM_min);
-        //Serial.println(torque);
         PWM16A(torque);
         PWM16B(0);
       } else {
-        //PWM16A(RCMscaler(RCM_zer) * MM_MAX_MOTOR_TORQUE);
         PWM16A(RCM_zer);
         PWM16B(0);
       }
@@ -258,15 +178,6 @@ void PWM16EnableA() {  // milos
   // Enable Fast PWM on Pin 9: Set OC1A at BOTTOM and clear OC1A on OCR1A compare
   TCCR1A |= (1 << COM1A1);
   pinModeFast(PWM_PIN_L, OUTPUT);
-
-  // milos, added - set minimal values right away (pwm0.50.100 and rcm have a non-zero duty cycle for zero force)
-  /*if (!bitRead(pwmstate, 1) && bitRead(pwmstate, 6)) { // milos, pwmstate bit1=0 and bit6=1 - if we have set pwm0.50.100 mode
-    OCR1A = TOP / 2; // Default to 50% PWM
-    } else if (bitRead(pwmstate, 1) && bitRead(pwmstate, 6)) { // milos, pwmstate bit1=1 and bit6=1 - if we have set RCM mode
-    OCR1A = RCM_zer; // Default to zero force RCM duty cycle value (1.5ms pulse width)
-    } else {
-    OCR1A = 0;   // Default to 0% PWM
-    }*/
 }
 
 void PWM16EnableB() {  // milos

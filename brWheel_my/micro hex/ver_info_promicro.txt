@@ -44,5 +44,6 @@ version		features
 210htm		the same as v210m, with 4x4 button matrix and a hat switch support
 211ahm		the same as 210am, with shifter register and a hat switch support
 211sm		the same as v210m, with support for ADS1015 external ADC for pedals and shift register
+211chfm		the same as v210cfm, with a hat switch and shift register, but it has no clutch and handbrake
 212ahm		the same as 211ahm, with load cell support with HX711 
 213ahm		the same as 212ahm, but has analog FFB output with 2x12bit DAC MCP4275

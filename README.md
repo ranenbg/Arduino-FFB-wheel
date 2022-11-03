@@ -10,7 +10,7 @@ Firmware features:
 - fully supported 16bit FFB effects (custom force effect not implemented)
 - envelope and conditional block effects, start delay, durration, deadband, direction enable
 - FFB calculation and axis/button update rate is 500Hz (2ms period)
-- many options available (external 12bit ADC/DAC, pedal autocalibration, manual calibration, z-index support/offset/reset, hatswitch, button matrix, external shift register)
+- many options available (external 12bit ADC/DAC, automatic/manual pedal calibration, z-index support/offset/reset, hatswitch, button matrix, external shift register)
 - RS232 serial interface for configuration of all wheel parameters
 - fully adjustable FFB output in the form of 2 channel digital 16bit PWM or analog 12bit DAC signals
 - available pwm modes: pwm+-, pwm+dir, pwm0.50.100, rcm

@@ -10,7 +10,7 @@ Firmware features:
 - fully supported 16bit FFB effects (custom force effect not implemented)
 - envelope and conditional block effects, start delay, durration, deadband, direction enable
 - FFB calculation and axis/button update rate is 500Hz (2ms period)
-- many options available (external 12bit ADC/DAC, pedal autocalibration, manual calibration, z-index, hatswitch, button matrix, external shift register)
+- many options available (external 12bit ADC/DAC, pedal autocalibration, manual calibration, z-index support/offset/reset, hatswitch, button matrix, external shift register)
 - RS232 serial interface for configuration of all wheel parameters
 - fully adjustable FFB output in the form of 2 channel digital 16bit PWM or analog 12bit DAC signals
 - available pwm modes: pwm+-, pwm+dir, pwm0.50.100, rcm
@@ -22,7 +22,7 @@ Firmware features:
 Detailed documentation and more information about the firmware can be found in txt files inside **[docs](https://github.com/ranenbg/Arduino-FFB-wheel/tree/master/brWheel_my/docs)** folder. Compiled firmware in HEX format for Arduino Leonardo and Micro can be found in **[leonardo hex](https://github.com/ranenbg/Arduino-FFB-wheel/tree/master/brWheel_my/leonardo%20hex)**, while firmware for Arduino ProMicro (with replacement pinout) is located in **[micro hex](https://github.com/ranenbg/Arduino-FFB-wheel/tree/master/brWheel_my/micro%20hex)** folder. All neccessary wiring diagrams are in **[wirings](https://github.com/ranenbg/Arduino-FFB-wheel/tree/master/brWheel_my/wirings)** folder.
 
 # Firmware pinouts and wiring diagrams
-![plot](./brWheel_my/wirings/Firmware-v21x%20pinout.png)
+![plot](./brWheel_my/wirings/Firmware-v22x%20pinout.png)
 ## Encoder and LED wiring
 ![plot](./brWheel_my/wirings/encoder_ffb_clip_led_wiring_diagram.png)
 ## Motor driver wiring

@@ -81,7 +81,7 @@ class Joystick_
     void send_16_10_18(int16_t x, uint16_t y, uint16_t z, uint16_t rx, uint32_t buttons);
     void send_16_16_10_10_12(int16_t x, uint16_t y, uint16_t z, uint16_t rx, uint32_t buttons); // milos, added this one
     void send_16_16_12_12_32(int16_t x, uint16_t y, uint16_t z, uint16_t rx, uint32_t buttons); // milos, added this one
-    void send_16_16_12_12_12_28(int16_t x, uint16_t y, uint16_t z, uint16_t rx, uint16_t ry, uint32_t buttons); // milos, added this one
+    void send_16_16_12_12_12_28(uint16_t x, uint16_t y, uint16_t z, uint16_t rx, uint16_t ry, uint32_t buttons); // milos, added this one
     void send_16_16_12_12_12_12_32(int16_t x, uint16_t y, uint16_t z, uint16_t rx, uint16_t ry, uint16_t rz, uint32_t buttons); // milos, added this one
     // DEBUG 2 axis to H-Shifter
     void send_16_8_32(int16_t x, uint16_t y, uint16_t z, uint16_t rx, uint16_t sx, uint16_t sy, uint32_t buttons);
@@ -226,4 +226,3 @@ void USB_Flush(uint8_t ep);
 #endif
 
 #endif /* if defined(USBCON) */
-

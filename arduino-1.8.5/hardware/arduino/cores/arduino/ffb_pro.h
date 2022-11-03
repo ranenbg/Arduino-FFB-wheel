@@ -14,7 +14,7 @@ const s32 FRC_THRESHOLD = 1; //milos, added - friction treshold
 #define MAX_VAL			((1<<VAL_NB_BITS)-1)
 #define MID_VAL			(1<<(VAL_NB_BITS-1))
 
-#define MID_REPORT_X  (X_AXIS_PHYS_MAX >> 1)
+#define MID_REPORT_X  (X_AXIS_PHYS_MAX >> 1) // milos, 32767
 #define MID_REPORT_Y  (Y_AXIS_PHYS_MAX >> 1)
 #define MID_REPORT_Z 	(Z_AXIS_PHYS_MAX >> 1)
 

@@ -1114,7 +1114,7 @@ void Joystick_::send_16_16_12_12_32(int16_t x, uint16_t y, uint16_t z, uint16_t 
 }
 
 // milos ver4, 16+16+12+12+12 bits version + 28 buttons
-void Joystick_::send_16_16_12_12_12_28(int16_t x, uint16_t y, uint16_t z, uint16_t rx, uint16_t ry, uint32_t buttons)
+void Joystick_::send_16_16_12_12_12_28(uint16_t x, uint16_t y, uint16_t z, uint16_t rx, uint16_t ry, uint32_t buttons)
 {
   // milos, total of 12 bytes, 2B for x, 2B for y, 3B for z and rx, 5B for ry and buttons
   u8 j[12];

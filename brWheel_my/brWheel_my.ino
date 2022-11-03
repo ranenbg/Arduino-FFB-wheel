@@ -122,7 +122,7 @@ cQuadEncoder myEnc;
 #endif
 
 #ifdef USE_LCD  // milos, added
-LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);  // Set the LCD I2C address
+LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);  // Set the LCD i2C address
 #endif
 
 #ifdef USE_VNH5019
@@ -199,7 +199,7 @@ void setup() {
   minTorquePP = 0;
 #endif
   ROTATION_MAX = int32_t(float(CPR) / 360.0 * float(ROTATION_DEG)); // milos
-  ROTATION_MID = ROTATION_MAX / 2; // milos
+  ROTATION_MID = ROTATION_MAX >> 1; // milos
 
   //myEnc.Init(ROTATION_MID + brWheelFFB.offset, true); //ROTATION_MID + gCalibrator.mOffset); // milos, pullups enabled
   myEnc.Init(ROTATION_MID, true); // milos, pullups enabled, do not apply any encoder offset at this point
@@ -271,18 +271,18 @@ void loop() {
       //SYNC_LED_HIGH(); // milos
 #ifdef  USE_SHIFT_REGISTER
       for (uint8_t i = 0; i <= SHIFTS_NUM; i++) { // milos, added (read all states in one pass)
-        nextInputState();           // milos, refresh state of shift-register and read incoming bit
+        nextInputState();  // milos, refresh state of shift-register and read the incoming bit
       }
 #endif
       if (zIndexFound) {
-        turn = myEnc.Read() - ROTATION_MID + brWheelFFB.offset; //milos, only apply z-index offset if z-index pulse is found
+        turn = myEnc.Read() - ROTATION_MID + brWheelFFB.offset; // milos, only apply z-index offset if z-index pulse is found
       } else {
         turn = myEnc.Read() - ROTATION_MID;
       }
 
-      command = gFFB.CalcTorqueCommand(turn);
-      turn *= f32(X_AXIS_PHYS_MAX) / f32(ROTATION_MAX); //milos
-      turn = constrain(turn, -MID_REPORT_X, MID_REPORT_X); //milos
+      command = gFFB.CalcTorqueCommand(turn); // milos, encoder raw units -inf,0,inf
+      turn *= f32(X_AXIS_PHYS_MAX) / f32(ROTATION_MAX); // milos, conversion to physical units
+      turn = constrain(turn, -MID_REPORT_X - 1, MID_REPORT_X); // milos, -32768,0,32767 scaled to signed full 16bit range
 
       SetPWM(command); // milos, FFB signal generated as PWM (or DAC) output
       //SYNC_LED_LOW(); //milos
@@ -397,7 +397,7 @@ void loop() {
         //SendInputReport((s16)turn, (u16)accel, (u16)brake, (u16)clutch, button);
         //SendInputReport((s16)turn, (u16)accel, (u16)brake, (u16)clutch, (u16)shifterX, (u16)shifterY, buttons); // original
         //SendInputReport((s32)turn, (u16)brake, (u16)accel, (u16)clutch, button); // milos, X, Y, Z, RX, button
-        SendInputReport((s32)turn, (u16)brake, (u16)accel, (u16)clutch, (u16)hbrake, button); // milos, X, Y, Z, RX, RY, hat+button
+        SendInputReport(turn + MID_REPORT_X + 1, brake, accel, clutch, hbrake, button); // milos, X, Y, Z, RX, RY, hat+button; 0,32768,65535 X-axis range
 
 #ifdef AVG_INPUTS //milos, added option see config.h
         ClearAnalogInputs();

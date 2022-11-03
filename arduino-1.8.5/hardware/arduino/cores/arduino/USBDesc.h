@@ -69,8 +69,8 @@
 #define RY_AXIS_NB_BITS 12  //10
 #define RZ_AXIS_NB_BITS 12  //10
 
-#define X_AXIS_LOG_MAX	((1L<<(X_AXIS_NB_BITS-1))-1)
-#define X_AXIS_LOG_MIN	(-X_AXIS_LOG_MAX)
+#define X_AXIS_LOG_MAX	((1L<<(X_AXIS_NB_BITS))-1)//((1L<<(X_AXIS_NB_BITS-1))-1)
+#define X_AXIS_LOG_MIN	0//(-X_AXIS_LOG_MAX)
 #define X_AXIS_PHYS_MAX	((1L<<X_AXIS_NB_BITS)-1)
 
 #define Y_AXIS_LOG_MAX	((1L<<(Y_AXIS_NB_BITS))-1)

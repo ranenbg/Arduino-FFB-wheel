@@ -92,8 +92,27 @@ version		features
 210zf		the same as v210, with z-index and XY analog shiffter support
 210azf		the same as v210zf, with pedal autocalib instead of manual calib
 210ht		the same as v210, with 4x4 button matrix and a hat switch support
-211ah		the same as 210a, with shifter register support
+211ah		the same as v210a, with shifter register and hat switch support 
 211s		the same as v210, with support for ADS1015 external ADC for pedals and shift register
 211chf		the same as v210cf, with a hat switch and shift register		
-212ah		the same as 211ah, with load cell support with HX711 
-213ah		the same as 211ah, but has analog FFB output with 2x12bit DAC MCP4275
+212ah		the same as v211ah, with load cell support with HX711 
+213ah		the same as v211ah, but has analog FFB output with 2x12bit DAC MCP4275
+
+- firmware HEX versions bellow require wheel control v2.5 or newer
+
+220		encoder, 4 axis, 8 buttons, 100k CPR, wheel angle as metric for conditional effects, shift register fix, button matrix, 2 FFB axis, periodic effects timing fix, duration and start delay fix, 16bit direction, new HX711 library, debug FFB optimizations, 16x less strong spring, manual pedal axis calibration, pwm0.50.100 mode, rcm pwm mode, X-axis calibration 0-65k, encoder z-index reset
+220a		the same as v220, with pedal autocalib instead of manual calib
+220z		the same as v220, with z-index support
+220c		the same as v220, with hardware wheel recenter button on pin D2
+220f		the same as v220, with XY analog shiffter support
+220cf		the same as v220c, with XY analog shiffter support
+220acf		the same as v220cf, with automatic pedal calibration
+220zf		the same as v220, with z-index and XY analog shiffter support
+220azf		the same as v210zf, with pedal autocalib instead of manual calib
+220ht		the same as v220, with 4x4 button matrix and a hat switch support
+221ah		the same as v220a, with shifter register and hat switch support 
+221s		the same as v220, with support for ADS1015 external ADC for pedals and shift register
+221chf		the same as v210cf, with a hat switch and shift register		
+222ah		the same as v221ah, with load cell support with HX711
+222zh		the same as v221ah, but has Z-index support and has manual pedal calibration instead
+223ah		the same as v221ah, but has analog FFB output with 2x12bit DAC MCP4275

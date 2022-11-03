@@ -128,12 +128,10 @@ void readSerial() {
         brakeMin = Z_AXIS_LOG_MAX, brakeMax = 0;
         clutchMin = RX_AXIS_LOG_MAX, clutchMax = 0;
         hbrakeMin = RY_AXIS_LOG_MAX, hbrakeMax = 0;
-        //CONFIG_SERIAL.println("ok");
         CONFIG_SERIAL.println(1);
 #else
-        //CONFIG_SERIAL.println("na");
         CONFIG_SERIAL.println(0);
-#endif
+#endif 
         break;
       case 'O': // milos, added to adjust optical encoder CPR
         temp = CONFIG_SERIAL.parseInt();
@@ -142,7 +140,7 @@ void readSerial() {
         wheelAngle = float(temp1) * float(ROTATION_DEG) / float(ROTATION_MAX); // milos, current wheel angle
         CPR = temp; // milos, update CPR
         ROTATION_MAX = int32_t(float(temp) / 360.0 * float(ROTATION_DEG)); // milos, updated
-        ROTATION_MID = ROTATION_MAX / 2; // milos, updated
+        ROTATION_MID = ROTATION_MAX >> 1; // milos, updated, divide by 2
         //brWheelFFB.offset = 0; //milos
         temp1 = int32_t(wheelAngle * float(ROTATION_MAX) / float(ROTATION_DEG)); // milos, here we recover the old wheel angle
         myEnc.Write(ROTATION_MID + temp1 - brWheelFFB.offset); // milos
@@ -158,13 +156,22 @@ void readSerial() {
         //CONFIG_SERIAL.print("Wheel centered from position: "); // milos
         //CONFIG_SERIAL.println(temp1);  // milos
 #ifdef USE_ZINDEX
-        brWheelFFB.offset = -myEnc.Read() + ROTATION_MID;
-        CONFIG_SERIAL.println(brWheelFFB.offset);
-#else
-        //brWheelFFB.offset = 0;
-        myEnc.Write(ROTATION_MID); // milos
+        brWheelFFB.offset = ROTATION_MID - myEnc.Read();
+        //CONFIG_SERIAL.println(brWheelFFB.offset); // milos, saving some bytes in flash memory
         CONFIG_SERIAL.println(1);
-#endif
+#else
+        myEnc.Write(ROTATION_MID); // milos, just set at zero angle
+        CONFIG_SERIAL.println(0);
+#endif    
+        break;
+      case 'Z': // milos, hard reset the z-index offset
+#ifdef USE_ZINDEX
+        brWheelFFB.offset = 0;
+        SetParam(PARAM_ADDR_OFFSET, brWheelFFB.offset); // milos, update EEPROM right away
+        CONFIG_SERIAL.println(1);
+#else
+        CONFIG_SERIAL.println(0);
+#endif 
         break;
       case 'G': // milos, this was not working, fixed now
         temp = CONFIG_SERIAL.parseInt();
@@ -173,14 +180,14 @@ void readSerial() {
         wheelAngle = float(temp1) * float(ROTATION_DEG) / float(ROTATION_MAX); // milos, current wheel angle
         ROTATION_DEG = temp; // milos, update degrees of rotation
         ROTATION_MAX = int32_t(float(CPR) / 360.0 * float(temp)); // milos, updated
-        ROTATION_MID = ROTATION_MAX / 2; // milos, updated
+        ROTATION_MID = ROTATION_MAX >> 1; // milos, updated, divide by 2
         //brWheelFFB.offset = 0; //milos
         temp1 = int32_t(wheelAngle * float(ROTATION_MAX) / float(ROTATION_DEG)); // milos, here we recover the old wheel angle
         myEnc.Write(ROTATION_MID + temp1 - brWheelFFB.offset); // milos
         //CONFIG_SERIAL.print("Rotation [30-1800]deg: "); // milos
         //CONFIG_SERIAL.println(temp);  // milos
         CONFIG_SERIAL.println(1);
-        //SetParam(PARAM_ADDR_ROTATION_DEG, temp);//milos, update EEPROM
+        //SetParam(PARAM_ADDR_ROTATION_DEG, temp);// milos, update EEPROM
         break;
       case 'E': //milos, added - turn desktop effects on/off
         ffb_temp = CONFIG_SERIAL.parseInt();
@@ -191,19 +198,19 @@ void readSerial() {
         }
         CONFIG_SERIAL.println(effstate, BIN);
         //CONFIG_SERIAL.println(1);
-        //SetParam(PARAM_ADDR_DSK_EFFC, effstate);//milos, update EEPROM
+        //SetParam(PARAM_ADDR_DSK_EFFC, effstate);// milos, update EEPROM
         break;
       case 'W': //milos, added - configure PWM settings and frequency
         ffb_temp = CONFIG_SERIAL.parseInt();
         ffb_temp = constrain(ffb_temp, 0, 255);
-        //CONFIG_SERIAL.print("PWM settings byte: "); //milos, dir enabled, phase correct and pwm frequency
-        for (uint8_t i = 0; i < 8; i++) { //milos, decode incomming number into individual bits
+        //CONFIG_SERIAL.print("PWM settings byte: "); // milos, dir enabled, phase correct and pwm frequency
+        for (uint8_t i = 0; i < 8; i++) { // milos, decode incomming number into individual bits
           bitWrite(pwmstate, i, bitRead(ffb_temp, i));
         }
 #ifdef USE_EEPROM
-        SetParam(PARAM_ADDR_PWM_SET, pwmstate);//milos, update EEPROM with new pwm settings
-        temp = calcTOP(pwmstate) * minTorquePP; //milos, recalculate new min torque for curent min torque %
-        SetParam(PARAM_ADDR_MIN_TORQ, temp);//milos, update min torque in EEPROM
+        SetParam(PARAM_ADDR_PWM_SET, pwmstate); // milos, update EEPROM with new pwm settings
+        temp = calcTOP(pwmstate) * minTorquePP; // milos, recalculate new min torque for curent min torque %
+        SetParam(PARAM_ADDR_MIN_TORQ, temp); // milos, update min torque in EEPROM
 #endif
         CONFIG_SERIAL.println(calcTOP(pwmstate));
         /*for (uint8_t i = 0; i < 8; i++) { //milos, decode incomming number into individual bits

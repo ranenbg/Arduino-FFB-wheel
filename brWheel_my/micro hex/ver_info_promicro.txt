@@ -42,8 +42,26 @@ version		features
 210acfm		the same as v210cfm, with automatic pedal calibration
 210azm		the same as v210am, with z-index support
 210htm		the same as v210m, with 4x4 button matrix and a hat switch support
-211ahm		the same as 210am, with shifter register and a hat switch support
+211ahm		the same as v210am, with shifter register and a hat switch support
 211sm		the same as v210m, with support for ADS1015 external ADC for pedals and shift register
 211chfm		the same as v210cfm, with a hat switch and shift register, but it has no clutch and handbrake
-212ahm		the same as 211ahm, with load cell support with HX711 
-213ahm		the same as 212ahm, but has analog FFB output with 2x12bit DAC MCP4275
+212ahm		the same as v211ahm, with load cell support with HX711 
+213ahm		the same as v212ahm, but has analog FFB output with 2x12bit DAC MCP4275 instead of PWM output
+
+- firmware HEX versions bellow require wheel control v2.5 or newer
+
+220m		encoder, 4 axis, 8 buttons, 100k CPR, wheel angle as metric for conditional effects, shift register fix, button matrix, 2 FFB axis, periodic effects timing fix, duration and start delay fix, 16bit direction, new HX711 library, debug FFB optimizations, 16x less strong spring, manual pedal axis calibration, pwm0.50.100 mode, rcm pwm mode, X-axis calibration 0-65k, encoder z-index reset
+220am		the same as v220m, with pedal autocalib instead of manual calib
+220zm		the same as v220m, with z-index support
+220cm		the same as v220m, with hardware wheel recenter button on pin D2
+220cfm		the same as v220cm, with H-pattern analog XY shifter support, but it has no clutch and handbrake
+220acfm		the same as v220cfm, with automatic pedal calibration
+220azm		the same as v220am, with z-index support
+220htm		the same as v220m, with 4x4 button matrix and a hat switch support
+221ahm		the same as v220am, with shifter register and a hat switch support
+221sm		the same as v220m, with support for ADS1015 external ADC for pedals and shift register
+221chfm		the same as v220cfm, with a hat switch and shift register, but it has no clutch and handbrake
+222ahm		the same as v221ahm, with load cell support with HX711
+222zm		the same as v220zm, with shifter register and load cell support with HX711 
+223ahm		the same as v222ahm, but has analog FFB output with 2x12bit DAC MCP4275 instead of PWM output
+223hm		the same as v223ahm, but has manual pedal calibration instead of automatic

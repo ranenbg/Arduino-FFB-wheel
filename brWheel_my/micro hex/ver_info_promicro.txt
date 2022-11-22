@@ -58,6 +58,8 @@ version		features
 220acfm		the same as v220cfm, with automatic pedal calibration
 220azm		the same as v220am, with z-index support
 220htm		the same as v220m, with 4x4 button matrix and a hat switch support
+220azhtm	the same as v220htm, with automatic pedal calibration and z-index support
+220achtm	the same as v220htm, with automatic pedal calibration and hardware wheel recenter button on pin D2
 221ahm		the same as v220am, with shifter register and a hat switch support
 221sm		the same as v220m, with support for ADS1015 external ADC for pedals and shift register
 221chfm		the same as v220cfm, with a hat switch and shift register, but it has no clutch and handbrake

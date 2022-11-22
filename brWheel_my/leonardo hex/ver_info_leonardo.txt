@@ -110,6 +110,8 @@ version		features
 220zf		the same as v220, with z-index and XY analog shiffter support
 220azf		the same as v210zf, with pedal autocalib instead of manual calib
 220ht		the same as v220, with 4x4 button matrix and a hat switch support
+220azht		the same as v220ht, with automatic pedal calibration and z-index support
+220acht		the same as v220ht, with automatic pedal calibration and hardware wheel recenter button on pin D2
 221ah		the same as v220a, with shifter register and hat switch support 
 221s		the same as v220, with support for ADS1015 external ADC for pedals and shift register
 221chf		the same as v210cf, with a hat switch and shift register		

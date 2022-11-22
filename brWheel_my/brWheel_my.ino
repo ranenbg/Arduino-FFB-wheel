@@ -284,7 +284,7 @@ void loop() {
       turn *= f32(X_AXIS_PHYS_MAX) / f32(ROTATION_MAX); // milos, conversion to physical units
       turn = constrain(turn, -MID_REPORT_X - 1, MID_REPORT_X); // milos, -32768,0,32767 scaled to signed full 16bit range
 
-      SetPWM(command); // milos, FFB signal generated as PWM (or DAC) output
+      SetPWM(command); // milos, FFB signal is generated as PWM (or analog DAC) output
       //SYNC_LED_LOW(); //milos
       // USB Report
       {

@@ -1,6 +1,6 @@
 Milos Rankovic, ranenbg@gmail.com
 first created 21.11.2018.
-last updated 02.10.2022.
+last updated 25.12.2022.
 
 This txt file contains details about Arduino FFB wheel firmware capabilities and features:
 
@@ -45,7 +45,7 @@ adjustment of encoder CPR, fully adjustable PWM settings that are stored in EEPR
 Wheel control GUI: made in Processing 3.5.4, visualises all axis and buttons including serial commands sent and received from Arduino, full adjustment of FFB effect gains,
 ffb signal monitor, load/save last settings from EEPROM, recenter wheel, recalibrate pedals, encoder CPR adjustment, pwm adjustment, COM port cfg via dialog,
 Axis colors cfg txt, storing/loading FFB parameter profiles to/from PC, autodetection of firmware version, XY analog shifter support, manual pedal axis calibration,
-added pwm0.50.100 mode, hardware button wheel re-center, added rcm pwm mode, added z-index reset button, lattest version v2.5
+added pwm0.50.100 mode, hardware button wheel re-center, added rcm pwm mode, added z-index reset button, lattest version v2.5.1
 
 FFB output: fully configurable PWM settings, PWM frequency (tied to PWM resolution), PWM types (phase correct or fast TOP), PWM modes (pwm+-, pwm+dir, pwm0.50.100 or rcm),
 changes require restarting Arduino, analog 2ch external 12bit DAC MCP4725 available (requires recompiling)

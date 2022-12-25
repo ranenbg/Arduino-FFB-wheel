@@ -284,11 +284,7 @@ u32 readInputButtons() {
 #endif // end of load cell
 #ifdef USE_PROMICRO
 #ifndef USE_ZINDEX
-#ifndef USE_CENTERBTN
   bitWrite(buttons, 3, readSingleButton(3));
-#else // milos, we can not have button3 for proMicro when we use it for wheel recenter
-  bitWrite(buttons, 3, 0);
-#endif // end of centerbtn
 #else // milos, we can not have button3 for proMicro when we use z-index encoder
   bitWrite(buttons, 3, 0);
 #endif // end of z-index

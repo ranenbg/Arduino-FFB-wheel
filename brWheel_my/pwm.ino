@@ -6,7 +6,13 @@
 void InitPWM() {
 
   pinModeFast(DIR_PIN, OUTPUT);
-  pinModeFast(FFBCLIP_LED_PIN, OUTPUT); //milos
+#ifndef USE_PROMICRO
+  pinModeFast(FFBCLIP_LED_PIN, OUTPUT); //milos, if no promicro we can use ffb clip led
+#else // for promicro
+#ifndef USE_CENTERBTN
+  pinModeFast(FFBCLIP_LED_PIN, OUTPUT); //milos, for promicro we can only use ffb clip led if no center button
+#endif // end of center button
+#endif // end of promicro
   TOP = calcTOP(pwmstate); // milos, this will set appropriate TOP value for all PWM modes, depending on pwmstate loaded from EEPROM
   MM_MAX_MOTOR_TORQUE = TOP;
   minTorquePP = ((f32)MM_MIN_MOTOR_TORQUE) / ((f32)MM_MAX_MOTOR_TORQUE); // milos
@@ -30,7 +36,17 @@ void InitPWM() {
 #endif // of which ATmega
 #endif // of USE_MCP4275
 
-  for (uint8_t i = 0; i < 3; i++) { // milos, added - blink FFB clip LED few times at startup
+#ifndef USE_PROMICRO
+  blinkFFBclipLED(); //milos, if no promicro we can use ffb clip led
+#else // for promicro
+#ifndef USE_CENTERBTN
+  blinkFFBclipLED(); //milos, for promicro we can only use ffb clip led if no center button
+#endif // end of center button
+#endif // end of promicro
+}
+
+void blinkFFBclipLED() { // milos, added - blink FFB clip LED a few times at startup to indicate succesful boot
+  for (uint8_t i = 0; i < 3; i++) {
     digitalWriteFast(FFBCLIP_LED_PIN, HIGH);
     delay(20);
     digitalWriteFast(FFBCLIP_LED_PIN, LOW);
@@ -38,17 +54,26 @@ void InitPWM() {
   }
 }
 
-void SetPWM (s32 torque)  { // torque between -MM_MAX_MOTOR and +MM_MAX_MOTOR
-
-  //milos, added - turn on FFB clip LED if max FFB signal reached (shows 90-99% of FFB signal as linear increase from 0 to 1/4 of full brightness)
+void activateFFBclipLED(s32 t) {  //milos, added - turn on FFB clip LED if max FFB signal reached (shows 90-99% of FFB signal as linear increase from 0 to 1/4 of full brightness)
   float level = 0.01 * configGeneralGain;
-  if (abs(torque) >= 0.9 * MM_MAX_MOTOR_TORQUE * level && abs(torque) < level * MM_MAX_MOTOR_TORQUE - 1) {
-    analogWrite(FFBCLIP_LED_PIN, map(abs(torque), 0.9 * MM_MAX_MOTOR_TORQUE * level, level * MM_MAX_MOTOR_TORQUE, 1, 63));
-  } else if (abs(torque) >= level * MM_MAX_MOTOR_TORQUE - 1) {
+  if (abs(t) >= 0.9 * MM_MAX_MOTOR_TORQUE * level && abs(t) < level * MM_MAX_MOTOR_TORQUE - 1) {
+    analogWrite(FFBCLIP_LED_PIN, map(abs(t), 0.9 * MM_MAX_MOTOR_TORQUE * level, level * MM_MAX_MOTOR_TORQUE, 1, 63));
+  } else if (abs(t) >= level * MM_MAX_MOTOR_TORQUE - 1) {
     analogWrite(FFBCLIP_LED_PIN, 255); // for 100% FFB show full brightness
   } else {
     analogWrite(FFBCLIP_LED_PIN, 0); // if under 90% FFB turn off LED
   }
+}
+
+void SetPWM (s32 torque)  { //torque between -MM_MAX_MOTOR and +MM_MAX_MOTOR
+
+#ifndef USE_PROMICRO
+  activateFFBclipLED(torque); //milos, if no promicro we can use ffb clip led
+#else // for promicro
+#ifndef USE_CENTERBTN
+  activateFFBclipLED(torque); //milos, for promicro we can only use ffb clip led if no center button
+#endif // end of center button
+#endif // end of promicro
 
 #ifndef USE_LOAD_CELL // milos, only allow FFB balance if not using load cell
   FFB_bal = (f32)(LC_scaling - 128) / 255.0;

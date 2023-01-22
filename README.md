@@ -22,7 +22,7 @@ Firmware features:
 Detailed documentation and more information about the firmware can be found in txt files inside **[docs](https://github.com/ranenbg/Arduino-FFB-wheel/tree/master/brWheel_my/docs)** folder. Compiled firmware in HEX format for Arduino Leonardo and Micro can be found in **[leonardo hex](https://github.com/ranenbg/Arduino-FFB-wheel/tree/master/brWheel_my/leonardo%20hex)**, while firmware for Arduino ProMicro (with replacement pinout) is located in **[micro hex](https://github.com/ranenbg/Arduino-FFB-wheel/tree/master/brWheel_my/micro%20hex)** folder. All neccessary wiring diagrams are in **[wirings](https://github.com/ranenbg/Arduino-FFB-wheel/tree/master/brWheel_my/wirings)** folder.
 
 # Firmware pinouts and wiring diagrams
-![plot](./brWheel_my/wirings/Firmware-v22x%20pinout.png)
+
 ## Encoder and LED wiring
 ![plot](./brWheel_my/wirings/encoder_ffb_clip_led_wiring_diagram.png)
 ## Motor driver wiring

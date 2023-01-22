@@ -38,10 +38,10 @@ u8 analog_inputs_pins[] = // milos, changed to u8, from u16
 #ifdef USE_LOAD_CELL //milos
 #ifndef USE_EXTRABTN
   CLUTCH_PIN,
-#else
+#else // if no extra buttons
   CLUTCH_PIN
 #endif // end of extra button
-#else
+#else // if no lc
 #ifndef USE_EXTRABTN
   BRAKE_PIN,
   CLUTCH_PIN,
@@ -56,8 +56,8 @@ u8 analog_inputs_pins[] = // milos, changed to u8, from u16
 #else
 #ifndef USE_EXTRABTN
   HBRAKE_PIN
-#endif
-#endif
+#endif // end of extra button
+#endif // end of xy shifter
 };
 
 u8 axis_shift_n_bits[] =  // milos, changed to u8, from u16

@@ -380,7 +380,7 @@ void loop() {
         if (hbrake > hbrakeMax) hbrakeMax = hbrake;
 #endif //end of autocalib
         // milos, rescale all axis according to a new calibration
-        accel = map(accel, accelMin + dz, accelMax - dz, 0, Z_AXIS_PHYS_MAX);  // milos, with autocalibration
+        accel = map(accel, accelMin + dz, accelMax - dz, 0, Z_AXIS_PHYS_MAX);  // milos, with manual calibration
         clutch = map(clutch, clutchMin + dz, clutchMax - dz, 0, RX_AXIS_PHYS_MAX);
         hbrake = map(hbrake, hbrakeMin + dz, hbrakeMax - dz, 0, RY_AXIS_PHYS_MAX);
         accel = constrain(accel, 0, Z_AXIS_PHYS_MAX); // milos, constrain axis ranges

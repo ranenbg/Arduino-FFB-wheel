@@ -20,6 +20,7 @@
 //#define AVG_INPUTS        // milos, uncomment to use averaging of arduino analog inputs (if readings can be done faster than CONTROL_PERIOD)
 //#define USE_AUTOCALIB        // milos, uncomment to use autocalibration for pedal axis (if left commented manual calibration is enabled)
 #define USE_CENTERBTN    // milos, ucomment to assign digital input pin D2 for hardware wheel recenter to 0deg (not available when USE_ZINDEX, USE_ADS1105 or USE_MCP4725)
+#define USE_EXTRABTN    // milos, ucomment to configure analog inputs on pins A2 and A3 as a digital button inputs (2 extra buttons, note that clutch and handbrake will be unavailable)
 //#define USE_MCP4725      // milos, 12bit DAC (0-5V), uncomment to enable output of FFB signal as 2ch DAC voltage output
 #define USE_PROMICRO    // milos, uncomment if you are using Arduino ProMicro board (leave commented for Leonardo or Micro variants)
 #define USE_EEPROM // milos, uncomment this to enable loading/saving settings from EEPROM
@@ -111,6 +112,13 @@
 #define BUTTON6 8 // D8 or bit4 of PINB
 #define B6PORTBIT 4 // bit4
 #endif //end of shift reg
+
+#ifdef USE_EXTRABTN //milos, added - allocate 2 more buttons on A2, A3(at the expence of disabling clutch and handbrake)
+#define BUTTON8 A2 // A2 or bit5 of PINF
+#define B8PORTBIT 5 // bit5
+#define BUTTON9 A3 // A3 or bit4 of PINF
+#define B9PORTBIT 4 // bit4
+#endif
 
 #ifdef USE_DSP56ADC16S
 #define ADC_PIN_CLKIN		5

@@ -56,6 +56,7 @@ version		features
 220cm		the same as v220m, with hardware wheel recenter button on pin D2
 220cfm		the same as v220cm, with H-pattern analog XY shifter support, but it has no clutch and handbrake
 220chm		the same as v220cm, with hat switch support
+220chem		the same as v220chm, with 2 extra digital buttons on pins A2, A3 (clutch and handbrake are not available)
 220acfm		the same as v220cfm, with automatic pedal calibration
 220azm		the same as v220am, with z-index support
 220htm		the same as v220m, with 4x4 button matrix and a hat switch support

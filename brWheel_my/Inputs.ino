@@ -36,17 +36,27 @@ u8 analog_inputs_pins[] = // milos, changed to u8, from u16
 {
   ACCEL_PIN,
 #ifdef USE_LOAD_CELL //milos
+#ifndef USE_EXTRABTN
   CLUTCH_PIN,
 #else
+  CLUTCH_PIN
+#endif // end of extra button
+#else
+#ifndef USE_EXTRABTN
   BRAKE_PIN,
   CLUTCH_PIN,
-#endif
+#else
+  BRAKE_PIN
+#endif // end of extra button
+#endif // end of load cell
 #ifdef USE_XY_SHIFTER // milos
   HBRAKE_PIN,
   SHIFTER_X_PIN, // milos
   SHIFTER_Y_PIN // milos
 #else
+#ifndef USE_EXTRABTN
   HBRAKE_PIN
+#endif
 #endif
 };
 
@@ -199,6 +209,10 @@ void InitButtons() { // milos, added - if not using shift register, allocate som
   setMatrixRow(BUTTON7, HIGH);
 #endif // end of load cell
 #endif // end of button matrix
+#ifdef USE_EXTRABTN
+  pinMode(BUTTON8, INPUT_PULLUP);
+  pinMode(BUTTON9, INPUT_PULLUP);
+#endif // end of extra button
 }
 #endif // end of shift reg
 
@@ -294,6 +308,10 @@ u32 readInputButtons() {
   bitWrite(buttons, 4, readSingleButton(4));
   bitWrite(buttons, 5, readSingleButton(5));
   bitWrite(buttons, 6, readSingleButton(6));
+#ifdef USE_EXTRABTN
+  bitWrite(buttons, 8, readSingleButton(8));
+  bitWrite(buttons, 9, readSingleButton(9));
+#endif // end of extra button
 #else // do matrix button readout
   // buttons 0-3 of are columns j
   // buttons 4-7 of are rows i
@@ -352,7 +370,13 @@ bool readSingleButton (uint8_t i) { // milos, added
     temp = !bitRead(digitalReadFast(BUTTON7), B7PORTBIT); // milos, read bit6 from PINC D5 into buttons bit7
 #else
     temp = false; // milos, we can't use this pin for button if we use load cell
-#endif
+#endif // end of use lc
+#ifdef USE_EXTRABTN // milos, if enabled we have 2 more extra digital buttons
+  } else if (i == 8) {
+    temp = !bitRead(digitalReadFast(BUTTON8), B8PORTBIT); // milos, read bit5 from PINF A2 into buttons bit8
+  } else if (i == 9) {
+    temp = !bitRead(digitalReadFast(BUTTON9), B9PORTBIT); // milos, read bit4 from PINF A3 into buttons bit9
+#endif // end of extra button
   } else {
     temp = false;
   }

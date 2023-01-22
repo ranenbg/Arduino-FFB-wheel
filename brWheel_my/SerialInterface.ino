@@ -103,6 +103,9 @@ void readSerial() {
 #ifdef USE_XY_SHIFTER
         CONFIG_SERIAL.print("f");
 #endif
+#ifdef USE_EXTRABTN
+        CONFIG_SERIAL.print("e");
+#endif
 #ifdef USE_PROMICRO
         CONFIG_SERIAL.print("m");
 #endif

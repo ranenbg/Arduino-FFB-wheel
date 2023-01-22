@@ -330,8 +330,17 @@ void loop() {
         shifterX = analogRead(CLUTCH_PIN); // milos, use clutch analog input instead
         shifterY = analogRead(HBRAKE_PIN); // milos, use handbrake analog input instead
 #else // for proMicro, when no XY shifter
+#ifndef USE_EXTRABTN // milos, only available if not using extra buttons
         clutch = analogRead(CLUTCH_PIN) * 4; // milos, RX axis
         hbrake = analogRead(HBRAKE_PIN) * 4; // milos, RY axis
+#else // if using extra buttons
+#ifndef USE_LOAD_CELL
+        clutch = 0; // milos, RX axis unavailable when no lc
+#else
+        clutch = analogRead(CLUTCH_PIN) * 4; // milos, RX axis is available if we use lc
+#endif // end of use lc
+        hbrake = 0; // milos, RY axis is allways unavailable
+#endif // end of extra button
 #endif // end of xy shifter
 #endif // end proMicro
 #endif // end of avg

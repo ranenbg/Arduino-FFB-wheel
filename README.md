@@ -57,6 +57,7 @@ Firmware version string consists out of 3 digits and some letters (example: fw-v
 - "i" averaging of analog inputs
 - "t" 4x4 button matrix support
 - "f" analog XY shifter support
+- "e" two extra digital buttons enabled instead of analog clutch and handbrake axis
 - "m" replacement pinouts for Arduino ProMicro
 
 note* some combinations are not possible at the same time, like "fw-vXXXzs", or "fw-v213z" beacause they would use the same hardware interrupt pin for more than 1 function, while some are not possible due to ATmega32U4 32k memory limit

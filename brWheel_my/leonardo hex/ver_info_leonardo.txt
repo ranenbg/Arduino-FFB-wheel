@@ -106,6 +106,7 @@ version		features
 220c		the same as v220, with hardware wheel recenter button on pin D2
 220f		the same as v220, with XY analog shiffter support
 220cf		the same as v220c, with XY analog shiffter support
+220ct		the same as v220c, with 4x4 button matrix support
 220acf		the same as v220cf, with automatic pedal calibration
 220zf		the same as v220, with z-index and XY analog shiffter support
 220azf		the same as v210zf, with pedal autocalib instead of manual calib
@@ -116,5 +117,6 @@ version		features
 221s		the same as v220, with support for ADS1015 external ADC for pedals and shift register
 221chf		the same as v210cf, with a hat switch and shift register		
 222ah		the same as v221ah, with load cell support with HX711
+222h		the same as v222ah, but with manual pedal calibration
 222zh		the same as v221ah, but has Z-index support and has manual pedal calibration instead
 223ah		the same as v221ah, but has analog FFB output with 2x12bit DAC MCP4275

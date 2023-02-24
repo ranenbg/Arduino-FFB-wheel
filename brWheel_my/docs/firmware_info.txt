@@ -1,6 +1,6 @@
 Milos Rankovic, ranenbg@gmail.com
 first created 21.11.2018.
-last updated 25.12.2022.
+last updated 23.01.2023.
 
 This txt file contains details about Arduino FFB wheel firmware capabilities and features:
 

@@ -83,5 +83,5 @@ If you used some of the earlier firmware versions prior to fw-v22X, windows reme
 
 ## Credits
 
-Original BRWheel firmware by: Tero Loimuneva, Saku Kekkonen, Etienne Saint-Paul and Fernando Igor.
-https://github.com/fernandoigor/BRWheel/tree/alphatest
+FFB HID and USB core for Arduino by: Peter Barrett
+BRWheel firmware by: Tero Loimuneva, Saku Kekkonen, Etienne Saint-Paul and Fernando Igor, https://github.com/fernandoigor/BRWheel/tree/alphatest

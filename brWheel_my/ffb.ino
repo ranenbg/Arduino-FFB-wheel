@@ -4,7 +4,7 @@
   Copyright 2012  Tero Loimuneva (tloimu [at] gmail [dot] com)
   Copyright 2013  Saku Kekkonen
   Copyright 2015  Etienne Saint-Paul  (esaintpaul [at] gameseed [dot] fr)
-  Copyright 2018-2022  Milos Rankovic (ranenbg [at] gmail [dot] com)
+  Copyright 2018-2024  Milos Rankovic (ranenbg [at] gmail [dot] com)
 
   Permission to use, copy, modify, distribute, and sell this
   software and its documentation for any purpose is hereby granted

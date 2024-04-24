@@ -1,7 +1,7 @@
 /*
   Copyright 2015  Etienne Saint-Paul
   Copyright 2017  Fernando Igor  (fernandoigor [at] msn [dot] com)
-  Copyright 2018-2021  Milos Rankovic (ranenbg [at] gmail [dot] com)
+  Copyright 2018-2024  Milos Rankovic (ranenbg [at] gmail [dot] com)
 
   Permission to use, copy, modify, distribute, and sell this
   software and its documentation for any purpose is hereby granted
@@ -49,15 +49,15 @@ u8 analog_inputs_pins[] = // milos, changed to u8, from u16
   BRAKE_PIN
 #endif // end of extra button
 #endif // end of load cell
-#ifdef USE_XY_SHIFTER // milos
-  HBRAKE_PIN,
-  SHIFTER_X_PIN, // milos
-  SHIFTER_Y_PIN // milos
-#else
+  /*#ifdef USE_XY_SHIFTER // milos
+    HBRAKE_PIN,
+    SHIFTER_X_PIN, // milos
+    SHIFTER_Y_PIN // milos
+    #else*/
 #ifndef USE_EXTRABTN
   HBRAKE_PIN
 #endif // end of extra button
-#endif // end of xy shifter
+  //#endif // end of xy shifter
 };
 
 u8 axis_shift_n_bits[] =  // milos, changed to u8, from u16
@@ -76,7 +76,7 @@ u8 axis_shift_n_bits[] =  // milos, changed to u8, from u16
 s32 analog_inputs[sizeof(analog_inputs_pins)];
 
 //u8 load_cell_channel;
-s32 nb_mes;
+s8 nb_mes; // milos, changed from s32 to s8
 #endif
 
 //----------------------------------------- Options -------------------------------------------------------
@@ -130,7 +130,12 @@ void InitInputs() {
   for (u8 i = 0; i < sizeof(analog_inputs_pins); i++) {
     pinMode(analog_inputs_pins[i], INPUT);
   }
-
+#ifdef USE_XY_SHIFTER
+#ifndef USE_PROMICRO
+  pinMode(SHIFTER_X_PIN, INPUT);
+  pinMode(SHIFTER_Y_PIN, INPUT);
+#endif
+#endif
 #ifdef USE_SHIFT_REGISTER
   InitShiftRegister();
 #else
@@ -401,14 +406,14 @@ void setMatrixRow (uint8_t j, uint8_t val) { // milos, added
 //--------------------------------------------------------------------------------------------------------
 
 #ifdef AVG_INPUTS //milos, include this only if it is used
-void ClearAnalogInputs () {
+void ClearAnalogInputs() {
   for (u8 i = 0; i < sizeof(analog_inputs_pins); i++) {
     analog_inputs[i] = 0;
   }
   nb_mes = 0;
 }
 
-uint16_t ReadAnalogInputs () {
+uint16_t ReadAnalogInputs() {
   for (u8 i = 0; i < sizeof(analog_inputs_pins); i++) {
     analog_inputs[i] += analogRead(analog_inputs_pins[i]);
   }
@@ -417,7 +422,7 @@ uint16_t ReadAnalogInputs () {
   return nb_mes;
 }
 
-void AverageAnalogInputs () {
+void AverageAnalogInputs() {
   for (u8 i = 0; i < sizeof(analog_inputs_pins); i++) {
     analog_inputs[i] = (analog_inputs[i] << axis_shift_n_bits[i]) / nb_mes; //milos, fixed
   }

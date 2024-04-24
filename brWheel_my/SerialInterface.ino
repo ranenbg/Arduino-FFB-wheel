@@ -79,7 +79,7 @@ void readSerial() {
 #endif
 #ifdef USE_ZINDEX
         CONFIG_SERIAL.print("z");
-#else
+#else // if no z-index
 #ifndef USE_ADS1015
 #ifndef USE_MCP4725
 #ifdef USE_CENTERBTN
@@ -91,7 +91,7 @@ void readSerial() {
 #ifdef USE_HATSWITCH
         CONFIG_SERIAL.print("h");
 #endif
-#ifdef USE_ADS1105
+#ifdef USE_ADS1015
         CONFIG_SERIAL.print("s");
 #endif
 #ifdef AVG_INPUTS
@@ -105,6 +105,9 @@ void readSerial() {
 #endif
 #ifdef USE_EXTRABTN
         CONFIG_SERIAL.print("e");
+#endif
+#ifdef USE_ANALOGFFBAXIS
+        CONFIG_SERIAL.print("x");
 #endif
 #ifdef USE_PROMICRO
         CONFIG_SERIAL.print("m");
@@ -134,7 +137,7 @@ void readSerial() {
         CONFIG_SERIAL.println(1);
 #else
         CONFIG_SERIAL.println(0);
-#endif 
+#endif
         break;
       case 'O': // milos, added to adjust optical encoder CPR
         temp = CONFIG_SERIAL.parseInt();
@@ -165,7 +168,7 @@ void readSerial() {
 #else
         myEnc.Write(ROTATION_MID); // milos, just set at zero angle
         CONFIG_SERIAL.println(0);
-#endif    
+#endif
         break;
       case 'Z': // milos, hard reset the z-index offset
 #ifdef USE_ZINDEX
@@ -174,7 +177,7 @@ void readSerial() {
         CONFIG_SERIAL.println(1);
 #else
         CONFIG_SERIAL.println(0);
-#endif 
+#endif
         break;
       case 'G': // milos, this was not working, fixed now
         temp = CONFIG_SERIAL.parseInt();
@@ -194,9 +197,9 @@ void readSerial() {
         break;
       case 'E': //milos, added - turn desktop effects on/off
         ffb_temp = CONFIG_SERIAL.parseInt();
-        ffb_temp = constrain(ffb_temp, 0, 31);
+        ffb_temp = constrain(ffb_temp, 0, 255);
         //CONFIG_SERIAL.print("Desktop effects byte: "); //milos, autocentering spring, damper, inertia, friction and ffb out
-        for (uint8_t i = 0; i <= 4; i++) { //milos, decode incomming number into individual switches
+        for (uint8_t i = 0; i <= 7; i++) { //milos, decode incomming number into individual switches
           bitWrite(effstate, i, bitRead(ffb_temp, i));
         }
         CONFIG_SERIAL.println(effstate, BIN);

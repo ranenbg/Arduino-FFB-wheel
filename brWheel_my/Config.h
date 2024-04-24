@@ -7,7 +7,7 @@
 //#define USE_VNH5019				// Pololu dual 24V DC motor drive (partially inplemented)
 //#define USE_SM_RS485				// Granite devices simple motion protocol (not implemented yet)
 //#define USE_LCD					// milos, LCD via i2c (not implemented yet)
-//#define USE_ADS1015       // milos, uncomment for 12bit pedals (commented is 10bit from arduino inputs), can not be used with AVG_INPUTS
+//#define USE_ADS1015       // milos, uncomment for 12bit pedals, commented is 10bit from arduino inputs (can not be used with AVG_INPUTS)
 //#define USE_DSP56ADC16S			// 16 bits Stereo ADC (milos, can not be used if USE_SHIFT_REGISTER is uncommented)
 #define USE_QUADRATURE_ENCODER		// Position Quadrature encoder
 #define USE_ZINDEX          // milos, use Z-index encoder channel (warning, can not be used with USE_ADS1015 or USE_MCP4725)
@@ -15,13 +15,14 @@
 #define USE_SHIFT_REGISTER			// 8-bit Parallel-load shift registers G27 board steering wheel (milos, this one is modified for 16 buttons)
 //#define USE_DUAL_SHIFT_REGISTER		// Dual 8-bit Parallel-load shift registers G27 board shifter  (milos, not available curently)
 //#define USE_XY_SHIFTER    // milos, uncomment to use XY analog shifter (can not be used with USE_BTNMATRIX, note that for proMicro clutch and handbrake will be unavailable)
-#define USE_HATSWITCH        // milos, uncomment to use first 4 buttons for hat switch instead (can not be used if no load cell or with shift register)
+#define USE_HATSWITCH        // milos, uncomment to use first 4 buttons for hat switch instead
 //#define USE_BTNMATRIX        // milos, uncomment to use 8 pins as a 4x4 button matrix for total of 16 buttons (can not be used with USE_LOAD_CELL, shift register or XY shifter)
-//#define AVG_INPUTS        // milos, uncomment to use averaging of arduino analog inputs (if readings can be done faster than CONTROL_PERIOD)
+//#define AVG_INPUTS        // milos, uncomment to use averaging of arduino analog inputs (can not be used with USE_ADS1015)
 //#define USE_AUTOCALIB        // milos, uncomment to use autocalibration for pedal axis (if left commented manual calibration is enabled)
-//#define USE_CENTERBTN    // milos, ucomment to assign digital input pin D2 for hardware wheel recenter to 0deg (not available when USE_ZINDEX, USE_ADS1105 or USE_MCP4725)
+//#define USE_CENTERBTN    // milos, ucomment to assign digital input pin D2 for hardware wheel recenter to 0deg (not available when USE_ZINDEX, USE_ADS1015 or USE_MCP4725)
 //#define USE_EXTRABTN    // milos, ucomment to configure analog inputs on pins A2 and A3 as a digital button inputs (2 extra buttons, note that clutch and handbrake will be unavailable)
 //#define USE_MCP4725      // milos, 12bit DAC (0-5V), uncomment to enable output of FFB signal as 2ch DAC voltage output
+#define USE_ANALOGFFBAXIS // milos, uncomment to enable other than encoder X-axis to be tied with FFB axis
 //#define USE_PROMICRO    // milos, uncomment if you are using Arduino ProMicro board (leave commented for Leonardo or Micro variants)
 #define USE_EEPROM // milos, uncomment this to enable loading/saving settings from EEPROM
 
@@ -93,9 +94,9 @@
 #define BUTTON3 3 // pin3, used for button3 instead
 #define B3PORTBIT 0 // read bit0 of PIND
 #endif // end of center button
-#define SHIFTER_X_PIN A4 // milos, they are not on proMicro pcb
-#define SHIFTER_Y_PIN A5 // milos, they are not on proMicro pcb
-#endif
+//#define SHIFTER_X_PIN A4 // milos, they are not on proMicro pcb
+//#define SHIFTER_Y_PIN A5 // milos, they are not on proMicro pcb
+#endif // end of proMicro
 
 #ifdef USE_SHIFT_REGISTER //milos, added
 #define SHIFTREG_PL			  8	  // PL SH/LD (Shift or Load input) // milos, was 4
@@ -204,7 +205,7 @@ uint8_t LC_scaling; // milos, load cell scaling factor (affects brake pressure, 
 #define PARAM_ADDR_HBRK_LO       0x36 //milos, hand brake pedal cal min
 #define PARAM_ADDR_HBRK_HI       0x38 //milos, hand brake pedal cal max
 
-#define VERSION		0xDE // milos, this is my version (original was 8)
+#define VERSION		0xE8 // milos, firmware version (E6=230, E7=231, E8=232, E9=233) change this accordingly!
 
 #define GetParam(m_offset,m_data)	getParam((m_offset),(u8*)&(m_data),sizeof(m_data))
 #define SetParam(m_offset,m_data)	setParam((m_offset),(u8*)&(m_data),sizeof(m_data))
@@ -218,11 +219,28 @@ uint8_t LC_scaling; // milos, load cell scaling factor (affects brake pressure, 
 
 //------------------------------------- FFB Config -----------------------------------------------------
 
-//milos, these are now loaded from EEPROM
-u8 effstate; // = 0b00000001; //milos, added - turn on/off desktop effects through serial interface
-//bit0-autocentering spring, bit1-damper, bit2-inertia, bit3-friction, bit4-ffb monitor (sends ffb signal data to com port), bits 5-7 are unused
+// milos, these are now loaded from EEPROM
+u8 effstate; // = 0b00000001; // milos, added - turn on/off desktop effects through serial interface
+// bit0-autocentering spring, bit1-damper, bit2-inertia, bit3-friction, bit4-ffb monitor (sends ffb signal data to com port), bits 5-7 are FFB axis index
+// bits 5-7 define an index that sets which axis is tied to FFB axis (by default it's at X-axis where we have an optical encoder)
+// index FFB-axis
+// 0     X
+// 1     Y
+// 2     Z
+// 3     RX
+// 4     RY
+#ifdef USE_ANALOGFFBAXIS
+byte indFFBAxis(byte value) { // milos, argument should be effstate
+  byte temp = 0b00000000; // index of FFB Axis index selection (0-5)
+  for (uint8_t i = 0; i < 3; i++) {
+    bitWrite(temp, i, bitRead(value, i + 5)); //milos, decode bits5-7 from value byte into temp
+  }
+  return temp;
+}
+#endif
+
 u8 pwmstate; // =0b00000101; //milos, added - configures the PWM settings
-//bit0-phase correct (0 is fast top), bit1-dir enabled (0 is pwm+-), bits 2-5 are frequency select, bit6-enable pwm0.50.100, bit7 is unused
+// bit0-phase correct (0 is fast top), bit1-dir enabled (0 is pwm+-), bits 2-5 are frequency select, bit6-enable pwm0.50.100, bit7 is unused
 
 // bit0 pwm_type
 // 0    fast pwm
@@ -372,13 +390,23 @@ uint16_t sCal[5]; // milos, added - shifter calibration variables
 // 3  y0  2,4,6,8, R
 // 4  y1  N
 
-uint8_t sConfig; // milos, added - XY shifter configuration byte
-//bit0-H shifter, bit1-6 gears,bit2-,bit3-,bit4-,bit5-,bit6-,bit7-
-//if 1-sequential,if 1-8 gears
+uint8_t sConfig; // milos, added - analog XY H-shifter configuration byte
+//bit0-revBtn invert,bit1-8 gears,bit2-X invert,bit3-Y invert,bit4-unused,bit5-unused,bit6-unused,bit7-unused
+//bit0=1: reverse gear button inverted (for logitech G25/G27/G29/G923 H-shifters)
+//bit1=1: 8 gear mode (r gear in 8th)
+//bit2=1: X-axis inverted
+//bit3=1: Y-axis inverted
 // milos - added, function for decoding XY shifter analog values into last 8 buttons
 uint32_t decodeXYshifter (uint32_t inbits, int16_t sx, int16_t sy) {
-  uint32_t gears = 0;
+  uint32_t gears = 0; // shifter gears represented as digital buttons (1 bit for each gear)
   uint8_t revButtonBit = 0; // reverse gear button bit number (normal buttons start from bit4, bit0-bit3 are for hat switch)
+  if (bitRead(sConfig, 0)) {   // if reverse gear button is inverted (logitech shifters)
+    if (bitRead(inbits, revButtonBit + 4)) { // read rev gear button bit
+      bitClear(inbits, revButtonBit + 4); // if 1, set rev gear bit to 0
+    } else {
+      bitSet(inbits, revButtonBit + 4); // if 0, set rev gear bit to 1
+    }
+  }
   if (sx < sCal[0] && sy >= sCal[4]) { // 1st gear
     bitSet(gears, 16);
   } else if (sx < sCal[0] && sy < sCal[3]) { // 2nd gear
@@ -402,17 +430,29 @@ uint32_t decodeXYshifter (uint32_t inbits, int16_t sx, int16_t sy) {
   } else if (sx >= sCal[2] && sy >= sCal[4]) { // 7th gear
     bitSet(gears, 22);
   } else if (sx >= sCal[2] && sy < sCal[3]) { // 8th gear
-    if (bitRead(sConfig, 1)) {  // if 8 gear shifter
+    if (bitRead(sConfig, 1)) { // if 8 gear shifter
       if (bitRead(inbits, revButtonBit + 4)) {
         bitSet(gears, revButtonBit); // reverse gear
       } else {
         bitSet(gears, 23); // set 8th gear
       }
-    } else {  // if 6 gear shifter
+    } else { // if 6 gear shifter
       bitSet(gears, 23); // still set 8th gear
     }
   }
   return ((inbits & 0b11110000000011111111111111101111) | (gears << 4));
 }
+
+const uint8_t avgSamples = 4; // milos, added - number of samples for averaging of arduino analog inputs
+// milos, default axis calibration values depend on usage of averaging or external ADC
+#ifdef AVG_INPUTS
+const uint16_t maxCal = 4095;
+#else // if no avg inputs
+#ifdef USE_ADS1015
+const uint16_t maxCal = 2047;
+#else // if no ADS
+const uint16_t maxCal = 1023;
+#endif // end of ads
+#endif // end of avg inputs
 
 #endif // _CONFIG_H_

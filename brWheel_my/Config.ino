@@ -81,31 +81,25 @@ void SetDefaultConfig () { //milos - sets default values
   SetParam(PARAM_ADDR_SHFT_Y1, val); //milos, added
   val = 0; // milos, 0b00000000 - default is 6 gear H shifter
   SetParam(PARAM_ADDR_SHFT_CFG, val); //milos, added
-#endif
-#ifndef USE_AUTOCALIB //milos, added - load default min/max manual cal values for pedals
+#endif // end of h-shifter
+#ifndef USE_AUTOCALIB //milos, added - load default min/max manual cal values for pedal axis
   val = 0;
   SetParam(PARAM_ADDR_ACEL_LO, val);
-  val = Z_AXIS_PHYS_MAX;
-  SetParam(PARAM_ADDR_ACEL_HI, val);
-  val = 0;
   SetParam(PARAM_ADDR_BRAK_LO, val);
-  val = Z_AXIS_PHYS_MAX; //milos, when no LC brake cal limit is 4095
-  SetParam(PARAM_ADDR_BRAK_HI, val);
-  val = 0;
   SetParam(PARAM_ADDR_CLUT_LO, val);
-  val = RX_AXIS_PHYS_MAX;
-  SetParam(PARAM_ADDR_CLUT_HI, val);
-  val = 0;
   SetParam(PARAM_ADDR_HBRK_LO, val);
-  val = RY_AXIS_PHYS_MAX;
+  val = maxCal;
+  SetParam(PARAM_ADDR_ACEL_HI, val);
+  SetParam(PARAM_ADDR_BRAK_HI, val);
+  SetParam(PARAM_ADDR_CLUT_HI, val);
   SetParam(PARAM_ADDR_HBRK_HI, val);
-#endif
+#endif // end of auto cal
 }
 
-void SetEEPROMConfig () { //milos, changed VERSION to 16bit from 32bit
+void SetEEPROMConfig () { // milos, changed VERSION to 16bit from 32bit
   u16 value;
   GetParam(PARAM_ADDR_VERSION, value);
-  if (value != VERSION) {							// First time run, or version changed, so put default values for safety
+  if (value != VERSION) {							// milos, first time run, or on version change put default values for safety
     //ClearEEPROMConfig(); //milos, clear EEPROM before loading defaults
     SetDefaultConfig();
   }

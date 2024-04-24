@@ -3,7 +3,7 @@
 
   Copyright 2015  Etienne Saint-Paul  (esaintpaul [at] gameseed [dot] fr)
   Copyright 2017  Fernando Igor  (fernandoigor [at] msn [dot] com)
-  Copyright 2018-2023  Milos Rankovic (ranenbg [at] gmail [dot] com)
+  Copyright 2018-2024  Milos Rankovic (ranenbg [at] gmail [dot] com)
 
   Permission to use, copy, modify, distribute, and sell this
   software and its documentation for any purpose is hereby granted
@@ -61,20 +61,17 @@ extern u8 valueglobal;
   u8 spi_data_ready = false;*/
 
 b8 fault;
-s16 accel, clutch, hbrake;
+s16 accel, clutch, hbrake; // milos
 #ifdef USE_XY_SHIFTER
-s16 shifterX, shifterY;
+s16 shifterX, shifterY; // milos
 #endif
 s32 brake; //milos, we need 32bit due to 24 bits on load cell ADC
 s32 turn;
-/*u16 accelMin = Z_AXIS_LOG_MAX, accelMax = 0; // milos
-  s16 brakeMin = s16(Z_AXIS_LOG_MAX), brakeMax = 0; // milos, must be signed
-  u16 clutchMin = RX_AXIS_LOG_MAX, clutchMax = 0; // milos
-  u16 hbrakeMin = RY_AXIS_LOG_MAX, hbrakeMax = 0; // milos*/
 u16 accelMin, accelMax; // milos
 s16 brakeMin, brakeMax; // milos, must be signed
 u16 clutchMin, clutchMax; // milos
 u16 hbrakeMin, hbrakeMax; // milos
+//s16 accelMid, brakeMid, clutchMid, hbrakeMid; // milos
 u32 button = 0; //milos, added
 
 //milos, added
@@ -88,14 +85,13 @@ Adafruit_MCP4725 dac0; // address 0x60, address pin connected to GND (or disscon
 Adafruit_MCP4725 dac1; // address 0x61, address pin connected to VCC,                   right Force channel
 #endif
 
-//s32 shifterX, shifterY; // milos, commented
-
 cFFB gFFB;
 BRFFB brWheelFFB;
 
 //milos, added
 #ifdef AVG_INPUTS
 extern s32 analog_inputs[];
+u8 asc = 0; // milos, added - sample counter for averaging of analog inputs
 #endif
 
 //u32 last_send = 0;
@@ -256,7 +252,10 @@ void setup() {
 //--------------------------------------------------------------------------------------------------------
 void loop() {
 #ifdef AVG_INPUTS //milos, added option see config.h
-  ReadAnalogInputs();        // Some reading to take an average
+  if (asc < avgSamples) {
+    ReadAnalogInputs(); // milos, get readings for averaging (only do it until we get all samples)
+    asc++; // milos
+  }
 #endif
 
   now_micros = micros();
@@ -267,6 +266,9 @@ void loop() {
 
 #ifdef USE_QUADRATURE_ENCODER
     if ((now_micros - last_refresh) >= CONTROL_PERIOD) {
+#ifdef AVG_INPUTS //milos
+      asc = 0; // milos, reset counter for averaging
+#endif
       last_refresh = now_micros;
       //SYNC_LED_HIGH(); // milos
 #ifdef  USE_SHIFT_REGISTER
@@ -280,9 +282,30 @@ void loop() {
         turn = myEnc.Read() - ROTATION_MID;
       }
 
+#ifndef USE_ANALOGFFBAXIS
       command = gFFB.CalcTorqueCommand(turn); // milos, encoder raw units -inf,0,inf
+#else
+      int16_t aRng = 511; // milos, scaled analog axis range to be used as FFB steering input
+#ifdef AVG_INPUTS
+      aRng = 2047; // if averaging of arduino 10bit analog inputs is enabled
+#endif
+#ifdef USE_ADS1015
+      aRng = 1023; // if 12bit external ADC via ads1105 is enabled
+#endif
+      if (indFFBAxis(effstate) == 1) {
+        command = gFFB.CalcTorqueCommand(map(brake, 0, Y_AXIS_PHYS_MAX, -aRng - 1, aRng)); // milos, FFB on Y-axis
+      } else if (indFFBAxis(effstate) == 2) {
+        command = gFFB.CalcTorqueCommand(map(accel, 0, Z_AXIS_PHYS_MAX, -aRng - 1, aRng)); // milos, FFB on Z-axis
+      } else if (indFFBAxis(effstate) == 3) {
+        command = gFFB.CalcTorqueCommand(map(clutch, 0, RX_AXIS_PHYS_MAX, -aRng - 1, aRng)); // milos, FFB on RX-axis
+      } else if (indFFBAxis(effstate) == 4) {
+        command = gFFB.CalcTorqueCommand(map(hbrake, 0, RY_AXIS_PHYS_MAX, -aRng - 1, aRng)); // milos, FFB on RY-axis
+      } else { // milos, fail safe
+        command = gFFB.CalcTorqueCommand(turn); // milos, FFB on X-axis
+      }
+#endif
       turn *= f32(X_AXIS_PHYS_MAX) / f32(ROTATION_MAX); // milos, conversion to physical units
-      turn = constrain(turn, -MID_REPORT_X - 1, MID_REPORT_X); // milos, -32768,0,32767 scaled to signed full 16bit range
+      turn = constrain(turn, -MID_REPORT_X - 1, MID_REPORT_X); // milos, -32768,0,32767 scaled to signed 16bit range
 
       SetPWM(command); // milos, FFB signal is generated as PWM (or analog DAC) output
       //SYNC_LED_LOW(); //milos
@@ -301,24 +324,38 @@ void loop() {
           ads2 = ads.readADC_SingleEnded(0);  // milos, single input A0*/
 
 #ifdef USE_ADS1015 // milos, if you plan to use ADS1105 for all 3 pedals (no load cell), then change to readADC_SingleEnded
-        accel = constrain(ads.readADC_SingleEnded(ACCEL_INPUT) * 2, 0 , 4095); //milos, Z axis, 11bit
-        clutch = constrain(ads.readADC_SingleEnded(CLUTCH_INPUT) * 2, 0 , 4095); //milos, RX axis, 11bit
-        hbrake = constrain(ads.readADC_SingleEnded(HBRAKE_INPUT) * 2, 0 , 4095); //milos, RX axis, 11bit
-        //accel = constrain(ads.readADC_Differential_0_1() + 2047, 0, 4095);  //milos, Z axis, 12bit
-        //clutch = constrain(ads.readADC_SingleEnded(2) * 2, 0 , 4095); //milos, RX axis, 11bit
+        accel = constrain(ads.readADC_SingleEnded(ACCEL_INPUT), 0 , 2047); //milos, Z axis, 11bit
+        clutch = constrain(ads.readADC_SingleEnded(CLUTCH_INPUT), 0 , 2047); //milos, RX axis, 11bit
+        hbrake = constrain(ads.readADC_SingleEnded(HBRAKE_INPUT), 0 , 2047); //milos, RY axis, 11bit
+        //accel = constrain(ads.readADC_Differential_0_1()+2048, 0, 4095);  //milos, Z axis, 12bit
+        //clutch = constrain(ads.readADC_Differential_2_3()+2048, 0, 4095); //milos, RX axis, 12bit
 
 #else //if no ads
-#ifdef AVG_INPUTS //milos, added option
+#ifdef AVG_INPUTS //milos, added option - we do not avg h-shifter axis
         accel = analog_inputs[ACCEL_INPUT];
+#ifdef USE_PROMICRO
+#ifndef USE_XY_SHIFTER
         clutch = analog_inputs[CLUTCH_INPUT];
         hbrake = analog_inputs[HBRAKE_INPUT];
-        shifterX = analog_inputs[SHIFTER_X_INPUT]; // milos
-        shifterY = analog_inputs[SHIFTER_Y_INPUT]; // milos
-#else //if no avg
-        accel = analogRead(ACCEL_PIN) * 4; // milos, Z axis
+#else // milos, if we use h-shifter on proMicro with avg inputs
+        clutch = 0;
+        hbrake = 0;
+        shifterX = analogRead(CLUTCH_PIN); // milos
+        shifterY = analogRead(HBRAKE_PIN); // milos
+#endif // end of xy shifter
+#else // for leonardo we can avg pedal inputs and also have h-shifter axis
+        clutch = analog_inputs[CLUTCH_INPUT];
+        hbrake = analog_inputs[HBRAKE_INPUT];
+#ifdef USE_XY_SHIFTER
+        shifterX = analogRead(SHIFTER_X_PIN); // milos
+        shifterY = analogRead(SHIFTER_Y_PIN); // milos
+#endif // end of h-shifter
+#endif // end of proMicro
+#else // if no avg
+        accel = analogRead(ACCEL_PIN); // milos, Z axis
 #ifndef USE_PROMICRO // milos, when not proMicro
-        clutch = analogRead(CLUTCH_PIN) * 4; // milos, RX axis
-        hbrake = analogRead(HBRAKE_PIN) * 4; // milos, RY axis
+        clutch = analogRead(CLUTCH_PIN); // milos, RX axis
+        hbrake = analogRead(HBRAKE_PIN); // milos, RY axis
 #ifdef USE_XY_SHIFTER // milos
         shifterX = analogRead(SHIFTER_X_PIN); // milos
         shifterY = analogRead(SHIFTER_Y_PIN); // milos
@@ -331,13 +368,13 @@ void loop() {
         shifterY = analogRead(HBRAKE_PIN); // milos, use handbrake analog input instead
 #else // for proMicro, when no XY shifter
 #ifndef USE_EXTRABTN // milos, only available if not using extra buttons
-        clutch = analogRead(CLUTCH_PIN) * 4; // milos, RX axis
-        hbrake = analogRead(HBRAKE_PIN) * 4; // milos, RY axis
+        clutch = analogRead(CLUTCH_PIN); // milos, RX axis
+        hbrake = analogRead(HBRAKE_PIN); // milos, RY axis
 #else // if using extra buttons
 #ifndef USE_LOAD_CELL
         clutch = 0; // milos, RX axis unavailable when no lc
 #else
-        clutch = analogRead(CLUTCH_PIN) * 4; // milos, RX axis is available if we use lc
+        clutch = analogRead(CLUTCH_PIN); // milos, RX axis is available if we use lc
 #endif // end of use lc
         hbrake = 0; // milos, RY axis is allways unavailable
 #endif // end of extra button
@@ -354,19 +391,19 @@ void loop() {
         }
         //update() should be called at least as often as HX711 sample rate; >10Hz@10SPS, >80Hz@80SPS
         //longer delay in sketch will reduce effective sample rate (be carefull with delay() in loop)
-        LoadCell.update(); //milos, I have configured mine for 80Hz reading by applying 5V at pin15 of HX711 chip (by default it's 10Hz, pin15 grounded)
+        LoadCell.update(); // milos, I have configured mine for 80Hz reading by applying 5V at pin15 of HX711 chip (by default it's 10Hz, pin15 grounded)
         brake = LoadCell.getData(); // milos, read smoothed data from LC (running average of 1 samples, see HX711_ADC.h I modded it)
 #else // milos, when no LC
 #ifdef USE_ADS1015
-        brake = constrain(ads.readADC_SingleEnded(BRAKE_INPUT) * 2, 0 , 4095); //milos, Y axis, 11bit
-#else //if no ads
-#ifdef AVG_INPUTS //milos, added option
+        brake = constrain(ads.readADC_SingleEnded(BRAKE_INPUT), 0 , 2047); // milos, Y axis, 11bit
+#else // if no ads
+#ifdef AVG_INPUTS // milos, added option
         brake = analog_inputs[BRAKE_INPUT];
-#else //if no avg
-        brake = analogRead(BRAKE_PIN) * 4; // milos, Y axis
-#endif //end of avg
-#endif //end of ads
-#endif //end of lc
+#else // if no avg
+        brake = analogRead(BRAKE_PIN); // milos, Y axis
+#endif // end of avg
+#endif // end of ads
+#endif // end of lc
 
 
 #ifdef  USE_AUTOCALIB // milos, update limits for autocalibration
@@ -378,8 +415,21 @@ void loop() {
         if (clutch > clutchMax) clutchMax = clutch;
         if (hbrake < hbrakeMin) hbrakeMin = hbrake;
         if (hbrake > hbrakeMax) hbrakeMax = hbrake;
-#endif //end of autocalib
-        // milos, rescale all axis according to a new calibration
+#endif // end of autocalib
+#ifdef USE_AVGINPUTS
+        // milos, update calibration limits for increased axis resolution due to averaging (depends on num of samples)
+        accelMin *= avgSamples;
+        accelMax *= avgSamples;
+#ifndef USE_LOADCELL
+        brakeMin *= avgSamples;
+        brakeMax *= avgSamples;
+#endif
+        clutchMin *= avgSamples;
+        clutchMax *= avgSamples;
+        hbrakeMin *= avgSamples;
+        hbrakeMax *= avgSamples;
+#endif // end of avg inputs
+        // milos, rescale all axis according to a new manual calibration
         accel = map(accel, accelMin + dz, accelMax - dz, 0, Z_AXIS_PHYS_MAX);  // milos, with manual calibration
         clutch = map(clutch, clutchMin + dz, clutchMax - dz, 0, RX_AXIS_PHYS_MAX);
         hbrake = map(hbrake, hbrakeMin + dz, hbrakeMax - dz, 0, RY_AXIS_PHYS_MAX);
@@ -401,6 +451,8 @@ void loop() {
         button = readInputButtons(); // milos, reads all buttons including matrix and hat switch
 
 #ifdef USE_XY_SHIFTER // milos, added
+        if ((bitRead(sConfig, 2))) shifterX = 1023 - shifterX; // milos, invert shifter X-axis
+        if ((bitRead(sConfig, 3))) shifterY = 1023 - shifterY; // milos, invert shifter Y-axis
         button = decodeXYshifter(button, shifterX, shifterY); // milos, added - convert analog XY shifter values into last 8 buttons
 #endif
         //SendInputReport((s16)turn, (u16)accel, (u16)brake, (u16)clutch, button);

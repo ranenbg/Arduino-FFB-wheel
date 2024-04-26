@@ -91,4 +91,4 @@ version		features
 232ahxm		the same as v231ahxm, with load cell support with HX711
 232zxm		the same as v230zxm, with shifter register and load cell support with HX711 
 233ahxm		the same as v232ahxm, but has analog FFB output with 2x12bit DAC MCP4275 instead of PWM output
-233xm		the same as v233ahxm, but has manual pedal calibration instead of automatic and has no hat switch
+233axm		the same as v233ahxm, but has no hat switch

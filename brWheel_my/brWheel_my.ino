@@ -223,10 +223,14 @@ void setup() {
 #endif
 
 #ifdef USE_AUTOCALIB
+#ifdef AVG_INPUTS
   dz = 8; // milos, set the accel, brake and clutch pedal dead zones that will be taken from min and max axis val (default is 8 out of 4095)
-#else
+#else //
+  dz = 2; // milos, set 2 our of 1023
+#endif // end of avg inputs
+#else // when no autocal
   dz = 0; // milos, we can set min/max cal limits manualy so we do not need this
-#endif
+#endif // end of autocal
   bdz = 2047; // milos, set the brake pedal dead zone taken from min axis val, when using load cell (default is 2047 out of 65535)
   last_LC_scaling = LC_scaling; // milos
 

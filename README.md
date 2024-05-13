@@ -3,7 +3,7 @@ Stand alone directInput USB device recognized in Windows as a joystick with forc
 
 Firmware features:
 - supported Arduino boards: Leonardo, Micro and ProMicro (ATmega32U4, 5V, 16MHz)
-- 4 analog axis + 1 for optical encoder, 2 FFB axis (only 1 has pwm or dac output)
+- 4 analog axes + 1 for an optical encoder, 2 FFB axes (only 1 has PWM or DAC output)
 - automatic or manual analog axis calibration
 - up to 16 buttons by 4x4 matrix or via **[button box firmware](https://github.com/ranenbg/Arduino-FFB-wheel/tree/master/tx_rw_ferrari_458_wheel_emu_16buttons)** uploaded to Arduino Nano/Uno
 - analog XY H-pattern shifter, configurable to 6/8 gears + reverse

@@ -54,10 +54,11 @@ Firmware version string consists out of 3 digits and some letters (example: fw-v
 - "c" hardware wheel re-center support
 - "h" Hat Switch (D-pad) support
 - "s" external ADC support for pedals with ADS1015
-- "i" averaging of analog inputs
+- "i" averaging of Arduino analog inputs
 - "t" 4x4 button matrix support
 - "f" analog XY shifter support
-- "e" two extra digital buttons enabled instead of analog clutch and handbrake axis
+- "e" two extra digital buttons enabled (clutch and handbrake axis are unavailable)
+- "x" enables to select which (analog) axis is tied to the FFB
 - "m" replacement pinouts for Arduino ProMicro
 
 note* some combinations are not possible at the same time, like "fw-vXXXzs", or "fw-v213z" beacause they would use the same hardware interrupt pin for more than 1 function, while some are not possible due to ATmega32U4 32k memory limit

@@ -3,14 +3,14 @@ Stand alone directInput USB device recognized in Windows as a joystick with forc
 
 Firmware features:
 - supported Arduino boards: Leonardo, Micro and ProMicro (ATmega32U4, 5V, 16MHz)
-- 4 analog axis + 1 for optical encoder, 2 FFB axis (only 1 has pwm or dac output)
+- 4 analog axes + 1 for an optical encoder, 2 FFB axes (only 1 has PWM or DAC output)
 - automatic or manual analog axis calibration
 - up to 16 buttons by 4x4 matrix or via **[button box firmware](https://github.com/ranenbg/Arduino-FFB-wheel/tree/master/tx_rw_ferrari_458_wheel_emu_16buttons)** uploaded to Arduino Nano/Uno
 - analog XY H-pattern shifter, configurable to 6/8 gears + reverse
 - fully supported 16bit FFB effects (custom force effect not implemented)
 - envelope and conditional block effects, start delay, durration, deadband, direction enable
 - FFB calculation and axis/button update rate is 500Hz (2ms period)
-- many firmware options (external 12bit ADC/DAC, automatic/manual pedal calibration, z-index support/offset/reset, hatswitch, button matrix, external shift register, hardware wheel re-center, xy analog H shifter)
+- many firmware options (external 12bit ADC/DAC, automatic/manual pedal calibration, z-index support/offset/reset, hatswitch, button matrix, external shift register, hardware wheel re-center, xy analog H shifter, FFB on analog axis)
 - RS232 serial interface for configuration of all wheel parameters
 - fully adjustable FFB output in the form of 2 channel digital 16bit PWM or analog 12bit DAC signals
 - available pwm modes: pwm+-, pwm+dir, pwm0.50.100, rcm
@@ -54,10 +54,11 @@ Firmware version string consists out of 3 digits and some letters (example: fw-v
 - "c" hardware wheel re-center support
 - "h" Hat Switch (D-pad) support
 - "s" external ADC support for pedals with ADS1015
-- "i" averaging of analog inputs
+- "i" averaging of Arduino analog inputs
 - "t" 4x4 button matrix support
 - "f" analog XY shifter support
-- "e" two extra digital buttons enabled instead of analog clutch and handbrake axis
+- "e" two extra digital buttons enabled (clutch and handbrake axis are unavailable)
+- "x" enables to select which (analog) axis is tied to the FFB
 - "m" replacement pinouts for Arduino ProMicro
 
 note* some combinations are not possible at the same time, like "fw-vXXXzs", or "fw-v213z" beacause they would use the same hardware interrupt pin for more than 1 function, while some are not possible due to ATmega32U4 32k memory limit

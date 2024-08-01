@@ -68,9 +68,9 @@ version		features
 223ahm		the same as v222ahm, but has analog FFB output with 2x12bit DAC MCP4275 instead of PWM output
 223hm		the same as v223ahm, but has manual pedal calibration instead of automatic
 
-- firmware HEX versions bellow require wheel control v2.6 or newer
+- firmware HEX versions bellow require wheel control v2.6.0 or newer
 
-230xm		encoder, 4 axis, 8 buttons, 100k CPR, wheel angle as metric for conditional effects, shift register fix, button matrix, 2 FFB axis, periodic effects timing fix, duration and start delay fix, 16bit direction, new HX711 library, debug FFB optimizations, 16x less strong spring, manual pedal axis calibration, pwm0.50.100 mode, rcm pwm mode, X-axis calibration 0-65k, encoder z-index reset, additional h-shifter options, FFB on analog axis selector
+230xm		encoder, 4 axis, 8 buttons, 100k CPR, wheel angle as metric for conditional effects, shift register fix, button matrix, 2 FFB axis, periodic effects timing fix, duration and start delay fix, 16bit direction, new HX711 library, debug FFB optimizations, 16x less strong spring, manual pedal axis calibration, pwm0.50.100 mode, rcm pwm mode, X-axis calibration 0-65k, encoder z-index reset, additional h-shifter options, FFB on analog axis selector, with variable pedal cal values
 
 230axm		the same as v230xm, with pedal autocalib instead of manual calib
 230zxm		the same as v230xm, with z-index support
@@ -89,6 +89,7 @@ version		features
 231sxm		the same as v230xm, with support for ADS1015 external ADC for pedals and with shift register
 231chfxm	the same as v230cfxm, with a hat switch and shift register, but it has no clutch and handbrake
 232ahxm		the same as v231ahxm, with load cell support with HX711
-232zxm		the same as v230zxm, with shifter register and load cell support with HX711 
+232zxm		the same as v230zxm, with shifter register and load cell support with HX711
+232chxm		the same as v230xm, with hardware wheel recenter button on pin D2
 233ahxm		the same as v232ahxm, but has analog FFB output with 2x12bit DAC MCP4275 instead of PWM output
 233axm		the same as v233ahxm, but has no hat switch

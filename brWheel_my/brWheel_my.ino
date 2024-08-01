@@ -226,7 +226,7 @@ void setup() {
 #ifdef AVG_INPUTS
   dz = 8; // milos, set the accel, brake and clutch pedal dead zones that will be taken from min and max axis val (default is 8 out of 4095)
 #else //
-  dz = 2; // milos, set 2 our of 1023
+  dz = 2; // milos, set 2 out of 1023
 #endif // end of avg inputs
 #else // when no autocal
   dz = 0; // milos, we can set min/max cal limits manualy so we do not need this

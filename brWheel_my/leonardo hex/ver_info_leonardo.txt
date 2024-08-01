@@ -121,16 +121,16 @@ version		features
 222zh		the same as v221ah, but has Z-index support and has manual pedal calibration instead
 223ah		the same as v221ah, but has analog FFB output with 2x12bit DAC MCP4275
 
-- firmware HEX versions bellow require wheel control v2.6 or newer
+- firmware HEX versions bellow require wheel control v2.6.0 or newer
 
-230x		encoder, 4 axis, 8 buttons, 100k CPR, wheel angle as metric for conditional effects, shift register fix, button matrix, 2 FFB axis, periodic effects timing fix, duration and start delay fix, 16bit direction, new HX711 library, debug FFB optimizations, 16x less strong spring, manual pedal axis calibration, pwm0.50.100 mode, rcm pwm mode, X-axis calibration 0-65k, encoder z-index reset, additional h-shifter options, FFB on analog axis selector
+230x		encoder, 4 axis, 8 buttons, 100k CPR, wheel angle as metric for conditional effects, shift register fix, button matrix, 2 FFB axis, periodic effects timing fix, duration and start delay fix, 16bit direction, new HX711 library, debug FFB optimizations, 16x less strong spring, manual pedal axis calibration, pwm0.50.100 mode, rcm pwm mode, X-axis calibration 0-65k, encoder z-index reset, additional h-shifter options, FFB on analog axis selector, variable pedal cal values
 230ax		the same as v230x, with pedal autocalib instead of manual calib
 230zx		the same as v230x, with z-index support
 230cx		the same as v230x, with hardware wheel recenter button on pin D2
 230ix		the same as v230x, with averaging of analog inputs for pedals (4 samples)
 230sx		the same as v230x, with support for ADS1015 external ADC for pedals
-230fx		the same as v230x, with XY analog shiffter support
-230cfx		the same as v230cx, with XY analog shiffter support
+230fx		the same as v230x, with XY analog shifter support
+230cfx		the same as v230cx, with XY analog shifter support
 230ctx		the same as v230cx, with 4x4 button matrix support
 230acfx		the same as v230cfx, with automatic pedal calibration
 230zfx		the same as v230fx, with z-index support
@@ -140,8 +140,9 @@ version		features
 230achtx	the same as v230htx, with automatic pedal calibration and hardware wheel recenter button on pin D2
 231ahx		the same as v230ax, with shifter register and hat switch support 
 231sx		the same as v230x, with support for ADS1015 external ADC for pedals and shift register
-231chf		the same as v230cfx, with a hat switch and shift register, but without FFB axis selector		
+231chfx		the same as v230cfx, with a hat switch and shift register		
 232ahx		the same as v231ahx, with load cell support with HX711
 232hx		the same as v232ahx, but with manual pedal calibration
 232zhx		the same as v232ahx, with load cell and Z-index support, but has manual pedal calibration instead
+232chx		the same as v232hx, with hardware wheel recenter button on pin D2 
 233ahx		the same as v232ahx, but has analog FFB output with 2x12bit DAC MCP4275

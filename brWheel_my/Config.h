@@ -8,14 +8,14 @@
 //#define USE_SM_RS485				// Granite devices simple motion protocol (not implemented yet)
 //#define USE_LCD					// milos, LCD via i2c (not implemented yet)
 //#define USE_ADS1015       // milos, uncomment for 12bit pedals, commented is 10bit from arduino inputs (can not be used with AVG_INPUTS)
-//#define USE_DSP56ADC16S			// 16 bits Stereo ADC (milos, can not be used if USE_SHIFT_REGISTER is uncommented)
+//#define USE_DSP56ADC16S			// 16 bits Stereo ADC (milos, can not be used with USE_SHIFT_REGISTER)
 #define USE_QUADRATURE_ENCODER		// Position Quadrature encoder
-#define USE_ZINDEX          // milos, use Z-index encoder channel (warning, can not be used with USE_ADS1015 or USE_MCP4725)
+#define USE_ZINDEX          // milos, use Z-index encoder channel (caution, can not be used with USE_ADS1015 or USE_MCP4725)
 #define USE_LOAD_CELL				// Load cell shield // milos, new library for LC
-#define USE_SHIFT_REGISTER			// 8-bit Parallel-load shift registers G27 board steering wheel (milos, this one is modified for 16 buttons)
+#define USE_SHIFT_REGISTER			// 2x8-bit parallel-load shift registers G27 board steering wheel (milos, this one is modified for 16 buttons)
 //#define USE_DUAL_SHIFT_REGISTER		// Dual 8-bit Parallel-load shift registers G27 board shifter  (milos, not available curently)
 //#define USE_XY_SHIFTER    // milos, uncomment to use XY analog shifter (can not be used with USE_BTNMATRIX, note that for proMicro clutch and handbrake will be unavailable)
-//#define USE_HATSWITCH        // milos, uncomment to use first 4 buttons for hat switch instead
+#define USE_HATSWITCH        // milos, uncomment to use first 4 buttons for hat switch instead
 //#define USE_BTNMATRIX        // milos, uncomment to use 8 pins as a 4x4 button matrix for total of 16 buttons (can not be used with USE_LOAD_CELL, shift register or XY shifter)
 //#define AVG_INPUTS        // milos, uncomment to use averaging of arduino analog inputs (can not be used with USE_ADS1015)
 //#define USE_AUTOCALIB        // milos, uncomment to use autocalibration for pedal axis (if left commented manual calibration is enabled)
@@ -23,7 +23,7 @@
 //#define USE_EXTRABTN    // milos, ucomment to configure analog inputs on pins A2 and A3 as a digital button inputs (2 extra buttons, note that clutch and handbrake will be unavailable)
 //#define USE_MCP4725      // milos, 12bit DAC (0-5V), uncomment to enable output of FFB signal as 2ch DAC voltage output
 #define USE_ANALOGFFBAXIS // milos, uncomment to enable other than encoder X-axis to be tied with FFB axis
-#define USE_PROMICRO    // milos, uncomment if you are using Arduino ProMicro board (leave commented for Leonardo or Micro variants)
+//#define USE_PROMICRO    // milos, uncomment if you are using Arduino ProMicro board (leave commented for Leonardo or Micro variants)
 #define USE_EEPROM // milos, uncomment this to enable loading/saving settings from EEPROM
 
 #define CALIBRATE_AT_INIT	0 //milos, was 1

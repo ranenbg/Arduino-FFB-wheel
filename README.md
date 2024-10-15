@@ -1,30 +1,32 @@
 # Arduino-FFB-wheel
-Stand alone directInput USB device recognized in Windows as a joystick with force feedback functionality, based on BRWheel by Fernando Igor from 2017.
+Stand-alone DirectInput USB device recognized in Windows as a joystick with force feedback functionality, based on BRWheel by Fernando Igor from 2017.
 
 Firmware features:
 - supported Arduino boards: Leonardo, Micro and ProMicro (ATmega32U4, 5V, 16MHz)
-- 4 analog axes + 1 for an optical encoder, 2 FFB axes (only 1 has PWM or DAC output)
+- 4 analog axes + 1 for an optical or magnetic encoder, 2 FFB axes (only 1 has PWM or DAC output)
 - automatic or manual analog axis calibration
 - up to 16 buttons by 4x4 matrix or via **[button box firmware](https://github.com/ranenbg/Arduino-FFB-wheel/tree/master/tx_rw_ferrari_458_wheel_emu_16buttons)** uploaded to Arduino Nano/Uno
 - analog XY H-pattern shifter, configurable to 6/8 gears + reverse
 - fully supported 16bit FFB effects (custom force effect not implemented)
-- envelope and conditional block effects, start delay, durration, deadband, direction enable
+- envelope and conditional block effects, start delay, duration, deadband, and direction enable
 - FFB calculation and axis/button update rate is 500Hz (2ms period)
-- many firmware options (external 12bit ADC/DAC, automatic/manual pedal calibration, z-index support/offset/reset, hatswitch, button matrix, external shift register, hardware wheel re-center, xy analog H shifter, FFB on analog axis)
-- RS232 serial interface for configuration of all wheel parameters
-- fully adjustable FFB output in the form of 2 channel digital 16bit PWM or analog 12bit DAC signals
-- available pwm modes: pwm+-, pwm+dir, pwm0.50.100, rcm
-- available dac modes: dac+-, dac+dir
-- load cell support for HX711 chip (for brake pedal axis only)
-- all wheel parameters are stored in EEPROM (and automatically loaded at each powerup)
+- many firmware options (external 12bit ADC/DAC, automatic/manual pedal calibration, z-index support/offset/reset, hat switch, button matrix, external shift register, hardware wheel re-center, xy analog H shifter, FFB on analog axis)
+- RS232 serial interface for configuration of all firmware settings
+- fully adjustable FFB output in the form of 2-channel digital 16bit PWM or analog 12bit DAC signals
+- available PWM modes: PWM+-, PWM+dir, PWM0.50.100, RCM
+- available DAC modes: DAC+-, DAC+dir
+- load cell support for 24bit HX711 chip (for brake pedal axis only)
+- all firmware settings are stored in EEPROM (and automatically loaded at each Arduino powerup)
 - original wheel control user interface **[Arduino FFB gui](https://github.com/ranenbg/Arduino-FFB-gui)** for an easy configuration and monitoring of all inputs/outputs 
 
 Detailed documentation and more information about the firmware can be found in txt files inside **[docs](https://github.com/ranenbg/Arduino-FFB-wheel/tree/master/brWheel_my/docs)** folder. Compiled firmware in HEX format for Arduino Leonardo and Micro can be found in **[leonardo hex](https://github.com/ranenbg/Arduino-FFB-wheel/tree/master/brWheel_my/leonardo%20hex)**, while firmware for Arduino ProMicro (with replacement pinout) is located in **[promicro hex](https://github.com/ranenbg/Arduino-FFB-wheel/tree/master/brWheel_my/promicro%20hex)** folder. All necessary wiring diagrams are in **[wirings](https://github.com/ranenbg/Arduino-FFB-wheel/tree/master/brWheel_my/wirings)** folder.
 
 # Firmware pinouts and wiring diagrams
-![plot](./brWheel_my/wirings/Firmware-v22x%20pinout.png)
-## Encoder and LED wiring
+![plot](./brWheel_my/wirings/Firmware-v24x%20pinout.png)
+## Optical encoder and LED wiring
 ![plot](./brWheel_my/wirings/encoder_ffb_clip_led_wiring_diagram.png)
+## Magnetic encoder wiring
+![plot](./brWheel_my/wirings/as5600_wiring_diagram.png)
 ## Motor driver wiring
 ![plot](./brWheel_my/wirings/bts7960_wiring_diagram.png)
 ## Button box firmware pinouts - for Arduino Nano/Uno
@@ -50,6 +52,7 @@ Firmware version string consists out of 3 digits and some letters (example: fw-v
 
  Here is the complete list of all available options that may be added to any of the above firmware*:
 - "a" pedal axis autocalibration enabled (otherwise a manual calibration is enabled)
+- "w" magnetic encoder AS5600 support
 - "z" Z-index encoder support
 - "c" hardware wheel re-center support
 - "h" Hat Switch (D-pad) support
@@ -61,7 +64,7 @@ Firmware version string consists out of 3 digits and some letters (example: fw-v
 - "x" enables to select which (analog) axis is tied to the FFB
 - "m" replacement pinouts for Arduino ProMicro
 
-note* some combinations are not possible at the same time, like "fw-vXXXzs", or "fw-v213z" beacause they would use the same hardware interrupt pin for more than 1 function, while some are not possible due to ATmega32U4 32k memory limit
+note* some combinations are not possible at the same time, like "fw-vXXXzs", or "fw-v243z" beacause they would use the same hardware interrupt pin for more than 1 function, while some are not possible due to ATmega32U4 32k memory limit
 
 ## Firmware download
 

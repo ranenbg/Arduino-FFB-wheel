@@ -1,40 +1,41 @@
 Milos Rankovic, ranenbg@gmail.com
 first created 25.03.2020.
-last update 13.05.2024.
+last update 14.10.2024.
 
 This txt file contains a list of all available RS232 serial interface commands implemented in my latest Arduino Leonardo FFB wheel firmware version (you can use this info to make your own control GUI)
 
-Arduino boards are also recognized as a serial communication device due to onboard FTDI chip CH340 and its Windows drivers, through which we can send or receive commands from the ATmega32U4 microcontroller
+Arduino boards are also recognized as a virtual serial communication device (COM port) through which we can send/receive commands to/from the ATmega32U4 microcontroller
 
 RS232,   commands are not case sensitive (in this manual capital letters are used only as an example)
-         some commands do not have any parameter following a command char, but if they have, a range of available input values will be given here
+         some commands do not have any parameter following a command char, but if they do, a range of available input values is given
          all commands must be terminated with CR: carriage return - char(13)
-         upon receiving valid command arduino terminates all responses with CR+LF: carriage return - char(13) and line feed - char(10)
-         some commands have response and some don't (in this txt file, null means no serial response from arduino)
+         upon receiving valid command Arduino terminates all responses with CR+LF: carriage return - char(13) and line feed - char(10)
+         some commands have response and some don't (in this txt file, null means no serial response from Arduino)
          most commands can apply changes right away, but some require Arduino restart (for PWM settings - reconfiguration of internal timer registers is necessary)
-         if arduino restart is needed, do not send any additional commands before restart
-         firmware will check if any command is received every 10ms (100 times per second, or 100Hz)
-         arduino response time is typically between (2-10)ms
-         at each arduino powerup firmware will automatically load and configure all settings from EEPROM (for load cell - it may take up to about 2s to complete tare zeroing)
+         if Arduino restart is needed, do not send any additional commands before restart
+         firmware will check if any serial command is received every 10ms (100Hz refresh rate)
+         Arduino response time is therefore maximally 10ms, but typically is around (2-5)ms
+         at each Arduino powerup firmware will automatically load and configure all settings from EEPROM (for load cell - it takes additional 2s for completing tare zeroing)
          FFB clip LED will quickly blink 3 times to indicate that everything is loaded, configured and ready to use
 
 versions, I have put some logic in firmware naming, so here is some basic explanation (if you plan to upgrade firmware, please respect this):
          fw-vXX,  two digits only are a test versions of new firmware features (not used anymore)
-         fw-vXX0, three digits ending with 0 - the basic firmware with no external devices support, except for optical encoder, it has PWM signal as FFB output
+         fw-vXX0, three digits ending with 0 - the basic firmware with no external devices support, except for optical/magnetic encoder (has PWM signal as FFB output)
          fw-vXX1, three digits ending with 1 - adds support for external button box
          fw-vXX2, three digits ending with 2 - adds support for both external button box and load cell
-         fw-vXX3, three digits ending with 3 - adds support for external button box, load cell and two external 12bit DAC - MCP4725
+         fw-vXX3, three digits ending with 3 - adds support for external button box, load cell and two external 12bit DAC - MCP4725 (has analog signal as FFB output)
 
 options, firmware version may include some letters after 3rd digit, their meaning is:
          a - pedal autocalibration enabled (if no a, then manual calibration is enabled)
-         z - encoder z-index support
+	 w - magnetic encoder AS5600 support
+         z - optical encoder with z-index support
          h - enabled Hat Switch (uses first 4 buttons from button box)
-         s - enabled external 12bit ADC - ADS1105 (for analog inputs)
+         s - enabled external 12bit ADC - ADS1015 (for analog inputs)
          t - enabled 4x4 button matrix
          f - enabled XY analog H-pattern shifter
          i - enabled averaging of analog inputs
 	 e - support for two additional digital buttons (clutch and handbrake axis will be unavailable)
-	 x - enables the option to select to which (analog) axis will FFB be tied to
+	 x - enables the option to select to which (analog) axis is FFB tied to
          m - replacement pinouts for ProMicro (for FFB clipping LED, buttons 3 and 4, PWM direction pin)
 
 [1] all wheel parameters read out
@@ -46,7 +47,7 @@ U		1080 100 50 50 100 100 100 50 70 0 0 45 1 500 2400 9
 
 [2] show firmware version
 command		example response
-V		fw-v230x
+V		fw-v240x
 
 [3] show states for encoder
 0 - not calibrated or no z-index found (normal for encoders without z-channel)
@@ -61,20 +62,20 @@ this feature has two modes of operation depending on firmware option "z"
 do not use this command if you do not have a mechanical limits for wheel rotation installed (should use center command instead)
 (b)for firmware with "z" option, this procedure will rotate the wheel until a z-index pulse from encoder is detected
 at this position of z-index, a 0deg value will be assigned to the wheel (this may not be a real wheel zero angle)
-if a wheel is not centered at this position (99% chance), return the wheel by hand to the center, then send "center" command to save z-index offset value
-this will save the z-index pulse angle offset in EEPROM 
-on next Arduino powerup as soon as z-index is detected, the wheel will automatically apply the angle correction using the offset loaded from EEPROM
+if a wheel is not centered at this position (99% chance), return the wheel by hand to the center, then send "center" command, then send "save" command to save new z-index offset value
+this procedure will store the z-index pulse angle offset in EEPROM 
+on next Arduino powerup as soon as z-index is detected, the firmware will automatically apply the angle correction using the offset loaded from EEPROM
 note that z-index angle offset will change if you re-mount your encoder, as you are not able to put it back to the exact same angle mechanically
 command		example response
 R		null
 
-[5] adjust load cell brake pressure calibration factor (valid for fw-v XX2 only, for all other it becomes a *PWM balance slider)
+[5] adjust load cell brake pressure calibration factor (valid for fw-vXX2 only, for all other it becomes a *PWM balance slider)
 sent and received number is only a relative value
 each load cell will have a different max force
 value of 4 will give 1:1 reading from HX711 24bit ADC chip
-*PWM balance slider - you can use it to compensate for example if a motor has stronger pull in one direction (128 - center, equal pull)
+*PWM balance slider - you can use it to compensate for example if your motor has a stronger pull in one direction (128-center, equal pull in both directions)
 value	leftPWM(%)	rightPWM (%)
-1	100    		50
+0	100    		50
 128	100		100
 255	50		100
 command		example response	range
@@ -88,17 +89,18 @@ command		example response	range
 P		1			null
 
 [7] optical encoder CPR (PPR) adjustment
-sent and received number is CPR - counts per revolution of optical encoder shaft
+sent and received number is CPR - counts per revolution of encoder shaft (valid for optical, magnetic encoders and pots)
 encoders usualy have specified PPR - pulses per revolution
 CPR = 4 * PPR * X
 X=1 if encoder is directly mounted to the wheel rim, otherwise it is a gear ratio between encoder and wheel shafts
+if a pot is used for X-axis then CPR is tied to resolution of that analog input (Arduino 10bit 1024, with averaging 4096, or with ADS1105 in single ended readout 2048)
 command		example response	range
 O 2400		1			4-600000
 
 
 [8] re-center wheel
-use this command to reset 0deg position of your wheel rim (after you manualy centering the wheel)
-this will be required each time arduino is powered on or reset, but it's very quick and easy to do
+use this command to reset 0deg position of your wheel rim (after you manually centering the wheel)
+this will be required each time Arduino is powered on or reset, but it's very quick and easy to do
 for HEX firmware with "z" option enabled, it will set z-index offset in the units of encoder CPR
 command		example response	range
 C		1			null
@@ -115,16 +117,16 @@ command		example response	range
 G 900		1			30-1800
 
 [11] adjust desktop effects
-byte, bit0-autocentering spring, bit1-damper, bit2-inertia, bit3-friction, bit4-ffb monitor, bits5,7-are index of FFB axis selection (bit5 is LSB, 0 means X-axis)
+byte, bit0-autocentering spring, bit1-damper, bit2-inertia, bit3-friction, bit4-ffb monitor, bits5,7-are index of FFB axis selection (bit5 is LSB for index, 0 means X-axis)
 bit0 - is LSB (lowest significant bit)
 sent and received number is a decimal equivalent (form) of this byte
 command		example response	range
 E 1		1			0-31
 
 [12] adjust PWM settings - requires Arduino restart in order to apply changes (press reset button, or just re-plug Arduino to USB port)
-byte, bit0-phase correct (or fast mode), bit1-dir enabled (or pwm+-), bits 2-5 are frequency select, bits6-pwm0.50.100 mode enable, bit7 is unused
-pwm0.50.100. mode selection is done by setting bit1 LOW and bit6 HIGH
-rcm mode selection is done by setting both bit1 and bit6 HIGH (please note that not all frequencies are available, see firmware_info.txt for more details)
+byte, bit0-phase correct (or fast mode), bit1-dir enabled (or PWM+-), bits 2-5 are frequency select, bits6-pwm0.50.100 mode enable, bit7 is unused
+PWM0.50.100. mode selection is done by setting bit1 LOW and bit6 HIGH
+RCM mode selection is done by setting both bit1 and bit6 HIGH (please note that not all frequencies are available, see firmware_info.txt for more details)
 
 bit0 pwm_type
 0    fast pwm
@@ -143,7 +145,7 @@ the settings will be stored in EEPROM right away (no additional saving is necess
 command		example response	range
 W 5		400			0-255
 
-[13] store all FFB parameter settings in EEPROM (stores everything except for PWM settings)
+[13] Save command - store firmware settings in EEPROM (stores everything except for PWM settings)
 command		example response
 A		1
 
@@ -227,11 +229,6 @@ HF 2		1			0-255
 
 [30] XY analog shifter calibration and config readout
 returns shifter config byte and limits a, b, c, d, e
-note that full scale h-shifter calibration ranges will vary depending on firmware options
-range	fw-option
-1023	all (except "s" and "i")	
-2047	"s"
-4095	"i"
 command		example response	range
 HG		0 255 511 767 255 511	null
 
@@ -258,7 +255,7 @@ YC		1			0-4095
 [35] manual pedal axis calibration "d" limit
 sets the maximal calibration value for accelerator pedal
 command		example response	range
-YD
+YD		1			0-4095
 
 [36] manual pedal axis calibration "e" limit
 sets the minimal calibration value for clutch pedal
@@ -280,7 +277,12 @@ sets the maximal calibration value for handbrake pedal
 command		example response	range
 YH		1			0-4095
 
-[40] XY analog shifter position readout
-returns pedal axis calibration values a, b, c, d, e, f, g, h
+[40] manual pedal axis calibration readout
+returns pedal axis calibration limit values a, b, c, d, e, f, g, h
+note that depending on firmware options these limits have different ranges
+range	fw-option
+1023	all (except "s" and "i")	
+2047	"s"
+4095	"i"
 command		example response		range
 YR		0 4095 0 4095 0 4095 0 4095	null

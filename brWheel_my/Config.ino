@@ -44,43 +44,47 @@ void SetDefaultConfig () { //milos - sets default values
   SetParam(PARAM_ADDR_FRC_GAIN, ffb); //milos, added
   SetParam(PARAM_ADDR_INR_GAIN, ffb); //milos, added
   ffb = 70; //milos, added
-  SetParam(PARAM_ADDR_CTS_GAIN, ffb); //milos, added
-  val = 0; //milos, added
+  SetParam(PARAM_ADDR_CTS_GAIN, ffb); // milos, added
+  val = 0; // milos, added
   SetParam(PARAM_ADDR_MIN_TORQ, val); //milos, added
-  val = 500; //milos, for PWM signals
+  val = 500; // milos, for PWM signals
   SetParam(PARAM_ADDR_MAX_TORQ, val); //milos, added
   //minTorquePP = 0.0; //milos, added
-  val = 4095; //milos, for 12bit DAC
-  SetParam(PARAM_ADDR_MAX_DAC, val); //milos, added
+  val = 4095; // milos, for 12bit DAC
+  SetParam(PARAM_ADDR_MAX_DAC, val); // milos, added
 #ifdef USE_LOAD_CELL
-  val = 45; //milos, default max brake pressure
+  val = 45; // milos, default max brake pressure
 #else
-  val = 128; //milos, FFB balance center value
+  val = 128; // milos, FFB balance center value
 #endif
-  SetParam(PARAM_ADDR_BRK_PRES, val); //milos, added
-  ffb = 0b00000001; //milos, added, autocenter spring on
-  SetParam(PARAM_ADDR_DSK_EFFC, ffb); //milos, added
-  val32 = 2400; //milos, default CPR value (here you can set a new one)
-  SetParam(PARAM_ADDR_ENC_CPR, val32); //milos, added
+  SetParam(PARAM_ADDR_BRK_PRES, val); // milos, added
+  ffb = 0b00000001; // milos, added, autocenter spring on
+  SetParam(PARAM_ADDR_DSK_EFFC, ffb); // milos, added
+#ifndef USE_AS5600
+  val32 = 2400; // milos, default CPR value for optical encoder (this is for 600PPR)
+#else
+  val32 = 4096; // milos, default CPR value for magnetic encoder AS5600
+#endif
+  SetParam(PARAM_ADDR_ENC_CPR, val32); // milos, added
 #ifndef USE_MCP4725
   ffb = 0b00001001; // milos, PWM out enabled, phase correct, pwm+-, 16kHz, TOP 500
 #else
-  ffb = 0b10000000; //milos, DAC out enabled, DAC+- mode
+  ffb = 0b10000000; // milos, DAC out enabled, DAC+- mode
 #endif
-  SetParam(PARAM_ADDR_PWM_SET, ffb); //milos, added
+  SetParam(PARAM_ADDR_PWM_SET, ffb); // milos, added
 #ifdef USE_XY_SHIFTER
   val = 255;
-  SetParam(PARAM_ADDR_SHFT_X0, val); //milos, added
+  SetParam(PARAM_ADDR_SHFT_X0, val); // milos, added
   val = 511;
-  SetParam(PARAM_ADDR_SHFT_X1, val); //milos, added
+  SetParam(PARAM_ADDR_SHFT_X1, val); // milos, added
   val = 767;
-  SetParam(PARAM_ADDR_SHFT_X2, val); //milos, added
+  SetParam(PARAM_ADDR_SHFT_X2, val); // milos, added
   val = 255;
-  SetParam(PARAM_ADDR_SHFT_Y0, val); //milos, added
+  SetParam(PARAM_ADDR_SHFT_Y0, val); // milos, added
   val = 511;
-  SetParam(PARAM_ADDR_SHFT_Y1, val); //milos, added
+  SetParam(PARAM_ADDR_SHFT_Y1, val); // milos, added
   val = 0; // milos, 0b00000000 - default is 6 gear H shifter
-  SetParam(PARAM_ADDR_SHFT_CFG, val); //milos, added
+  SetParam(PARAM_ADDR_SHFT_CFG, val); // milos, added
 #endif // end of h-shifter
 #ifndef USE_AUTOCALIB //milos, added - load default min/max manual cal values for pedal axis
   val = 0;

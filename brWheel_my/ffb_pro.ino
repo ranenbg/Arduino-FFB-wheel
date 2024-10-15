@@ -506,8 +506,12 @@ void BRFFB::calibrate() {
     else
       rightGap = actual;
   }
-  //ROTATION_MAX = rightGap; //milos, commented
-  myEnc.Write(ROTATION_MAX); //milos
+  //ROTATION_MAX = rightGap; // milos, commented
+#ifndef USE_AS5600 // milos, when no AS5600
+  myEnc.Write(ROTATION_MAX); // milos, set quadrature encoder to right edge
+#else
+  as5600.resetCumulativePosition(ROTATION_MAX); // milos, set magnetic encoder to right edge
+#endif
 
   SetPWM(0);
   if (startPos == actual) {
@@ -618,7 +622,7 @@ void FfbproModifyDuration(uint8_t effectId, uint16_t duration, uint16_t stdelay)
   volatile TEffectState* effect = &gEffectStates[effectId]; // milos, added
   effect->duration = duration; // milos, added
   effect->startDelay = stdelay; // milos, added
-  effectTime[effectId - 1] = 0; //milos, added - reset timer for this effect when duration is changed
+  effectTime[effectId - 1] = 0; // milos, added - reset timer for this effect when duration is changed
 }
 
 /*void FfbproSetDeviceGain(USB_FFBReport_DeviceGain_Output_Data_t* data, volatile TEffectState * effect) //milos, added
@@ -645,7 +649,7 @@ void FfbproSetEnvelope (USB_FFBReport_SetEnvelope_Output_Data_t* data, volatile 
   */
   effect->attackLevel = (u8)data->attackLevel;
   effect->fadeLevel = (u8)data->fadeLevel;
-  effect->attackTime = (u16)data->attackTime; //milos, added
+  effect->attackTime = (u16)data->attackTime; // milos, added
   effect->fadeTime = (u16)data->fadeTime;
 }
 
@@ -662,10 +666,10 @@ void FfbproSetCondition (USB_FFBReport_SetCondition_Output_Data_t* data, volatil
     uint16_t positiveSaturation;  // 0..32767 (physical 0..32767) //milos, was 0(0)..255(10000), int8_t, uncommented
     uint8_t deadBand;  // 0..255 (physical 0..32767) //milos, was 0(0)..255(10000)
   */
-  effect->magnitude = (s16)data->positiveCoefficient; //milos, postitve coefficient can also be negative
-  effect->offset = (s16)data->cpOffset; //milos, this offset changes X-pos
-  effect->deadBand = (u8)data->deadBand; //milos, added
-  effect->positiveSaturation = (s16)data->positiveSaturation; //milos, postitve saturation can also be negative (not used currently)
+  effect->magnitude = (s16)data->positiveCoefficient; // milos, postitve coefficient can also be negative
+  effect->offset = (s16)data->cpOffset; // milos, this offset changes X-pos
+  effect->deadBand = (u8)data->deadBand; // milos, added
+  effect->positiveSaturation = (s16)data->positiveSaturation; // milos, postitve saturation can also be negative (not used currently)
 }
 
 void FfbproSetPeriodic (USB_FFBReport_SetPeriodic_Output_Data_t* data, volatile TEffectState * effect)
@@ -681,9 +685,9 @@ void FfbproSetPeriodic (USB_FFBReport_SetPeriodic_Output_Data_t* data, volatile 
     uint16_t period;  // 0..65535  (physical 0..65535), exp -3, s //milos, was 0(0)..32767(32767)
   	} USB_FFBReport_SetPeriodic_Output_Data_t;
   */
-  //effect->type = USB_EFFECT_PERIODIC; //milos, was conflicting with FfbproSetEffect
+  //effect->type = USB_EFFECT_PERIODIC; // milos, was conflicting with FfbproSetEffect
   effect->magnitude = (u16)data->magnitude;
-  effect->offset = (((s16)data->offset)); //milos, this offset changes magnitude
+  effect->offset = (((s16)data->offset)); // milos, this offset changes magnitude
   effect->phase = (u8)data->phase;
   effect->period = (u16)data->period;
 }
@@ -702,14 +706,14 @@ void FfbproSetConstantForce (USB_FFBReport_SetConstantForce_Output_Data_t* data,
 
 void FfbproSetRampForce (USB_FFBReport_SetRampForce_Output_Data_t* data, volatile TEffectState * effect)
 {
-  uint8_t eid = data->effectBlockIndex; //milos, uncommented
+  uint8_t eid = data->effectBlockIndex; // milos, uncommented
   /*USB effect data:
     uint8_t	reportId;	// =6
     uint8_t	effectBlockIndex;	// 1..40
     int8_t rampStart; // -128..127  (physical -32768..32767) //milos, was -10000..10000
     int8_t rampEnd; // -128..127  (physical -32768..32767) //milos, was -10000..10000*/
-  effect->rampStart = data->rampStart; //milos, added
-  effect->rampEnd = data->rampEnd; //milos, added
+  effect->rampStart = data->rampStart; // milos, added
+  effect->rampEnd = data->rampEnd; // milos, added
 }
 
 void setFFB(s32 command) {
@@ -755,12 +759,12 @@ uint8_t FfbproSetEffect (USB_FFBReport_SetEffect_Output_Data_t* data, volatile T
     uint16_t startDelay;  // 0..65535, exp -3, s //milos, uncommented
     } USB_FFBReport_SetEffect_Output_Data_t;
   */
-  effect->type = data->effectType; //milos, this is where effect type is being set
+  effect->type = data->effectType; // milos, this is where effect type is being set
   effect->gain = (s16)data->gain;
-  FfbproModifyDuration(eid, (u16)data->duration, (u16)data->startDelay); //milos, added
-  //effect->startDelay = (u16)data->startDelay; //milos, added
-  effect->direction = (u16)data->direction; //milos, added
-  effect->enableAxis = (u8)data->enableAxis; //milos, added
+  FfbproModifyDuration(eid, (u16)data->duration, (u16)data->startDelay); // milos, added
+  //effect->startDelay = (u16)data->startDelay; / /milos, added
+  effect->direction = (u16)data->direction; // milos, added
+  effect->enableAxis = (u8)data->enableAxis; // milos, added
   //bool is_periodic = false; //milos, commented
   //s32 mag = (((s32)effect->magnitude)*((s32)effect->gain)) / 163;
   // Fill in the effect type specific data

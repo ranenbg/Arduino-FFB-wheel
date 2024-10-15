@@ -126,7 +126,7 @@ void InitLoadCell () { // milos, added
 #endif
 
 void InitInputs() {
-  //analogReference(INTERNAL); // sets 2.56V on AREF pin for Leonardo or Micro, can be EXTERNAL
+  //analogReference(INTERNAL); // sets 2.56V on AREF pin for Leonardo or Micro, can be EXTERNAL also
   for (u8 i = 0; i < sizeof(analog_inputs_pins); i++) {
     pinMode(analog_inputs_pins[i], INPUT);
   }
@@ -184,10 +184,8 @@ void InitShiftRegister() {
 #else // no shift reg
 void InitButtons() { // milos, added - if not using shift register, allocate some free pins for buttons
   pinMode(BUTTON0, INPUT_PULLUP);
-#ifndef USE_XY_SHIFTER // milos, only when no XY shifter configure buttons
   pinMode(BUTTON1, INPUT_PULLUP);
   pinMode(BUTTON2, INPUT_PULLUP);
-#endif
 #ifndef USE_PROMICRO
   pinMode(BUTTON3, INPUT_PULLUP); // for Leonardo and Micro, we can use button3 even with z-index
 #else // if use proMicro
@@ -202,7 +200,7 @@ void InitButtons() { // milos, added - if not using shift register, allocate som
 #ifndef USE_LOAD_CELL
   pinMode(BUTTON7, INPUT_PULLUP);
 #endif // end of load cell
-#else // if use button matrix
+#else // if we use button matrix
   pinModeFast(BUTTON4, OUTPUT);
   pinModeFast(BUTTON5, OUTPUT);
   pinModeFast(BUTTON6, OUTPUT);
@@ -221,10 +219,9 @@ void InitButtons() { // milos, added - if not using shift register, allocate som
 }
 #endif // end of shift reg
 
-
-
 #ifdef USE_SHIFT_REGISTER
 void nextInputState() {
+
   bitVal = 0;
   if (SHIFTREG_STATE > SHIFTS_NUM) {	// SINGLE SHIFT = 25 states  DUAL SHIFT = 49 states (both zero include), 33 for 16 shifts // milos, 49 for 24 shifts or 3 bytes, 65 for 32 shifts or 4 bytes
     SHIFTREG_STATE = 0;       // milos, we only read first 4 bytes since those contain button values on thrustmaster wheel rims (rim sends total of 8 bytes due to headroom for more buttons)
@@ -237,10 +234,16 @@ void nextInputState() {
   }
   if (SHIFTREG_STATE < 2) {
     if (SHIFTREG_STATE == 0) digitalWriteFast(SHIFTREG_PL, HIGH); //milos, changed to fast, was LOW
-    if (SHIFTREG_STATE == 1) digitalWriteFast(SHIFTREG_PL, LOW); //milos, changed to fast, was HIGH
+    if (SHIFTREG_STATE == 1) {
+      digitalWriteFast(SHIFTREG_PL, LOW); // milos, changed to fast, was HIGH
+#ifdef USE_SN74ALS166N
+      delayMicroseconds(5);
+      digitalWriteFast(SHIFTREG_PL, HIGH); // milos, load parralel inputs
+#endif
+    }
   } else {
     if (SHIFTREG_STATE % 2 == 0) {
-      bitVal = bitRead(digitalReadFast(SHIFTREG_DATA_SW), 7); // milos, faster reading
+      bitVal = bitRead(digitalReadFast(SHIFTREG_DATA_SW), 7); // milos, faster reading (bit7 of PIND register is pin D6)
       //if (i < 16) bytesVal_SW |= (bitVal << ((16 - 1) - i)); //milos, was 8 (we read first 2 bytes) // milos, commented old
       //if (i < 16) bitWrite(bytesVal_SW, i, bitVal); // milos, added
 
@@ -250,9 +253,9 @@ void nextInputState() {
 
       if (i < 32) bitWrite(bytesVal_SHR, i, bitVal); // milos, added
       i++;
-      digitalWriteFast(SHIFTREG_CLK, HIGH); //milos, changed to fast
+      digitalWriteFast(SHIFTREG_CLK, HIGH); // milos, changed to fast, was HIGH
     } else if (SHIFTREG_STATE % 2 == 1) {
-      digitalWriteFast(SHIFTREG_CLK, LOW); //milos, changed to fast
+      digitalWriteFast(SHIFTREG_CLK, LOW); // milos, changed to fast, was LOW
     }
   }
   SHIFTREG_STATE++;
@@ -281,7 +284,7 @@ u32 readInputButtons() {
     bmask <<= 1;
     }*/
 
-  //milos, my version - write 2B from bytesVal_SW into first 2B of buttons and 2B from btnVal_H into last 2B of buttons
+  // milos, my version - write 2B from bytesVal_SW into first 2B of buttons and 2B from btnVal_H into last 2B of buttons
   /*for (u8 i = 0; i < 16; i++) {
     bitWrite(buttons, i, bitRead(bytesVal_SW, i));
     bitWrite(buttons, i + 16, bitRead(bytesVal_H, i));
@@ -294,25 +297,162 @@ u32 readInputButtons() {
   buttons = bytesVal_SHR;
 
 #else  // milos, when no shift reg, use Arduino Leonardo for 3 or 4 buttons
-#ifndef USE_BTNMATRIX // milos, added - read all buttons only if we are not using button matrix
-  bitWrite(buttons, 0, readSingleButton(0));
+#ifndef USE_BTNMATRIX // milos, added - read all available buttons only if we are not using button matrix
+  // milos, here we define button mappings (link between arduino pins and buttons defined in HID)
+  bitWrite(buttons, 0, readSingleButton(0)); // milos, first 0 is button bit in HID, second 0 is associated to arduino pin - see config.h)
   bitWrite(buttons, 1, readSingleButton(1));
   bitWrite(buttons, 2, readSingleButton(2));
-#ifndef USE_LOADCELL // milos, only available if we do not use load cell
-  bitWrite(buttons, 7, readSingleButton(7));
-#endif // end of load cell
-#ifdef USE_PROMICRO
-#ifndef USE_ZINDEX
-  bitWrite(buttons, 3, readSingleButton(3));
-#else // milos, we can not have button3 for proMicro when we use z-index encoder
+  //------------- milos, start button3 case
+#ifdef USE_PROMICRO // milos, for proMicro button3 on D3 is available only if not using zindex and i2C devices
+#ifdef USE_ZINDEX
+  // milos, we can not have button3 for proMicro when we use z-index encoder
   bitWrite(buttons, 3, 0);
 #endif // end of z-index
-#else //milos, if we use Leonardo or Micro we can have button3 even with z-index
+#ifdef USE_AS5600
+  // milos, we can not have button3 for proMicro when we use AS5600 (i2C)
+  bitWrite(buttons, 3, 0);
+#endif // end of as5600
+#ifdef USE_ADS1015
+  // milos, we can not have button3 for proMicro when we use ADS1015 (i2C)
+  bitWrite(buttons, 3, 0);
+#endif // end of ads1015
+#ifdef USE_MCP4725
+  // milos, we can not have button3 for proMicro when we use MCP4725 (i2C)
+  bitWrite(buttons, 3, 0);
+#endif // end of mcp4725
+#ifndef USE_ZINDEX
+#ifndef USE_AS5600
+#ifndef USE_ADS1015
+#ifndef USE_MCP4725
+  bitWrite(buttons, 3, readSingleButton(3));   // milos, we can have button3 on D3 on proMicro only if nothing is using pin D3
+#endif // end of z-index
+#endif // end of as5600
+#endif // end of ads1015
+#endif // end of mcp4725
+#else // milos, if we use Leonardo or Micro we can have button3 on D12 even with z-index and i2C devices
   bitWrite(buttons, 3, readSingleButton(3));
 #endif // end of pro micro
   bitWrite(buttons, 4, readSingleButton(4));
   bitWrite(buttons, 5, readSingleButton(5));
   bitWrite(buttons, 6, readSingleButton(6));
+#ifndef USE_LOAD_CELL // milos, when no load cell
+#ifndef USE_AS5600 // milos, when not using as5600 we can have button7 at pin D5
+  bitWrite(buttons, 7, readSingleButton(7));
+#else // milos, if we use mag encoder and hat switch on proMicro
+#ifdef USE_PROMICRO
+#ifdef USE_HATSWITCH
+  bitWrite(buttons, 3, readSingleButton(7)); // milos, we need to remap D6 to button3 in order for hat switch left to work
+  bitWrite(buttons, 7, 0); // milos, we don't have button4 in that case
+#endif // end of hat swich
+#else // for leonardo/micro with hat switch
+bitWrite(buttons, 7, readSingleButton(7)); // milos, button7 is on pin D5 for leonardo/micro with hat switch
+#endif // end of proMicro
+#endif // end of as5600
+#else // milos, with load cell
+  bitWrite(buttons, 7, 0); // milos, button7 (pin D5) is unavailable on all boards if we use load cell
+#endif
+  //------------- end of button3 case
+  /*  //------------- milos, start of case for butons 0,4,5,6,7
+  #ifdef USE_LOAD_CELL // milos, with load cell
+  #ifdef USE_HATSWITCH // milos, with hat switch
+  #ifdef USE_PROMICRO // milos, for proMicro
+        // milos, load cell, hat switch, proMicro
+  #else // milos, for leonardo/micro
+        // milos, load cell, hat switch, leonardo/micro
+  #endif // end of proMicro
+  #else // milos, without hat switch
+  #ifdef USE_PROMICRO // milos, for proMicro
+        // milos, load cell, proMicro
+  #else // milos, for leonardo/micro
+        // milos, load cell, leonardo/micro
+  #endif // end of proMicro
+  #endif // end of hat switch
+  #else // milos, without load cell
+  #ifdef USE_XY_SHIFTER // milos, without load cell and XY shifter
+  #ifdef USE_HATSWITCH // milos, without load cell and hat switch
+  #ifdef USE_PROMICRO // milos, for proMicro
+          // milos, xy shifter, hat switch, proMicro
+  #else // milos, for leonardo/micro
+          // milos, xy shifter, hat switch, leonardo/micro
+  #endif // end of proMicro
+  #else // milos, without load cell and without hat switch
+  #ifdef USE_PROMICRO // milos, for proMicro
+          // milos, xy shifter, proMicro
+          // button0 should not be visible in this case, put 0 at bit4 of buttons in xy sh decode
+          bitWrite(buttons, 4, readSingleButton(4));
+          bitWrite(buttons, 5, readSingleButton(5));
+          bitWrite(buttons, 6, readSingleButton(6));
+          bitWrite(buttons, 7, readSingleButton(7));
+  #else // milos, for leonardo/micro
+          // milos, xy shifter, leonardo/micro
+          bitWrite(buttons, 6, readSingleButton(6));
+  #endif // end of proMicro
+  #endif // end of hat switch
+  #else // milos, without load cell and without XY shifter
+  #ifdef USE_HATSWITCH // milos, without load cell, without XY shifter and with hat switch
+  #ifdef USE_PROMICRO // milos, for proMicro
+          // milos, hat switch, proMicro
+          bitWrite(buttons, 4, readSingleButton(4));
+          bitWrite(buttons, 5, readSingleButton(5));
+          bitWrite(buttons, 6, readSingleButton(6));
+          bitWrite(buttons, 7, readSingleButton(7));
+  #else // milos, for leonardo/micro
+          // milos, hat switch, leonardo/micro
+          bitWrite(buttons, 4, readSingleButton(4));
+          bitWrite(buttons, 5, readSingleButton(5));
+          bitWrite(buttons, 6, readSingleButton(6));
+          bitWrite(buttons, 7, readSingleButton(7));
+  #endif // end of proMicro
+  #else // milos, without hat switch
+  #ifdef USE_PROMICRO // milos, for proMicro
+          // milos, proMicro
+          //bitWrite(buttons, 0, readSingleButton(0));
+          bitWrite(buttons, 4, readSingleButton(4));
+          bitWrite(buttons, 5, readSingleButton(5));
+          bitWrite(buttons, 6, readSingleButton(6));
+          bitWrite(buttons, 7, readSingleButton(7));
+  #else // milos, for leonardo/micro
+          // milos, leonardo/micro
+          //bitWrite(buttons, 0, readSingleButton(0));
+          bitWrite(buttons, 4, readSingleButton(4));
+          bitWrite(buttons, 5, readSingleButton(5));
+          bitWrite(buttons, 6, readSingleButton(6));
+          bitWrite(buttons, 7, readSingleButton(7));
+  #endif // end of proMicro
+  #endif // end of hat switch
+  #endif // end of xy shifter
+  #endif // end of load cell*/
+  //------------- milos, end of case for butons 0,4,5,6,7
+  /*
+    //bitWrite(buttons, 4, readSingleButton(4)); // milos, was commented
+  #ifndef USE_PROMICRO // milos, if leonardo/micro
+  #ifdef USE_XY_SHIFTER // milos, if xy shifter
+  #ifndef USE_HATSWITCH // milos, if hat switch
+    bitWrite(buttons, 0, readSingleButton(0)); // milos, if leonardo/micro and xy shifter, but no hat switch we can use button0
+    //bitWrite(buttons, 5, readSingleButton(5)); // milos, if leonardo/micro and xy shifter, but no hat switch we can use button5 // milos, was commented
+  #endif // end of hat switch
+  #else // milos, if no xy shifter but with hat switch
+  #ifdef USE_HATSWITCH
+    bitWrite(buttons, 5, readSingleButton(5));
+  #endif // end of hat switch
+  #endif // end of xy shifter
+  #else // milos, for proMicro
+    //#ifdef USE_HATSWITCH
+    bitWrite(buttons, 0, readSingleButton(0)); // milos, on proMicro we can have button0 only with hat switch
+    //#endif // milos, end of hat switch
+    bitWrite(buttons, 4, readSingleButton(4)); // milos, on proMicro we can have button4
+    bitWrite(buttons, 5, readSingleButton(5)); // milos, on proMicro we can have button5
+  #endif // end of proMicro
+    bitWrite(buttons, 6, readSingleButton(6));
+  #ifndef USE_LOAD_CELL // milos, only available if we do not use load cell
+    //#ifndef USE_HATSWITCH // milos, if no hat switch
+    //#ifdef USE_PROMICRO // milos, if proMicro
+    bitWrite(buttons, 7, readSingleButton(7));
+    //#endif // end of proMicro
+    //#endif // end of hat switch
+  #endif // end of load cell
+  */
+
 #ifdef USE_EXTRABTN
   bitWrite(buttons, 8, readSingleButton(8));
   bitWrite(buttons, 9, readSingleButton(9));
@@ -337,9 +477,9 @@ u32 readInputButtons() {
 #endif // end of shift reg
 
 #ifdef USE_HATSWITCH // milos, added
-  buttons = decodeHat(buttons); //milos, decodes hat switch values into only 1st 4 buttons (button0-up, button1-right, button2-down, button3-left)
+  buttons = decodeHat(buttons); // milos, decodes hat switch values into only 1st 4 buttons (button0-up, button1-right, button2-down, button3-left)
 #else
-  buttons = buttons << 4; //milos, bitshift to the left 4bits to skip updating hat switch
+  buttons = buttons << 4; // milos, bitshift to the left 4 bits to skip updating hat switch
 #endif // end of hat switch
 
   return (buttons); // milos, we send all 4 bytes
@@ -349,19 +489,11 @@ u32 readInputButtons() {
 bool readSingleButton (uint8_t i) { // milos, added
   bool temp;
   if (i == 0) {
-    temp = !bitRead(digitalReadFast(BUTTON0), B0PORTBIT); // milos, read bit4 from PINF A3 (or bit4 from PIND D4 when no LC) into buttons bit0
+    temp = !bitRead(digitalReadFast(BUTTON0), B0PORTBIT); // milos, read bit4 from PINF A3 (or bit4 from PIND D4 when no LC, or bit6 from PINC D5 on leonardo/micro when XY shifter) into buttons bit0
   } else if (i == 1) {
-#ifndef USE_XY_SHIFTER
     temp = !bitRead(digitalReadFast(BUTTON1), B1PORTBIT); // milos, read bit1 from PINF A4 (or bit3 from PINB D14 on ProMicro) into buttons bit1
-#else
-    temp = false; // milos, we can't use this pin for button if we use XY shifter
-#endif
   } else if (i == 2) {
-#ifndef USE_XY_SHIFTER
     temp = !bitRead(digitalReadFast(BUTTON2), B2PORTBIT); // milos, read bit0 from PINF A5 (or bit1 from PINB D15 on ProMicro) into buttons bit2
-#else
-    temp = false; // milos, we can't use this pin for button if we use XY shifter
-#endif
   } else if (i == 3) {
     temp = !bitRead(digitalReadFast(BUTTON3), B3PORTBIT); // milos, read bit6 from PIND D12 into buttons bit3
   } else if (i == 4) {
@@ -370,12 +502,10 @@ bool readSingleButton (uint8_t i) { // milos, added
     temp = !bitRead(digitalReadFast(BUTTON5), B5PORTBIT); // milos, read bit6 from PINE D7 into buttons bit5
   } else if (i == 6) {
     temp = !bitRead(digitalReadFast(BUTTON6), B6PORTBIT); // milos, read bit4 from PINB D8 into buttons bit6
+#ifndef USE_LOAD_CELL // milos, save some memory space if this button is unavailable
   } else if (i == 7) {
-#ifndef USE_LOAD_CELL
     temp = !bitRead(digitalReadFast(BUTTON7), B7PORTBIT); // milos, read bit6 from PINC D5 into buttons bit7
-#else
-    temp = false; // milos, we can't use this pin for button if we use load cell
-#endif // end of use lc
+#endif // end of load cell
 #ifdef USE_EXTRABTN // milos, if enabled we have 2 more extra digital buttons
   } else if (i == 8) {
     temp = !bitRead(digitalReadFast(BUTTON8), B8PORTBIT); // milos, read bit5 from PINF A2 into buttons bit8

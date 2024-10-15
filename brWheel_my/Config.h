@@ -10,16 +10,18 @@
 //#define USE_ADS1015       // milos, uncomment for 12bit pedals, commented is 10bit from arduino inputs (can not be used with AVG_INPUTS)
 //#define USE_DSP56ADC16S			// 16 bits Stereo ADC (milos, can not be used with USE_SHIFT_REGISTER)
 #define USE_QUADRATURE_ENCODER		// Position Quadrature encoder
-#define USE_ZINDEX          // milos, use Z-index encoder channel (caution, can not be used with USE_ADS1015 or USE_MCP4725)
+//#define USE_AS5600          // milos, uncomment to enable magnetic encoder via i2C instead of optical encoder
+//#define USE_ZINDEX          // milos, use Z-index encoder channel (caution, can not be used with USE_ADS1015, USE_MCP4725 or USE_AS5600)
 #define USE_LOAD_CELL				// Load cell shield // milos, new library for LC
 #define USE_SHIFT_REGISTER			// 2x8-bit parallel-load shift registers G27 board steering wheel (milos, this one is modified for 16 buttons)
 //#define USE_DUAL_SHIFT_REGISTER		// Dual 8-bit Parallel-load shift registers G27 board shifter  (milos, not available curently)
+//#define USE_SN74ALS166N          // milos, uncomment to use 3x8bit parralel-in serial-out shift register chips for 24 buttons, otherwise it's 16 buttons with ard nano-buttonbox (must be used with USE_SHIFT_REGISTER, but not implemented yet)
 //#define USE_XY_SHIFTER    // milos, uncomment to use XY analog shifter (can not be used with USE_BTNMATRIX, note that for proMicro clutch and handbrake will be unavailable)
-#define USE_HATSWITCH        // milos, uncomment to use first 4 buttons for hat switch instead
-//#define USE_BTNMATRIX        // milos, uncomment to use 8 pins as a 4x4 button matrix for total of 16 buttons (can not be used with USE_LOAD_CELL, shift register or XY shifter)
+#define USE_HATSWITCH        // milos, uncomment to use first 4 buttons for hat switch (D-pad)
+//#define USE_BTNMATRIX        // milos, uncomment to use 8 pins as a 4x4 button matrix for total of 16 buttons (can not be used with load cell, shift register or XY shifter)
 //#define AVG_INPUTS        // milos, uncomment to use averaging of arduino analog inputs (can not be used with USE_ADS1015)
 //#define USE_AUTOCALIB        // milos, uncomment to use autocalibration for pedal axis (if left commented manual calibration is enabled)
-//#define USE_CENTERBTN    // milos, ucomment to assign digital input pin D2 for hardware wheel recenter to 0deg (not available when USE_ZINDEX, USE_ADS1015 or USE_MCP4725)
+//#define USE_CENTERBTN    // milos, ucomment to assign digital input pin D2 for hardware wheel recenter to 0deg (caution, can not be used with USE_ZINDEX, USE_ADS1015, USE_MCP4725 or USE_AS5600)
 //#define USE_EXTRABTN    // milos, ucomment to configure analog inputs on pins A2 and A3 as a digital button inputs (2 extra buttons, note that clutch and handbrake will be unavailable)
 //#define USE_MCP4725      // milos, 12bit DAC (0-5V), uncomment to enable output of FFB signal as 2ch DAC voltage output
 #define USE_ANALOGFFBAXIS // milos, uncomment to enable other than encoder X-axis to be tied with FFB axis
@@ -35,19 +37,15 @@
 //#define	SYNC_LED_PIN		12 //milos, USB polling clock
 
 //milos, added - ffb clip LED indicator
-#ifndef USE_PROMICRO
-#define  FFBCLIP_LED_PIN    13 // for Leonardo and Micro
-#else  // of USE_PROMICRO
+#define FFBCLIP_LED_PIN 13 // only for leonardo/micro
+
 #ifndef USE_MCP4725 // milos, we can only use it if DAC is not using i2C pins 2,3
-#ifndef USE_ADS1105 // milos, we can only use it if ADS1105 is not using i2C pins 2,3
-#define  FFBCLIP_LED_PIN    3 // for ProMicro and no USE_ADS1105 or USE_MCP4725
-#else
-#define  FFBCLIP_LED_PIN    15 // for ProMicro and no USE_ADS1105
-#endif // of USE_ADS1105
-#else // no USE_MCP4725
-#define  FFBCLIP_LED_PIN    15 // for ProMicro and no USE_MCP4725
-#endif // of USE_MCP4725
-#endif // of USE_PROMICRO
+#ifndef USE_ADS1015 // milos, we can only use it if ADS1015 is not using i2C pins 2,3
+#ifndef USE_AS5600 // milos, we can only use it if AS5600 is not using i2C pin 2,3
+#define FFBCLIP_LED_PIN 3 // for ProMicro if no i2C devices
+#endif // end of as5600
+#endif // end of ads1015
+#endif // end of mcp4725
 
 #define ACCEL_PIN			A0
 #ifdef USE_LOAD_CELL // milos
@@ -60,61 +58,82 @@
 #endif
 
 // milos, added - for alternate button0 options
-#ifdef USE_LOAD_CELL //milos
+#ifdef USE_LOAD_CELL // milos, with load cell
 #define BUTTON0 A3 // A3, used for button0
 #define B0PORTBIT 4 // read bit4
-#else
+#else // no load cell
 #define BUTTON0 4 // D4, used for button0
 #define B0PORTBIT 4 // read bit4 of PIND
 #define BUTTON7 5 // D5, used for button7
 #define B7PORTBIT 6 // read bit6 of PINC
-#endif
+#endif // end of load cell
 
-#ifndef USE_PROMICRO // milos, added - for Leonardo or Micro
-#ifndef USE_XY_SHIFTER // milos, when no XY shifter buttons are available on analog pins
-#define BUTTON1 A4 // A4, used for button1 instead
-#define B1PORTBIT 1 // read bit1
-#define BUTTON2 A5 // A5, used for button2 instead
-#define B2PORTBIT 0 // read bit0
-#else // if we use xy shifter
-#define SHIFTER_X_PIN A4 // milos
-#define SHIFTER_Y_PIN A5 // milos
-#endif // end of xy shifter
-#define BUTTON3 12 // used for button3
-#define B3PORTBIT 6 // read bit6 or D12
-#else // for Pro Micro
-#define BUTTON1 14 // pin14, used for button1 instead
-#define B1PORTBIT 3 // bit3
-#define BUTTON2 15 // pin15, used for button2 instead
-#define B2PORTBIT 1 // bit1
-#ifndef USE_CENTERBTN // if not using center button
-#define BUTTON3 2 // pin2, used for button3 instead
-#define B3PORTBIT 1 // read bit1 of PIND
-#else // if we use center button it uses the pin2
-#define BUTTON3 3 // pin3, used for button3 instead
-#define B3PORTBIT 0 // read bit0 of PIND
-#endif // end of center button
-//#define SHIFTER_X_PIN A4 // milos, they are not on proMicro pcb
-//#define SHIFTER_Y_PIN A5 // milos, they are not on proMicro pcb
-#endif // end of proMicro
-
-#ifdef USE_SHIFT_REGISTER //milos, added
-#define SHIFTREG_PL			  8	  // PL SH/LD (Shift or Load input) // milos, was 4
-#define SHIFTREG_CLK		  7 	// CLOCK 8-bit Parallel shift // milos, was 5
-#define SHIFTREG_DATA_SW	6		// DATA from Steering Wheel
-//#define SHIFTREG_DATA_H		7		// DATA from Shifter H (Dual 8-bit) //milos, not in use
-//#define SHIFTREG_DATA_OUT	13	// DATA Shift-Out LED (8-bit)   ###### NOT YET IMPLEMENTED ###### //milos, was 3
+#ifdef USE_SHIFT_REGISTER // milos, added
+#define SHIFTREG_PL 8 // PL SH/LD (Shift or Load input) // milos, was 4
+#define SHIFTREG_CLK 7 // CLOCK 8-bit Parallel shift // milos, was 5
+#define SHIFTREG_DATA_SW 6 // DATA from Steering Wheel
+//#define SHIFTREG_DATA_H 7 // DATA from Shifter H (Dual 8-bit) //milos, not in use
+//#define SHIFTREG_DATA_OUT 13 // DATA Shift-Out LED (8-bit)   ###### NOT YET IMPLEMENTED ###### //milos, was 3
 #define SHIFTS_NUM  33 // milos, added - defines number of shifts for shift register from the button box (depends on number of buttons we want to read, see inputs.ino)
-#else //milos, if no shift reg re-alocate some pins to button4-6 instead
+#else // milos, if no shift reg re-alocate some pins for buttons 4-6 instead
 #define BUTTON4 6 // D6 or bit7 of PIND
 #define B4PORTBIT 7 // bit7
 #define BUTTON5 7 // D7 or bit6 of PINE
 #define B5PORTBIT 6 // bit6
 #define BUTTON6 8 // D8 or bit4 of PINB
 #define B6PORTBIT 4 // bit4
-#endif //end of shift reg
+#endif // end of shift reg
 
-#ifdef USE_EXTRABTN //milos, added - allocate 2 more buttons on A2, A3(at the expence of disabling clutch and handbrake)
+#ifndef USE_PROMICRO // milos, added - for Leonardo or Micro
+#ifndef USE_XY_SHIFTER // milos, when no XY shifter - buttons are available on analog pins
+#define BUTTON1 A4 // A4, used for button1 instead
+#define B1PORTBIT 1 // read bit1 of PINF
+#define BUTTON2 A5 // A5, used for button2 instead
+#define B2PORTBIT 0 // read bit0 of PINF
+#else // if we use xy shifter on leonardo or micro
+#define SHIFTER_X_PIN A4 // milos
+#define SHIFTER_Y_PIN A5 // milos
+// milos, re-map buttons 1,2 to be available for hat switch on leonardo/micro when using xy shifter
+#ifdef USE_HATSWITCH // milos, alternate button0,4 mappings because of hat switch with xy shifter
+#define BUTTON0 5 // D5, used for button0
+#define B0PORTBIT 6 // read bit6 of PINC
+#define BUTTON4 4 // D4, used for button4
+#define B4PORTBIT 4 // read bit4 of PIND
+#endif // end of hat switch
+#define BUTTON1 6 // D6, used for button1 instead
+#define B1PORTBIT 7 // read bit7 of PIND
+#define BUTTON2 7 // D7, used for button2 instead
+#define B2PORTBIT 6 // read bit6 of PINE
+// milos, end of button re-map
+#endif // end of xy shifter
+#define BUTTON3 12 // D12, used for button3 on leonardo/micro
+#define B3PORTBIT 6 // read bit6 of PIND
+#else // for Pro Micro
+// milos, re-map buttons 0,4,7 when xy shifter is used to be available for hat switch on proMicro
+#ifdef USE_HATSWITCH // milos, with hat switch
+#define BUTTON0 5 // D5, used for button0
+#define B0PORTBIT 6 // read bit6 of PINC
+#define BUTTON4 4 // D4, used for button4
+#define B4PORTBIT 4 // read bit4 of PIND
+#define BUTTON7 6 // D6, used for button7
+#define B7PORTBIT 7 // read bit7 of PIND
+#endif // end of hat switch
+#define BUTTON1 14 // D14, used for button1 instead
+#define B1PORTBIT 3 // read bit3 of PINB
+#define BUTTON2 15 // D15, used for button2 instead
+#define B2PORTBIT 1 // read bit1 of PINB
+#ifndef USE_CENTERBTN // if not using center button
+#define BUTTON3 2 // D2, used for button3 instead on proMicro
+#define B3PORTBIT 1 // read bit1 of PIND
+#else // if we use center button it uses the pin D2
+#define BUTTON3 3 // D3, used for button3 instead, we have no FFB clip LED
+#define B3PORTBIT 0 // read bit0 of PIND
+#endif // end of center button
+//#define SHIFTER_X_PIN A4 // milos, they are not on proMicro pcb
+//#define SHIFTER_Y_PIN A5 // milos, they are not on proMicro pcb
+#endif // end of proMicro
+
+#ifdef USE_EXTRABTN // milos, added - allocate 2 more buttons on A2,A3 (at the cost of disabling clutch and handbrake axis)
 #define BUTTON8 A2 // A2 or bit5 of PINF
 #define B8PORTBIT 5 // bit5
 #define BUTTON9 A3 // A3 or bit4 of PINF
@@ -205,7 +224,7 @@ uint8_t LC_scaling; // milos, load cell scaling factor (affects brake pressure, 
 #define PARAM_ADDR_HBRK_LO       0x36 //milos, hand brake pedal cal min
 #define PARAM_ADDR_HBRK_HI       0x38 //milos, hand brake pedal cal max
 
-#define VERSION		0xE8 // milos, firmware version (E6=230, E7=231, E8=232, E9=233) change this accordingly!
+#define VERSION		0xF2 // milos, firmware version (F0=240, F1=241, F2=242, F3=243) change this accordingly!
 
 #define GetParam(m_offset,m_data)	getParam((m_offset),(u8*)&(m_data),sizeof(m_data))
 #define SetParam(m_offset,m_data)	setParam((m_offset),(u8*)&(m_data),sizeof(m_data))
@@ -399,12 +418,13 @@ uint8_t sConfig; // milos, added - analog XY H-shifter configuration byte
 // milos - added, function for decoding XY shifter analog values into last 8 buttons
 uint32_t decodeXYshifter (uint32_t inbits, int16_t sx, int16_t sy) {
   uint32_t gears = 0; // shifter gears represented as digital buttons (1 bit for each gear)
-  uint8_t revButtonBit = 0; // reverse gear button bit number (normal buttons start from bit4, bit0-bit3 are for hat switch)
+  const uint8_t InpRevButtonBit = 0; // input reverse gear button bit number (normal buttons start from bit4, bit0-bit3 are reserved for hat switch)
+  const uint8_t OutRevButtonBit = 0; // output reverse gear button bit number (this is where we want to put reverse gear button, out of 24 available buttons)
   if (bitRead(sConfig, 0)) {   // if reverse gear button is inverted (logitech shifters)
-    if (bitRead(inbits, revButtonBit + 4)) { // read rev gear button bit
-      bitClear(inbits, revButtonBit + 4); // if 1, set rev gear bit to 0
+    if (bitRead(inbits, InpRevButtonBit + 4)) { // read rev gear button bit
+      bitClear(inbits, InpRevButtonBit + 4); // if 1, set rev gear bit to 0
     } else {
-      bitSet(inbits, revButtonBit + 4); // if 0, set rev gear bit to 1
+      bitSet(inbits, InpRevButtonBit + 4); // if 0, set rev gear bit to 1
     }
   }
   if (sx < sCal[0] && sy >= sCal[4]) { // 1st gear
@@ -421,8 +441,8 @@ uint32_t decodeXYshifter (uint32_t inbits, int16_t sx, int16_t sy) {
     if (bitRead(sConfig, 1)) { // if 8 gear shifter
       bitSet(gears, 21); // set 6th gear
     } else { // if 6 gear shifter
-      if (bitRead(inbits, revButtonBit + 4)) {
-        bitSet(gears, revButtonBit); // reverse gear
+      if (bitRead(inbits, InpRevButtonBit + 4)) {
+        bitSet(gears, OutRevButtonBit); // reverse gear
       } else {
         bitSet(gears, 21); // still set 6th gear
       }
@@ -431,8 +451,8 @@ uint32_t decodeXYshifter (uint32_t inbits, int16_t sx, int16_t sy) {
     bitSet(gears, 22);
   } else if (sx >= sCal[2] && sy < sCal[3]) { // 8th gear
     if (bitRead(sConfig, 1)) { // if 8 gear shifter
-      if (bitRead(inbits, revButtonBit + 4)) {
-        bitSet(gears, revButtonBit); // reverse gear
+      if (bitRead(inbits, InpRevButtonBit + 4)) {
+        bitSet(gears, OutRevButtonBit); // reverse gear
       } else {
         bitSet(gears, 23); // set 8th gear
       }
@@ -440,7 +460,25 @@ uint32_t decodeXYshifter (uint32_t inbits, int16_t sx, int16_t sy) {
       bitSet(gears, 23); // still set 8th gear
     }
   }
-  return ((inbits & 0b11110000000011111111111111101111) | (gears << 4));
+  // milos, on leonardo/micro when both xy shifter and hat switch are used pins D5,D6,D7 are remaped to buttons 0,1,2
+  // milos, so we need to stop reading these pins twice as normal buttons
+  // milos, pins D5,D6,D7 are taken care of by bit mask at bit4,bit5,bit7 in xy shifter decoding function
+  uint32_t bitMask = 0b11110000000011111111111111101111; // milos, default bit mask, bit4=0 for reverse gear button, bits20-27 are 0 for gear buttons to be inserted
+#ifdef USE_XY_SHIFTER // milos, with xy shifter
+#ifdef USE_HATSWITCH // milos, with hat switch
+#ifndef USE_PROMICRO // milos, only for leonardo/micro
+  bitMask = 0b11110000000011111111111101001111; // milos, modifyed bit mask not to show duplicate buttons0,1,3
+#else // milos, for proMicro
+  bitMask = 0b11110000000011111111111111101111; // milos, default bit mask
+#endif // end of proMicro
+#else // milos, no hat switch with xy shifter
+#ifndef USE_PROMICRO // milos, only for leonardo/micro
+  bitMask = 0b11110000000011111111111110001111; // milos, modifyed bit mask not to show duplicate buttons0,1,2
+#endif // end of proMicro
+#endif // end of hat switch
+#endif // end of xy shifter
+
+  return ((inbits & bitMask) | (gears << 4)); // milos, gears are shifted to the left by 4 bits to skip updating hat switch, reverse gear is at bit4 (1st bit of buttons)
 }
 
 const uint8_t avgSamples = 4; // milos, added - number of samples for averaging of arduino analog inputs

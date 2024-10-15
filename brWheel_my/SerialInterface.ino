@@ -11,8 +11,7 @@ u8 toUpper(u8 c)
 }
 
 void readSerial() {
-  if (CONFIG_SERIAL.available() > 0)
-  {
+  if (CONFIG_SERIAL.available() > 0) {
     u8 c = toUpper(CONFIG_SERIAL.read());
     //DEBUG_SERIAL.println(c);
     s32 temp, temp1;
@@ -82,12 +81,17 @@ void readSerial() {
 #else // if no z-index
 #ifndef USE_ADS1015
 #ifndef USE_MCP4725
+#ifndef USE_AS5600
 #ifdef USE_CENTERBTN
         CONFIG_SERIAL.print("c");
+#endif // end of as5600
 #endif // end of centerbtn
 #endif // end of mcp
 #endif // end of ads
 #endif // end of zindex
+#ifdef USE_AS5600
+        CONFIG_SERIAL.print("w");
+#endif
 #ifdef USE_HATSWITCH
         CONFIG_SERIAL.print("h");
 #endif
@@ -99,6 +103,9 @@ void readSerial() {
 #endif
 #ifdef USE_BTNMATRIX
         CONFIG_SERIAL.print("t");
+#endif
+#ifdef USE_SN74ALS166N
+        CONFIG_SERIAL.print("r");
 #endif
 #ifdef USE_XY_SHIFTER
         CONFIG_SERIAL.print("f");
@@ -142,14 +149,22 @@ void readSerial() {
       case 'O': // milos, added to adjust optical encoder CPR
         temp = CONFIG_SERIAL.parseInt();
         temp = constrain(temp, 4, 600000); //milos, extended to 32bit (100000*6)
+#ifndef USE_AS5600 // milos, when no AS5600
         temp1 = myEnc.Read() - ROTATION_MID + brWheelFFB.offset; // milos
+#else
+        temp1 = as5600.getCumulativePosition() - ROTATION_MID; // milos
+#endif
         wheelAngle = float(temp1) * float(ROTATION_DEG) / float(ROTATION_MAX); // milos, current wheel angle
         CPR = temp; // milos, update CPR
         ROTATION_MAX = int32_t(float(temp) / 360.0 * float(ROTATION_DEG)); // milos, updated
         ROTATION_MID = ROTATION_MAX >> 1; // milos, updated, divide by 2
         //brWheelFFB.offset = 0; //milos
         temp1 = int32_t(wheelAngle * float(ROTATION_MAX) / float(ROTATION_DEG)); // milos, here we recover the old wheel angle
+#ifndef USE_AS5600 // milos, when no AS5600
         myEnc.Write(ROTATION_MID + temp1 - brWheelFFB.offset); // milos
+#else
+        as5600.resetCumulativePosition(ROTATION_MID + temp1); // milos
+#endif
         //CONFIG_SERIAL.print("encoder CPR[4-600000]: ");
         //CONFIG_SERIAL.println(temp);
         CONFIG_SERIAL.println(1);
@@ -166,9 +181,13 @@ void readSerial() {
         //CONFIG_SERIAL.println(brWheelFFB.offset); // milos, saving some bytes in flash memory
         CONFIG_SERIAL.println(1);
 #else
+#ifndef USE_AS5600 // milos, when no AS5600
         myEnc.Write(ROTATION_MID); // milos, just set at zero angle
+#else // milos, if we use AS5600
+        as5600.resetCumulativePosition(ROTATION_MID);
+#endif // end of use as5600
         CONFIG_SERIAL.println(0);
-#endif
+#endif // end of use z index
         break;
       case 'Z': // milos, hard reset the z-index offset
 #ifdef USE_ZINDEX
@@ -182,14 +201,22 @@ void readSerial() {
       case 'G': // milos, this was not working, fixed now
         temp = CONFIG_SERIAL.parseInt();
         temp = constrain(temp, 30, 1800); // milos
+#ifndef USE_AS5600 // milos, when no AS5600
         temp1 = myEnc.Read() - ROTATION_MID + brWheelFFB.offset; // milos
+#else
+        temp1 = as5600.getCumulativePosition() - ROTATION_MID; // milos
+#endif
         wheelAngle = float(temp1) * float(ROTATION_DEG) / float(ROTATION_MAX); // milos, current wheel angle
         ROTATION_DEG = temp; // milos, update degrees of rotation
         ROTATION_MAX = int32_t(float(CPR) / 360.0 * float(temp)); // milos, updated
         ROTATION_MID = ROTATION_MAX >> 1; // milos, updated, divide by 2
         //brWheelFFB.offset = 0; //milos
         temp1 = int32_t(wheelAngle * float(ROTATION_MAX) / float(ROTATION_DEG)); // milos, here we recover the old wheel angle
+#ifndef USE_AS5600 // milos, when no AS5600
         myEnc.Write(ROTATION_MID + temp1 - brWheelFFB.offset); // milos
+#else
+        as5600.resetCumulativePosition(ROTATION_MID + temp1); // milos
+#endif
         //CONFIG_SERIAL.print("Rotation [30-1800]deg: "); // milos
         //CONFIG_SERIAL.println(temp);  // milos
         CONFIG_SERIAL.println(1);

@@ -4,15 +4,7 @@
 #include <digitalWriteFast.h>
 
 void InitPWM() {
-
   pinModeFast(DIR_PIN, OUTPUT);
-#ifndef USE_PROMICRO
-  pinModeFast(FFBCLIP_LED_PIN, OUTPUT); //milos, if no promicro we can use ffb clip led
-#else // for promicro
-#ifndef USE_CENTERBTN
-  pinModeFast(FFBCLIP_LED_PIN, OUTPUT); //milos, for promicro we can only use ffb clip led if no center button
-#endif // end of center button
-#endif // end of promicro
   TOP = calcTOP(pwmstate); // milos, this will set appropriate TOP value for all PWM modes, depending on pwmstate loaded from EEPROM
   MM_MAX_MOTOR_TORQUE = TOP;
   minTorquePP = ((f32)MM_MIN_MOTOR_TORQUE) / ((f32)MM_MAX_MOTOR_TORQUE); // milos
@@ -37,19 +29,27 @@ void InitPWM() {
 #endif // of USE_MCP4275
 
 #ifndef USE_PROMICRO
-  blinkFFBclipLED(); //milos, if no promicro we can use ffb clip led
-#else // for promicro
+  pinMode(FFBCLIP_LED_PIN, OUTPUT); // milos, if no proMicro we can use ffb clip led
+  blinkFFBclipLED(); // milos, signals end of configuration
+#else // for proMicro
 #ifndef USE_CENTERBTN
-  blinkFFBclipLED(); //milos, for promicro we can only use ffb clip led if no center button
+#ifndef USE_MCP4725 // milos, we can only use it if DAC is not using i2C pins 2,3
+#ifndef USE_ADS1015 // milos, we can only use it if ADS1015 is not using i2C pins 2,3
+#ifndef USE_AS5600 // milos, we can only use it if AS5600 is not using i2C pin 2,3
+  pinMode(FFBCLIP_LED_PIN, OUTPUT); // milos, for proMicro we can only use ffb clip led if no center button
+  blinkFFBclipLED(); // milos, signals end of configuration
+#endif // end of as5600
+#endif // end of ads1015
+#endif // end of mcp4725
 #endif // end of center button
-#endif // end of promicro
+#endif // end of proMicro
 }
 
 void blinkFFBclipLED() { // milos, added - blink FFB clip LED a few times at startup to indicate succesful boot
   for (uint8_t i = 0; i < 3; i++) {
-    digitalWriteFast(FFBCLIP_LED_PIN, HIGH);
+    digitalWrite(FFBCLIP_LED_PIN, HIGH);
     delay(20);
-    digitalWriteFast(FFBCLIP_LED_PIN, LOW);
+    digitalWrite(FFBCLIP_LED_PIN, LOW);
     delay(20);
   }
 }
@@ -68,12 +68,18 @@ void activateFFBclipLED(s32 t) {  //milos, added - turn on FFB clip LED if max F
 void SetPWM (s32 torque)  { //torque between -MM_MAX_MOTOR and +MM_MAX_MOTOR
 
 #ifndef USE_PROMICRO
-  activateFFBclipLED(torque); //milos, if no promicro we can use ffb clip led
-#else // for promicro
+  activateFFBclipLED(torque); // milos, if no promicro we can use ffb clip led
+#else // for proMicro
 #ifndef USE_CENTERBTN
-  activateFFBclipLED(torque); //milos, for promicro we can only use ffb clip led if no center button
+#ifndef USE_MCP4725 // milos, we can only use it if DAC is not using i2C pins 2,3
+#ifndef USE_ADS1015 // milos, we can only use it if ADS1015 is not using i2C pins 2,3
+#ifndef USE_AS5600 // milos, we can only use it if AS5600 is not using i2C pin 2,3
+  activateFFBclipLED(torque); // milos, for promicro we can only use ffb clip led if no center button
+#endif // end of as5600
+#endif // end of ads1015
+#endif // end of mcp4725
 #endif // end of center button
-#endif // end of promicro
+#endif // end of proMicro
 
 #ifndef USE_LOAD_CELL // milos, only allow FFB balance if not using load cell
   FFB_bal = (f32)(LC_scaling - 128) / 255.0;
@@ -123,13 +129,16 @@ void SetPWM (s32 torque)  { //torque between -MM_MAX_MOTOR and +MM_MAX_MOTOR
         torque = map (torque, 0, MM_MAX_MOTOR_TORQUE, MM_MIN_MOTOR_TORQUE, R_bal * MM_MAX_MOTOR_TORQUE);
         PWM16A(0);
         PWM16B(torque);
+        digitalWriteFast(DIR_PIN, HIGH); //use dir pin as BTS7960 pwm motor enable signal
       } else if (torque < 0) {
         torque = map (-torque, 0, MM_MAX_MOTOR_TORQUE, MM_MIN_MOTOR_TORQUE, L_bal * MM_MAX_MOTOR_TORQUE);
         PWM16A(torque);
         PWM16B(0);
+        digitalWriteFast(DIR_PIN, HIGH);
       } else {
         PWM16A(0);
         PWM16B(0);
+        digitalWriteFast(DIR_PIN, LOW); //disable bts output when no pwm signal to make it rotate freely
       }
     } else { // if PWM0.50.100 mode (pwmstate bit1=0 and bit6=1)
       if (torque > 0) {

@@ -8,7 +8,7 @@
 s16 ROTATION_DEG; //milos
 s32 CPR; //milos
 s32 ROTATION_MAX; //milos
-s32 ROTATION_MID; // milos
+s32 ROTATION_MID; //milos
 
 //-----------------------------------------------------------------------------------------------
 

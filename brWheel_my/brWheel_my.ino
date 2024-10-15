@@ -51,6 +51,9 @@
 #ifdef USE_MCP4725
 #include <Adafruit_MCP4725.h> //milos, added
 #endif
+#ifdef USE_AS5600 //milos, added
+#include "AS5600.h"
+#endif
 
 extern u8 valueglobal;
 
@@ -137,6 +140,10 @@ void stopIfFault()
   }
 }
 #endif
+
+#ifdef USE_AS5600 // milos, added
+AS5600L as5600(0x36); // uses default wire.h, milos added i2C address
+#endif
 //--------------------------------------------------------------------------------------------------------
 //-------------------------------------------- SETUP -----------------------------------------------------
 //--------------------------------------------------------------------------------------------------------
@@ -189,7 +196,7 @@ void setup() {
 #ifndef USE_MCP4725
   pwmstate = 0b00001001; // milos, PWM out enabled, phase correct, pwm+-, 16kHz, TOP 500
 #else
-  pwmstate = 0b10000000; //milos, DAC out enabled, DAC+- mode
+  pwmstate = 0b10000000; // milos, DAC out enabled, DAC+- mode
 #endif
   MM_MIN_MOTOR_TORQUE = 0;
   minTorquePP = 0;
@@ -197,8 +204,10 @@ void setup() {
   ROTATION_MAX = int32_t(float(CPR) / 360.0 * float(ROTATION_DEG)); // milos
   ROTATION_MID = ROTATION_MAX >> 1; // milos
 
+#ifndef USE_AS5600
   //myEnc.Init(ROTATION_MID + brWheelFFB.offset, true); //ROTATION_MID + gCalibrator.mOffset); // milos, pullups enabled
   myEnc.Init(ROTATION_MID, true); // milos, pullups enabled, do not apply any encoder offset at this point
+#endif
 
   InitInputs();
   FfbSetDriver(0);
@@ -211,7 +220,9 @@ void setup() {
   SetPWM(0); // milos, set PWM (or DAC) to 0 at startup
 
 #ifdef USE_QUADRATURE_ENCODER
-  (CALIBRATE_AT_INIT ? brWheelFFB.calibrate() : myEnc.Write(ROTATION_MID)); //milos, allways set encoder at 0deg (ROTATION_MID) at startup
+#ifndef USE_AS5600
+  (CALIBRATE_AT_INIT ? brWheelFFB.calibrate() : myEnc.Write(ROTATION_MID)); // milos, allways set encoder at 0deg (ROTATION_MID) at startup
+#endif
 #endif
 
 #ifdef USE_LCD //milos
@@ -251,6 +262,18 @@ void setup() {
 
   ads.begin(); //milos, added
 #endif
+
+#ifdef USE_AS5600
+#ifndef USE_ADS1015
+  Wire.begin(); // milos, D2-SDA and D3-SCL by default
+#endif
+  as5600.begin();
+  as5600.setFastFilter(0); // milos, added to configure fast filter threshold (0-OFF is slow filter enable)
+  as5600.setSlowFilter(0); // milos, added to configure slow filter or readout precision: 0-best(slowest), 3-worst(fastest)
+  //as5600.setAddress(0x36); // milos, not needed, address already defined in function constructor
+  //as5600.setDirection(AS5600_CLOCK_WISE); // milos, not needed, but DIR pin has to be on GND
+  as5600.resetCumulativePosition(ROTATION_MID); // milos, initialize at 0deg at startup
+#endif
 }
 
 //--------------------------------------------------------------------------------------------------------
@@ -272,19 +295,24 @@ void loop() {
     if ((now_micros - last_refresh) >= CONTROL_PERIOD) {
 #ifdef AVG_INPUTS //milos
       asc = 0; // milos, reset counter for averaging
-#endif
+#endif // end of avg_inputs
       last_refresh = now_micros;
       //SYNC_LED_HIGH(); // milos
 #ifdef  USE_SHIFT_REGISTER
       for (uint8_t i = 0; i <= SHIFTS_NUM; i++) { // milos, added (read all states in one pass)
         nextInputState();  // milos, refresh state of shift-register and read the incoming bit
       }
-#endif
+#endif // end of shift register
+#ifndef USE_AS5600 // milos, if AS5600 is not enabled quadrature encoder is used
       if (zIndexFound) {
         turn = myEnc.Read() - ROTATION_MID + brWheelFFB.offset; // milos, only apply z-index offset if z-index pulse is found
       } else {
         turn = myEnc.Read() - ROTATION_MID;
       }
+#else
+      // milos, to do - implement AS5600 angle readout here
+      turn = as5600.getCumulativePosition() - ROTATION_MID;
+#endif // end of as5600
 
 #ifndef USE_ANALOGFFBAXIS
       command = gFFB.CalcTorqueCommand(turn); // milos, encoder raw units -inf,0,inf
@@ -357,9 +385,14 @@ void loop() {
 #endif // end of proMicro
 #else // if no avg
         accel = analogRead(ACCEL_PIN); // milos, Z axis
-#ifndef USE_PROMICRO // milos, when not proMicro
+#ifndef USE_PROMICRO // milos, for Leonardo and Micro
+#ifndef USE_EXTRABTN // milos, we can have clutch and hbrake only when not using extra buttons
         clutch = analogRead(CLUTCH_PIN); // milos, RX axis
         hbrake = analogRead(HBRAKE_PIN); // milos, RY axis
+#else
+        clutch = 0; // milos, RX axis
+        hbrake = 0; // milos, RY axis
+#endif // end of extra button
 #ifdef USE_XY_SHIFTER // milos
         shifterX = analogRead(SHIFTER_X_PIN); // milos
         shifterY = analogRead(SHIFTER_Y_PIN); // milos
@@ -474,6 +507,6 @@ void loop() {
       }
       //SYNC_LED_LOW(); //milos
     }
-#endif
+#endif // end of use quad encoder
   }
 }

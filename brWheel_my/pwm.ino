@@ -4,7 +4,6 @@
 #include <digitalWriteFast.h>
 
 void InitPWM() {
-  pinModeFast(DIR_PIN, OUTPUT);
   TOP = calcTOP(pwmstate); // milos, this will set appropriate TOP value for all PWM modes, depending on pwmstate loaded from EEPROM
   MM_MAX_MOTOR_TORQUE = TOP;
   minTorquePP = ((f32)MM_MIN_MOTOR_TORQUE) / ((f32)MM_MAX_MOTOR_TORQUE); // milos
@@ -18,13 +17,18 @@ void InitPWM() {
   dac1.setVoltage(0, true, 0); // set voltage on dac1 (save voltage after power down)
 #else // milos, for pwm output
 #if defined(__AVR_ATmega168__)|| defined(__AVR_ATmega328P__) || defined(__AVR_ATmega32U4__)
-  PWM16Begin(); // Timer1 configuration: fast pwm mode or phase correct, depending on pwmstate byte
-  // On the Arduino UNO T1A is Pin 9 and T1B is Pin 10
+  pinModeFast(DIR_PIN, OUTPUT);
+  PWM16Begin(); // Timer1 and Timer3 configuration: frequency and mode depend on pwmstate byte
   PWM16A(0);  // Set initial PWM value for Pin 9
   PWM16EnableA();  // Turn PWM on for Pin 9
   PWM16B(0);  // Set initial PWM value for Pin 10
   PWM16EnableB();  // Turn PWM on for Pin 10
-  // }
+#ifdef USE_TWOFFBAXIS
+  PWM16C(0);  // Set initial PWM value for Pin 11
+  PWM16EnableC();  // Turn PWM on for Pin 11
+  PWM16D(0);  // Set initial PWM value for Pin 5
+  PWM16EnableD();  // Turn PWM on for Pin 5
+#endif // end of 2 ffb axis
 #endif // of which ATmega
 #endif // of USE_MCP4275
 
@@ -123,6 +127,7 @@ void SetPWM (s32 torque)  { //torque between -MM_MAX_MOTOR and +MM_MAX_MOTOR
     }
   }
 #else // milos, otherwise output FFB as PWM signals
+#ifndef USE_TWOFFBAXIS // milos, if we use 1 FFB axis
   if (!bitRead(pwmstate, 1)) { // if pwmstate bit1=0
     if (!bitRead(pwmstate, 6)) { // if PWM+- mode (pwmstate bit1=0, bit6=0)
       if (torque > 0) {
@@ -179,7 +184,38 @@ void SetPWM (s32 torque)  { //torque between -MM_MAX_MOTOR and +MM_MAX_MOTOR
       }
     }
   }
-#endif
+#else // milos, if we use 2 FFB axis
+  /*if (bitRead(effstate, 4)) {
+    CONFIG_SERIAL.print(torque); // milos, FFB X-axis
+    CONFIG_SERIAL.print(" ");
+    CONFIG_SERIAL.println(torqueY); // milos, FFB Y-axis
+  }*/
+  if (torque > 0) { // milos, X axis FFB, pwm+-, D9 (left), D10 (right)
+    torque = map (torque, 0, MM_MAX_MOTOR_TORQUE, MM_MIN_MOTOR_TORQUE, MM_MAX_MOTOR_TORQUE);
+    PWM16A(0);
+    PWM16B(torque);
+  } else if (torque < 0) {
+    torque = map (-torque, 0, MM_MAX_MOTOR_TORQUE, MM_MIN_MOTOR_TORQUE, MM_MAX_MOTOR_TORQUE);
+    PWM16A(torque);
+    PWM16B(0);
+  } else {
+    PWM16A(0);
+    PWM16B(0);
+  }
+  if (torqueY > 0) {  // milos, Y axis FFB, pwm+-, D11 (up), D5 (down)
+    torqueY = map (torqueY, 0, MM_MAX_MOTOR_TORQUE, MM_MIN_MOTOR_TORQUE, MM_MAX_MOTOR_TORQUE);
+    PWM16C(torqueY);
+    PWM16D(0);
+  } else if (torqueY < 0) {
+    torqueY = map (-torqueY, 0, MM_MAX_MOTOR_TORQUE, MM_MIN_MOTOR_TORQUE, MM_MAX_MOTOR_TORQUE);
+    PWM16C(0);
+    PWM16D(torqueY);
+  } else {
+    PWM16C(0);
+    PWM16D(0);
+  }
+#endif // end of 2 ffb axis
+#endif // end of use mcp4275
 }
 
 #ifndef USE_MCP4725
@@ -190,8 +226,11 @@ void PWM16Begin() { // milos - added, reconfigure timer1 automatically depending
   TIMSK1 = 0; // Timer/Counter1 Interrupt Mask Register
   TIFR1 = 0;  // Timer/Counter1 Interrupt Flag Register
   ICR1 = TOP; // milos, set upper counter flag
-  OCR1A = 0;  // Default to 0% PWM
-  OCR1B = 0;  // Default to 0% PWM
+  OCR1A = 0;  // Default to 0% PWM, D9
+  OCR1B = 0;  // Default to 0% PWM, D10
+#ifdef USE_TWOFFBAXIS
+  OCR1C = 0;  // Default to 0% PWM, D11
+#endif // end of 2 ffb axis
 
   if (bitRead(pwmstate, 1) && bitRead(pwmstate, 6)) { // if RMC pwm mode
     TCCR1B |= (1 << CS11); // milos, Set clock prescaler to 8
@@ -199,13 +238,38 @@ void PWM16Begin() { // milos - added, reconfigure timer1 automatically depending
     TCCR1B |= (1 << CS10); // Set clock prescaler to 1 for maximum PWM frequency
   }
   if (bitRead(pwmstate, 0)) { // if pwmstate bit0=1, configure timer for phase correct mode
-    // milos, Set Timer/Counter1 to Waveform Generation Mode 8: Phase and Frequency Correct PWM with TOP set by ICR1
+    // milos, Set Timer/Counter1 to Waveform Generation Mode 10: Phase and Frequency Correct PWM with TOP set by ICR1
+    TCCR1A |= (1 << WGM11);
     TCCR1B |= (1 << WGM13);
   } else {  // if pwmstate bit0=0, fast pwm mode
     // milos, Set Timer/Counter1 to Waveform Generation Mode 14: Fast PWM with TOP set by ICR1
     TCCR1A |= (1 << WGM11);
     TCCR1B |= (1 << WGM13) | (1 << WGM12);
   }
+#ifdef USE_TWOFFBAXIS
+  // Stop Timer/Counter3
+  TCCR3A = 0; // Timer/Counter3 Control Register A
+  TCCR3B = 0; // Timer/Counter3 Control Register B
+  TIMSK3 = 0; // Timer/Counter3 Interrupt Mask Register
+  TIFR3 = 0;  // Timer/Counter3 Interrupt Flag Register
+  ICR3 = TOP; // milos, set upper counter flag
+  OCR3A = 0;  // Default to 0% PWM, D5
+
+  if (bitRead(pwmstate, 1) && bitRead(pwmstate, 6)) { // if RMC pwm mode
+    TCCR3B |= (1 << CS31); // milos, Set clock prescaler to 8
+  } else { // for all other pwm modes
+    TCCR3B |= (1 << CS30); // Set clock prescaler to 1 for maximum PWM frequency
+  }
+  if (bitRead(pwmstate, 0)) { // if pwmstate bit0=1, configure timer for phase correct mode
+    // milos, Set Timer/Counter3 to Waveform Generation Mode 10: Phase and Frequency Correct PWM with TOP set by ICR3
+    TCCR3A |= (1 << WGM31);
+    TCCR3B |= (1 << WGM33);
+  } else {  // if pwmstate bit0=0, fast pwm mode
+    // milos, Set Timer/Counter3 to Waveform Generation Mode 14: Fast PWM with TOP set by ICR3
+    TCCR3A |= (1 << WGM31);
+    TCCR3B |= (1 << WGM33) | (1 << WGM32);
+  }
+#endif // end of 2 ffb axis
 }
 
 void PWM16EnableA() {  // milos
@@ -220,6 +284,20 @@ void PWM16EnableB() {  // milos
   pinModeFast(PWM_PIN_R, OUTPUT);
 }
 
+#ifdef USE_TWOFFBAXIS
+void PWM16EnableC() {  // milos
+  // Enable Fast PWM on Pin 11: Set OC1B at BOTTOM and clear OC1B on OCR1B compare
+  TCCR1A |= (1 << COM1C1);
+  pinModeFast(PWM_PIN_U, OUTPUT);
+}
+
+void PWM16EnableD() {  // milos
+  // Enable Fast PWM on Pin 5: Set OC3A at BOTTOM and clear OC3A on OCR3A compare
+  TCCR3A |= (1 << COM3A1);
+  pinModeFast(PWM_PIN_D, OUTPUT);
+}
+#endif // end of 2 ffb axis
+
 inline void PWM16A(uint16_t PWMValue) { // milos
   OCR1A = constrain(PWMValue, 0, TOP);
 }
@@ -227,4 +305,13 @@ inline void PWM16A(uint16_t PWMValue) { // milos
 inline void PWM16B(uint16_t PWMValue) { // milos
   OCR1B = constrain(PWMValue, 0, TOP);
 }
-#endif
+#ifdef USE_TWOFFBAXIS
+inline void PWM16C(uint16_t PWMValue) { // milos
+  OCR1C = constrain(PWMValue, 0, TOP);
+}
+
+inline void PWM16D(uint16_t PWMValue) { // milos
+  OCR3A = constrain(PWMValue, 0, TOP);
+}
+#endif // end of 2 ffb axis
+#endif // end of mcp4725

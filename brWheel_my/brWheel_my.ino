@@ -1,4 +1,3 @@
-
 /* Arduino Leonardo Force Feedback Wheel firmware
 
   Copyright 2015  Etienne Saint-Paul  (esaintpaul [at] gameseed [dot] fr)
@@ -31,7 +30,7 @@
 #endif
 #include "debug.h"
 #include <Wire.h>
-#include <digitalWriteFast.h>
+//#include <digitalWriteFast.h>
 #ifdef USE_EEPROM
 #include <EEPROM.h> //milos, uncommented
 #endif
@@ -101,7 +100,7 @@ u8 asc = 0; // milos, added - sample counter for averaging of analog inputs
 //u32 last_nextShift = 0;
 u32 last_ConfigSerial = 0;
 u32 last_refresh = 0;
-s32 command = 0;
+s32 ffbX = 0;
 u32 now_micros = micros();
 //u32 time_diff = now_micros;
 //u32 timeDiffNextShift = now_micros;
@@ -315,31 +314,35 @@ void loop() {
 #endif // end of as5600
 
 #ifndef USE_ANALOGFFBAXIS
-      command = gFFB.CalcTorqueCommand(turn); // milos, encoder raw units -inf,0,inf
-#else
+      ffbX = gFFB.CalcTorqueCommands(turn, 0); // milos, encoder raw units -inf,0,inf
+#else // with analog ffb axis
       int16_t aRng = 511; // milos, scaled analog axis range to be used as FFB steering input
 #ifdef AVG_INPUTS
       aRng = 2047; // if averaging of arduino 10bit analog inputs is enabled
-#endif
+#endif // end of avg inputs
 #ifdef USE_ADS1015
       aRng = 1023; // if 12bit external ADC via ads1105 is enabled
-#endif
+#endif // end of ads1015
+#ifndef USE_TWOFFBAXIS // milos, if 1 ffb axis
       if (indFFBAxis(effstate) == 1) {
-        command = gFFB.CalcTorqueCommand(map(brake, 0, Y_AXIS_PHYS_MAX, -aRng - 1, aRng)); // milos, FFB on Y-axis
+        ffbX = gFFB.CalcTorqueCommands(map(brake, 0, Y_AXIS_PHYS_MAX, -aRng - 1, aRng), 0); // milos, FFB on Y-axis
       } else if (indFFBAxis(effstate) == 2) {
-        command = gFFB.CalcTorqueCommand(map(accel, 0, Z_AXIS_PHYS_MAX, -aRng - 1, aRng)); // milos, FFB on Z-axis
+        ffbX = gFFB.CalcTorqueCommands(map(accel, 0, Z_AXIS_PHYS_MAX, -aRng - 1, aRng), 0); // milos, FFB on Z-axis
       } else if (indFFBAxis(effstate) == 3) {
-        command = gFFB.CalcTorqueCommand(map(clutch, 0, RX_AXIS_PHYS_MAX, -aRng - 1, aRng)); // milos, FFB on RX-axis
+        ffbX = gFFB.CalcTorqueCommands(map(clutch, 0, RX_AXIS_PHYS_MAX, -aRng - 1, aRng), 0); // milos, FFB on RX-axis
       } else if (indFFBAxis(effstate) == 4) {
-        command = gFFB.CalcTorqueCommand(map(hbrake, 0, RY_AXIS_PHYS_MAX, -aRng - 1, aRng)); // milos, FFB on RY-axis
+        ffbX = gFFB.CalcTorqueCommands(map(hbrake, 0, RY_AXIS_PHYS_MAX, -aRng - 1, aRng), 0); // milos, FFB on RY-axis
       } else { // milos, fail safe
-        command = gFFB.CalcTorqueCommand(turn); // milos, FFB on X-axis
+        ffbX = gFFB.CalcTorqueCommands(turn, 0); // milos, FFB on X-axis
       }
-#endif
+#else // milos, with 2 ffb axis
+      ffbX = gFFB.CalcTorqueCommands(map(brake, 0, Y_AXIS_PHYS_MAX, -aRng - 1, aRng), map(accel, 0, Z_AXIS_PHYS_MAX, -aRng - 1, aRng)); // milos, X-FFB on Y-axis, Y-FFB on Z-axis
+#endif // end of 2 ffb axis
+#endif // end of analog ffb axis
       turn *= f32(X_AXIS_PHYS_MAX) / f32(ROTATION_MAX); // milos, conversion to physical units
       turn = constrain(turn, -MID_REPORT_X - 1, MID_REPORT_X); // milos, -32768,0,32767 scaled to signed 16bit range
 
-      SetPWM(command); // milos, FFB signal is generated as PWM (or analog DAC) output
+      SetPWM(ffbX); // milos, FFB signal is generated as PWM (or analog DAC) output
       //SYNC_LED_LOW(); //milos
       // USB Report
       {
@@ -495,7 +498,7 @@ void loop() {
         //SendInputReport((s16)turn, (u16)accel, (u16)brake, (u16)clutch, button);
         //SendInputReport((s16)turn, (u16)accel, (u16)brake, (u16)clutch, (u16)shifterX, (u16)shifterY, buttons); // original
         //SendInputReport((s32)turn, (u16)brake, (u16)accel, (u16)clutch, button); // milos, X, Y, Z, RX, button
-        SendInputReport(turn + MID_REPORT_X + 1, brake, accel, clutch, hbrake, button); // milos, X, Y, Z, RX, RY, hat+button; 0,32768,65535 X-axis range
+        SendInputReport(turn + MID_REPORT_X + 1, brake, accel, clutch, hbrake, button); // milos, X, Y, Z, RX, RY, hat+button; (0-65535) X-axis range, center at 32768
 
 #ifdef AVG_INPUTS //milos, added option see config.h
         ClearAnalogInputs();

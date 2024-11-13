@@ -10,18 +10,19 @@
 //#define USE_ADS1015       // milos, uncomment for 12bit pedals, commented is 10bit from arduino inputs (can not be used with AVG_INPUTS)
 //#define USE_DSP56ADC16S			// 16 bits Stereo ADC (milos, can not be used with USE_SHIFT_REGISTER)
 #define USE_QUADRATURE_ENCODER		// Position Quadrature encoder
+//#define USE_TWOFFBAXIS        // milos, uncomment to enable 2nd FFB axis and PWM output for flight sticks (can't be used with USE_LOAD_CELL and without USE_ANALOGFFBAXIS)
 //#define USE_AS5600          // milos, uncomment to enable magnetic encoder via i2C instead of optical encoder
 //#define USE_ZINDEX          // milos, use Z-index encoder channel (caution, can not be used with USE_ADS1015, USE_MCP4725 or USE_AS5600)
-#define USE_LOAD_CELL				// Load cell shield // milos, new library for LC
+//#define USE_LOAD_CELL				// Load cell shield // milos, new library for LC
 #define USE_SHIFT_REGISTER			// 2x8-bit parallel-load shift registers G27 board steering wheel (milos, this one is modified for 16 buttons)
 //#define USE_DUAL_SHIFT_REGISTER		// Dual 8-bit Parallel-load shift registers G27 board shifter  (milos, not available curently)
 //#define USE_SN74ALS166N          // milos, uncomment to use 3x8bit parralel-in serial-out shift register chips for 24 buttons, otherwise it's 16 buttons with ard nano-buttonbox (must be used with USE_SHIFT_REGISTER, but not implemented yet)
-//#define USE_XY_SHIFTER    // milos, uncomment to use XY analog shifter (can not be used with USE_BTNMATRIX, note that for proMicro clutch and handbrake will be unavailable)
+#define USE_XY_SHIFTER    // milos, uncomment to use XY analog shifter (can not be used with USE_BTNMATRIX, note that for proMicro clutch and handbrake will be unavailable)
 #define USE_HATSWITCH        // milos, uncomment to use first 4 buttons for hat switch (D-pad)
 //#define USE_BTNMATRIX        // milos, uncomment to use 8 pins as a 4x4 button matrix for total of 16 buttons (can not be used with load cell, shift register or XY shifter)
 //#define AVG_INPUTS        // milos, uncomment to use averaging of arduino analog inputs (can not be used with USE_ADS1015)
 //#define USE_AUTOCALIB        // milos, uncomment to use autocalibration for pedal axis (if left commented manual calibration is enabled)
-//#define USE_CENTERBTN    // milos, ucomment to assign digital input pin D2 for hardware wheel recenter to 0deg (caution, can not be used with USE_ZINDEX, USE_ADS1015, USE_MCP4725 or USE_AS5600)
+#define USE_CENTERBTN    // milos, ucomment to assign digital input pin D2 for hardware wheel recenter to 0deg (caution, can not be used with USE_ZINDEX, USE_ADS1015, USE_MCP4725 or USE_AS5600)
 //#define USE_EXTRABTN    // milos, ucomment to configure analog inputs on pins A2 and A3 as a digital button inputs (2 extra buttons, note that clutch and handbrake will be unavailable)
 //#define USE_MCP4725      // milos, 12bit DAC (0-5V), uncomment to enable output of FFB signal as 2ch DAC voltage output
 #define USE_ANALOGFFBAXIS // milos, uncomment to enable other than encoder X-axis to be tied with FFB axis
@@ -150,6 +151,10 @@
 
 #define PWM_PIN_L     9 // milos, left PWM pin
 #define PWM_PIN_R     10 // milos, right PWM pin
+#ifdef USE_TWOFFBAXIS
+#define PWM_PIN_U     11 // milos, up PWM pin
+#define PWM_PIN_D     5 // milos, down PWM pin
+#endif
 #ifndef USE_PROMICRO // milos, added - for Leonardo or Micro
 #define DIR_PIN       11 // milos, PWM direction pin: 0V-left (negative force), 5V-right (positive force)
 #else // for Pro Micro
@@ -224,7 +229,7 @@ uint8_t LC_scaling; // milos, load cell scaling factor (affects brake pressure, 
 #define PARAM_ADDR_HBRK_LO       0x36 //milos, hand brake pedal cal min
 #define PARAM_ADDR_HBRK_HI       0x38 //milos, hand brake pedal cal max
 
-#define VERSION		0xF2 // milos, firmware version (F0=240, F1=241, F2=242, F3=243) change this accordingly!
+#define VERSION		0xF1 // milos, firmware version (F0=240, F1=241, F2=242, F3=243) change this accordingly!
 
 #define GetParam(m_offset,m_data)	getParam((m_offset),(u8*)&(m_data),sizeof(m_data))
 #define SetParam(m_offset,m_data)	setParam((m_offset),(u8*)&(m_data),sizeof(m_data))
@@ -315,9 +320,9 @@ uint16_t PWMtops [13] =
 {
   400,  // 0
   800,  // 1
-  1000, // 2
-  2000, // 3
-  4000, // 4
+  1023, // 2
+  2047, // 3
+  4095, // 4
   5000, // 5
   10000, // 6
   16383, // 7
@@ -332,6 +337,7 @@ uint16_t TOP; // milos, loaded from EEPROM
 uint16_t MM_MIN_MOTOR_TORQUE; // milos, loaded from EEPROM
 uint16_t MM_MAX_MOTOR_TORQUE; // milos, loaded from EEPROM
 uint16_t MAX_DAC; // milos, loaded from EEPROM
+int32_t torqueY; // milos, Y-axis FFB
 
 uint16_t calcTOP(byte value) { // milos, added - function which returns TOP value from pwmstate byte
 #ifndef USE_MCP4725
@@ -462,12 +468,14 @@ uint32_t decodeXYshifter (uint32_t inbits, int16_t sx, int16_t sy) {
   }
   // milos, on leonardo/micro when both xy shifter and hat switch are used pins D5,D6,D7 are remaped to buttons 0,1,2
   // milos, so we need to stop reading these pins twice as normal buttons
-  // milos, pins D5,D6,D7 are taken care of by bit mask at bit4,bit5,bit7 in xy shifter decoding function
+  // milos, pins D5,D6,D7 are taken care of by bit mask at bit4,bit5,bit7 in xy shifter decoding function bellow
   uint32_t bitMask = 0b11110000000011111111111111101111; // milos, default bit mask, bit4=0 for reverse gear button, bits20-27 are 0 for gear buttons to be inserted
 #ifdef USE_XY_SHIFTER // milos, with xy shifter
 #ifdef USE_HATSWITCH // milos, with hat switch
 #ifndef USE_PROMICRO // milos, only for leonardo/micro
+#ifndef USE_SHIFT_REGISTER // milos, for shift register we need default bitmask
   bitMask = 0b11110000000011111111111101001111; // milos, modifyed bit mask not to show duplicate buttons0,1,3
+#endif // end of shift register
 #else // milos, for proMicro
   bitMask = 0b11110000000011111111111111101111; // milos, default bit mask
 #endif // end of proMicro

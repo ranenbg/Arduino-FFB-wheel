@@ -85,7 +85,8 @@ class cFFB {
   public:
     cFFB();
 
-    s32 CalcTorqueCommand (s32 pos);
+    //s32 CalcTorqueCommand (s32 pos); // milos, returns single force (1 axis) value
+    s32 CalcTorqueCommands (s32 pos, s32 pos2); // milos, returns 2 FFB values padded into one 32bit int, 1st 16bits are X axis force and 2nd 16bits are Y axis force
 
     cSpeedObs mSpeed;
     cAccelObs mAccel; //milos, added

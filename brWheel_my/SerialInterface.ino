@@ -76,6 +76,9 @@ void readSerial() {
 #ifdef USE_AUTOCALIB
         CONFIG_SERIAL.print("a");
 #endif
+#ifdef USE_TWOFFBAXIS
+        CONFIG_SERIAL.print("b");
+#endif
 #ifdef USE_ZINDEX
         CONFIG_SERIAL.print("z");
 #else // if no z-index

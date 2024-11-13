@@ -46,7 +46,7 @@ b8 DoDebug(const u8 type);
 #define DEBUG_ENABLE_UART
 //#define DEBUG_ENABLE_USB
 
-#define DEBUG_BUFFER_SIZE 512
+#define DEBUG_BUFFER_SIZE 512 // milos, you may want to reduce this if your run out of memory
 
 // Debugging utilities
 
@@ -78,7 +78,7 @@ void FlushDebugBuffer(void);
 #define DEBUG_SERIAL		Serial
 #define CONFIG_SERIAL		Serial
 
-//#define DEBUG_FFB
+//#define DEBUG_FFB // milos, uncomment this to enable FFB debugging via UART
 //#define DEBUG_CALIBRATION
 
 #ifdef DEBUG_CALIBRATION

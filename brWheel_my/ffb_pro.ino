@@ -309,11 +309,15 @@ float EffectDivider() { //milos, added, calculates effects divider in order to s
 }
 
 //--------------------------------------------------------------------------------------------------------
-s32 cFFB::CalcTorqueCommand (s32 pos) {
+//s32 cFFB::CalcTorqueCommand (s32 pos) { // milos, commented - old 1 axis input
+s32 cFFB::CalcTorqueCommands (s32 pos, s32 pos2) { // milos, pos - Xaxis, pos2 - Yaxis
   //if ((!Btest(pidState.status, ACTUATORS_ENABLED)) || (Btest(pidState.status, DEVICE_PAUSED)))
   //return(0);
 
   s32 command = s32(0);
+#ifdef USE_TWOFFBAXIS
+  s32 command2 = s32(0);
+#endif
   f32 spd = mSpeed.Update(pos);
   f32 acl = mAccel.Update(spd); //milos, added - acceleration
 
@@ -321,6 +325,11 @@ s32 cFFB::CalcTorqueCommand (s32 pos) {
     if (abs(pos) > 1) { //milos, was 50
       if (bitRead(effstate, 0)) command += SpringEffect(pos, AUTO_CENTER_SPRING / EffectDivider() * configCenterGain / 100); //milos, autocenter spring force is equal (scaled accordingly) for all PWM modes - desktop autocenter effect
     }
+#ifdef USE_TWOFFBAXIS
+    if (abs(pos2) > 1) { //milos
+      if (bitRead(effstate, 0)) command2 += SpringEffect(pos2, AUTO_CENTER_SPRING / EffectDivider() * configCenterGain / 100); //milos, autocenter spring force is equal (scaled accordingly) for all PWM modes - desktop autocenter effect
+    }
+#endif
   } else for (u8 id = FIRST_EID; id <= MAX_EFFECTS; id++) {
 
       /*milos
@@ -364,7 +373,15 @@ s32 cFFB::CalcTorqueCommand (s32 pos) {
           case USB_EFFECT_CONSTANT:
             command -= ConstrainEffect(ScaleMagnitude(ApplyEnvelope(ef.magnitude, effectTime[id - 1], ef.attackLevel, ef.fadeLevel, ef.attackTime, ef.fadeTime, ef.duration, ef.startDelay) //milos, added
                                        , ef.gain, EffectDivider())) * configConstantGain / 100; //milos, added
-            if (bitRead(ef.enableAxis, 2)) command *= sin(TWO_PI * ef.direction / 32768.0); //milos, added - project force vector on FFB X-axis, if direction is enabled (bit2 of enableAxis byte)
+#ifdef USE_TWOFFBAXIS
+            command2 = command; // milos, added
+#endif // end of 2 ffb axis
+            if (bitRead(ef.enableAxis, 2)) { // milos, if direction is enabled (bit2 of enableAxis byte)
+              command *= sin(TWO_PI * ef.direction / 32768.0); //milos, added - project force vector on FFB X-axis
+#ifdef USE_TWOFFBAXIS
+              command2 *= cos(TWO_PI * ef.direction / 32768.0); //milos, added - project force vector on FFB Y-axis
+#endif // end of 2 ffb axis
+            }
             //LogTextLf("_pro constant");
             break;
           case USB_EFFECT_RAMP:
@@ -481,9 +498,33 @@ s32 cFFB::CalcTorqueCommand (s32 pos) {
       command += SpringEffect(pos, BOUNDARY_SPRING / EffectDivider() * configStopGain / 100); //milos, boundary spring force is equal (scaled accordingly) for all PWM modes
     }
   }
+#ifdef USE_TWOFFBAXIS // milos, endstop force for FFB Y-axis
+  s32 limit2 = Z_AXIS_PHYS_MAX >> 1;
+  if ((pos2 < -limit2) || (pos2 > limit2)) {
+    limit += 0; //milos, here you can offset end stop limit (now it's exactly at +-ROTATION_MID distance from center)
+    if ((pos2 < -limit2) || (pos2 > limit2)) {
+      if (pos2 >= 0) {
+        pos2 = pos2 - limit2; //milos
+      } else {
+        pos2 = pos2 + limit2; //milos
+      }
+      command2 += SpringEffect(pos2, BOUNDARY_SPRING / EffectDivider() * configStopGain / 100); //milos, boundary spring force is equal (scaled accordingly) for all PWM modes
+    }
+  }
+#endif // end of 2 ffb axis
 
   command = ConstrainEffect(command * configGeneralGain / 100);
+#ifndef USE_TWOFFBAXIS // milos, for 1 FFB axis
   if (bitRead(effstate, 4)) CONFIG_SERIAL.println(command); // milos, added - FFB real time monitor
+#else // for 2 ffb axis
+  command2 = ConstrainEffect(command2 * configGeneralGain / 100);
+  if (bitRead(effstate, 4)) { // milos, for 2 ffb axis we send X and Y forces to FFB monitor
+    CONFIG_SERIAL.print(command); // milos, FFB X axis
+    CONFIG_SERIAL.print(" ");
+    CONFIG_SERIAL.println(command2); // milos, FFB Y axis
+  }
+  torqueY = command2; // milos, added
+#endif // end of 2 ffb axis
   return (command);
 }
 

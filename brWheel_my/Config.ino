@@ -67,7 +67,7 @@ void SetDefaultConfig () { //milos - sets default values
 #endif
   SetParam(PARAM_ADDR_ENC_CPR, val32); // milos, added
 #ifndef USE_MCP4725
-  ffb = 0b00001001; // milos, PWM out enabled, phase correct, pwm+-, 16kHz, TOP 500
+  ffb = 0b00001101; // milos, PWM out enabled, phase correct, pwm+-, 7.8kHz, TOP 10bit (1023)
 #else
   ffb = 0b10000000; // milos, DAC out enabled, DAC+- mode
 #endif

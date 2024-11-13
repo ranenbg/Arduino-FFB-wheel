@@ -198,7 +198,9 @@ void InitButtons() { // milos, added - if not using shift register, allocate som
   pinMode(BUTTON5, INPUT_PULLUP);
   pinMode(BUTTON6, INPUT_PULLUP);
 #ifndef USE_LOAD_CELL
+#ifndef USE_TWOFFBAXIS
   pinMode(BUTTON7, INPUT_PULLUP);
+#endif // end of 2 ffb axis
 #endif // end of load cell
 #else // if we use button matrix
   pinModeFast(BUTTON4, OUTPUT);
@@ -299,7 +301,7 @@ u32 readInputButtons() {
 #else  // milos, when no shift reg, use Arduino Leonardo for 3 or 4 buttons
 #ifndef USE_BTNMATRIX // milos, added - read all available buttons only if we are not using button matrix
   // milos, here we define button mappings (link between arduino pins and buttons defined in HID)
-  bitWrite(buttons, 0, readSingleButton(0)); // milos, first 0 is button bit in HID, second 0 is associated to arduino pin - see config.h)
+  bitWrite(buttons, 0, readSingleButton(0)); // milos, first 0 is button bit in HID, second 0 in brackets is associated to arduino pin - see config.h)
   bitWrite(buttons, 1, readSingleButton(1));
   bitWrite(buttons, 2, readSingleButton(2));
   //------------- milos, start button3 case
@@ -337,121 +339,24 @@ u32 readInputButtons() {
   bitWrite(buttons, 6, readSingleButton(6));
 #ifndef USE_LOAD_CELL // milos, when no load cell
 #ifndef USE_AS5600 // milos, when not using as5600 we can have button7 at pin D5
+#ifndef USE_TWOFFBAXIS // milos, when not using 2 FFB axis, 2nd PWM channel
   bitWrite(buttons, 7, readSingleButton(7));
+#else // with 2ffb axis, D5 is used by timer3 for PWM output
+  bitWrite(buttons, 7, 0); // milos, we don't have button7
+#endif // end of 2 ffb axis
 #else // milos, if we use mag encoder and hat switch on proMicro
 #ifdef USE_PROMICRO
 #ifdef USE_HATSWITCH
   bitWrite(buttons, 3, readSingleButton(7)); // milos, we need to remap D6 to button3 in order for hat switch left to work
-  bitWrite(buttons, 7, 0); // milos, we don't have button4 in that case
+  bitWrite(buttons, 7, 0); // milos, we don't have button7 (pin D5) in that case
 #endif // end of hat swich
 #else // for leonardo/micro with hat switch
-bitWrite(buttons, 7, readSingleButton(7)); // milos, button7 is on pin D5 for leonardo/micro with hat switch
+  bitWrite(buttons, 7, readSingleButton(7)); // milos, button7 is on pin D5 for leonardo/micro with hat switch
 #endif // end of proMicro
 #endif // end of as5600
 #else // milos, with load cell
   bitWrite(buttons, 7, 0); // milos, button7 (pin D5) is unavailable on all boards if we use load cell
-#endif
-  //------------- end of button3 case
-  /*  //------------- milos, start of case for butons 0,4,5,6,7
-  #ifdef USE_LOAD_CELL // milos, with load cell
-  #ifdef USE_HATSWITCH // milos, with hat switch
-  #ifdef USE_PROMICRO // milos, for proMicro
-        // milos, load cell, hat switch, proMicro
-  #else // milos, for leonardo/micro
-        // milos, load cell, hat switch, leonardo/micro
-  #endif // end of proMicro
-  #else // milos, without hat switch
-  #ifdef USE_PROMICRO // milos, for proMicro
-        // milos, load cell, proMicro
-  #else // milos, for leonardo/micro
-        // milos, load cell, leonardo/micro
-  #endif // end of proMicro
-  #endif // end of hat switch
-  #else // milos, without load cell
-  #ifdef USE_XY_SHIFTER // milos, without load cell and XY shifter
-  #ifdef USE_HATSWITCH // milos, without load cell and hat switch
-  #ifdef USE_PROMICRO // milos, for proMicro
-          // milos, xy shifter, hat switch, proMicro
-  #else // milos, for leonardo/micro
-          // milos, xy shifter, hat switch, leonardo/micro
-  #endif // end of proMicro
-  #else // milos, without load cell and without hat switch
-  #ifdef USE_PROMICRO // milos, for proMicro
-          // milos, xy shifter, proMicro
-          // button0 should not be visible in this case, put 0 at bit4 of buttons in xy sh decode
-          bitWrite(buttons, 4, readSingleButton(4));
-          bitWrite(buttons, 5, readSingleButton(5));
-          bitWrite(buttons, 6, readSingleButton(6));
-          bitWrite(buttons, 7, readSingleButton(7));
-  #else // milos, for leonardo/micro
-          // milos, xy shifter, leonardo/micro
-          bitWrite(buttons, 6, readSingleButton(6));
-  #endif // end of proMicro
-  #endif // end of hat switch
-  #else // milos, without load cell and without XY shifter
-  #ifdef USE_HATSWITCH // milos, without load cell, without XY shifter and with hat switch
-  #ifdef USE_PROMICRO // milos, for proMicro
-          // milos, hat switch, proMicro
-          bitWrite(buttons, 4, readSingleButton(4));
-          bitWrite(buttons, 5, readSingleButton(5));
-          bitWrite(buttons, 6, readSingleButton(6));
-          bitWrite(buttons, 7, readSingleButton(7));
-  #else // milos, for leonardo/micro
-          // milos, hat switch, leonardo/micro
-          bitWrite(buttons, 4, readSingleButton(4));
-          bitWrite(buttons, 5, readSingleButton(5));
-          bitWrite(buttons, 6, readSingleButton(6));
-          bitWrite(buttons, 7, readSingleButton(7));
-  #endif // end of proMicro
-  #else // milos, without hat switch
-  #ifdef USE_PROMICRO // milos, for proMicro
-          // milos, proMicro
-          //bitWrite(buttons, 0, readSingleButton(0));
-          bitWrite(buttons, 4, readSingleButton(4));
-          bitWrite(buttons, 5, readSingleButton(5));
-          bitWrite(buttons, 6, readSingleButton(6));
-          bitWrite(buttons, 7, readSingleButton(7));
-  #else // milos, for leonardo/micro
-          // milos, leonardo/micro
-          //bitWrite(buttons, 0, readSingleButton(0));
-          bitWrite(buttons, 4, readSingleButton(4));
-          bitWrite(buttons, 5, readSingleButton(5));
-          bitWrite(buttons, 6, readSingleButton(6));
-          bitWrite(buttons, 7, readSingleButton(7));
-  #endif // end of proMicro
-  #endif // end of hat switch
-  #endif // end of xy shifter
-  #endif // end of load cell*/
-  //------------- milos, end of case for butons 0,4,5,6,7
-  /*
-    //bitWrite(buttons, 4, readSingleButton(4)); // milos, was commented
-  #ifndef USE_PROMICRO // milos, if leonardo/micro
-  #ifdef USE_XY_SHIFTER // milos, if xy shifter
-  #ifndef USE_HATSWITCH // milos, if hat switch
-    bitWrite(buttons, 0, readSingleButton(0)); // milos, if leonardo/micro and xy shifter, but no hat switch we can use button0
-    //bitWrite(buttons, 5, readSingleButton(5)); // milos, if leonardo/micro and xy shifter, but no hat switch we can use button5 // milos, was commented
-  #endif // end of hat switch
-  #else // milos, if no xy shifter but with hat switch
-  #ifdef USE_HATSWITCH
-    bitWrite(buttons, 5, readSingleButton(5));
-  #endif // end of hat switch
-  #endif // end of xy shifter
-  #else // milos, for proMicro
-    //#ifdef USE_HATSWITCH
-    bitWrite(buttons, 0, readSingleButton(0)); // milos, on proMicro we can have button0 only with hat switch
-    //#endif // milos, end of hat switch
-    bitWrite(buttons, 4, readSingleButton(4)); // milos, on proMicro we can have button4
-    bitWrite(buttons, 5, readSingleButton(5)); // milos, on proMicro we can have button5
-  #endif // end of proMicro
-    bitWrite(buttons, 6, readSingleButton(6));
-  #ifndef USE_LOAD_CELL // milos, only available if we do not use load cell
-    //#ifndef USE_HATSWITCH // milos, if no hat switch
-    //#ifdef USE_PROMICRO // milos, if proMicro
-    bitWrite(buttons, 7, readSingleButton(7));
-    //#endif // end of proMicro
-    //#endif // end of hat switch
-  #endif // end of load cell
-  */
+#endif // end of 
 
 #ifdef USE_EXTRABTN
   bitWrite(buttons, 8, readSingleButton(8));

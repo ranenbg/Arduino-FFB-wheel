@@ -2,7 +2,7 @@
   http://www.pjrc.com/teensy/td_libs_Encoder.html
   Copyright (c) 2011,2013 PJRC.COM, LLC - Paul Stoffregen <paul@pjrc.com>
   Copyright 2015  Etienne Saint-Paul  (esaintpaul [at] gameseed [dot] fr)
-  Copyright 2018-2021  Milos Rankovic (ranenbg [at] gmail [dot] com)
+  Copyright 2018-2025  Milos Rankovic (ranenbg [at] gmail [dot] com)
 
   Version 1.4 - milos, added Z-index support
   Version 1.3 - replaced assembler code with an increment table, and deal with a third index signal directly in the interrupt
@@ -30,6 +30,7 @@
 */
 
 #include <Arduino.h>
+#include "QuadEncoder.h"
 #include <digitalWriteFast.h>
 
 cQuadEncoder gQuadEncoder;
@@ -40,32 +41,8 @@ volatile s32 gPosition;
 
 //--------------------------------------------------------------------------------------------------------
 
-//Arduino UNO
-#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__) || defined(__AVR_ATmega8__)
-#define CORE_PIN2_INT		0
-#define CORE_PIN3_INT		1
-
-// Arduino Mega
-#elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-#define CORE_PIN2_INT		0
-#define CORE_PIN3_INT		1
-#define CORE_PIN18_INT		5
-#define CORE_PIN19_INT		4
-#define CORE_PIN20_INT		3
-#define CORE_PIN21_INT		2
-
-// Arduino Leonardo
-#elif defined(__AVR_ATmega32U4__) && !defined(CORE_TEENSY)
-#define CORE_PIN0_INT		2
-#define CORE_PIN1_INT		3
-#define CORE_PIN2_INT		1
-#define CORE_PIN3_INT		0
-#endif
-
-static void EnableInterrupt(u8 num, u8 type)
-{
-  switch (num)
-  {
+static void EnableInterrupt(u8 num, u8 type) {
+  switch (num) {
 #if defined(EICRA) && defined(EIMSK)
     case 0:
       EICRA = (EICRA & 0xFC) | type;
@@ -125,25 +102,22 @@ static void EnableInterrupt(u8 num, u8 type)
 
 //--------------------------------------------------------------------------------------------------------
 
-void cQuadEncoder::Init (s32 position, b8 pullups)
-{
+void cQuadEncoder::Init (s32 position, b8 pullups) {
   u8 it = pullups ? INPUT_PULLUP : INPUT;
   pinMode(QUAD_ENC_PIN_A, it);
   pinMode(QUAD_ENC_PIN_B, it);
 #ifdef USE_ZINDEX // milos, added
   pinMode(QUAD_ENC_PIN_I, it);
-#else
-  //milos, added - wheel recenter button
+#else // if no z-index
 #ifndef USE_ADS1015
 #ifndef USE_MCP4725
 #ifdef USE_CENTERBTN
-  pinMode(QUAD_ENC_PIN_I, INPUT_PULLUP);
-  EnableInterrupt(CORE_PIN2_INT, RISING); // digital interrupt pin D2
+  pinMode(QUAD_ENC_PIN_I, INPUT_PULLUP);   //milos, added - wheel recenter button
+  EnableInterrupt(CORE_PIN2_INT, RISING); // digital interrupt on pin D2
 #endif // end of centerbtn
 #endif // end of ads
 #endif // end of mcp
 #endif // end of zindex
-
   gIndexFound = false;
   gPosition = position;
   gLastState = 0;
@@ -151,21 +125,19 @@ void cQuadEncoder::Init (s32 position, b8 pullups)
   if (digitalReadFast(QUAD_ENC_PIN_B)) gLastState |= 2;
   EnableInterrupt(CORE_PIN0_INT, CHANGE);
   EnableInterrupt(CORE_PIN1_INT, CHANGE);
-  //EnableInterrupt(CORE_PIN2_INT, CHANGE); //milos, commented
-  //PCMSK0 = 0x10;                // If you want to use PCINT pins...  //milos, commented
-  //PCICR |= (1 << PCIE0);  //milos, commented
+  //EnableInterrupt(CORE_PIN2_INT, CHANGE); //milos, commented out
+  //PCMSK0 = 0x10;                // If you want to use PCINT pins...  //milos, commented out
+  //PCICR |= (1 << PCIE0);  //milos, commented out
 }
 
-s32 cQuadEncoder::Read()
-{
+s32 cQuadEncoder::Read() {
   noInterrupts();
   s32 pos = gPosition;
   interrupts();
   return (pos);
 }
 
-void cQuadEncoder::Write (s32 pos)
-{
+void cQuadEncoder::Write (s32 pos) {
   noInterrupts();
   gPosition = pos;
   interrupts();
@@ -191,12 +163,11 @@ s8 pos_inc[] =
   0,		// 15 not possible
 };
 
-void cQuadEncoder::Update()
-{
+void cQuadEncoder::Update() {
   u8 state = gLastState;
   // 	if (digitalReadFast(QUAD_ENC_PIN_A)) state |= 4;
   // 	if (digitalReadFast(QUAD_ENC_PIN_B)) state |= 8;
-  u8 pd = PIND;											// Optim : change code according to the pins and the mcu used (or use the lines above)
+  u8 pd = PIND;	// Optim : change code according to the pins and the mcu used (or use the lines above)
   state |= pd & 0b1100;
   gLastState = (state >> 2);
   gPosition += pos_inc[state];
@@ -213,26 +184,41 @@ void cQuadEncoder::Update()
 #endif
 }
 
-ISR(INT2_vect) {
-  gQuadEncoder.Update();
+ISR(INT2_vect) { // milos, interrupt activated function for RX
+  gQuadEncoder.Update(); // milos, otherwise we use it for optical encoder channel A on RX pin
 }
 
-ISR(INT3_vect) {
-  gQuadEncoder.Update();
+ISR(INT3_vect) { // milos, interrupt activated function for TX
+#ifndef USE_QUADRATURE_ENCODER
+#ifdef USE_AS5600
+#ifdef USE_CENTERBTN
+  recenter(); // milos, we re-map this interrupt for re-centering as5600 if optical encoder is unused
+#endif // end of centerbtn
+#endif // end of as5600
+#else // if we use quad enc
+  gQuadEncoder.Update(); // milos, otherwise we use it for optical encoder channel B on TX pin
+#endif // end of quad enc
 }
 
+
+#ifdef USE_CENTERBTN
+void recenter() {  // milos, interrupt function triggered on pin D2, or TX (if no opt enc, with as5600 and center button)
+#ifdef USE_QUADRATURE_ENCODER
 #ifndef USE_ZINDEX
 #ifndef USE_ADS1015
 #ifndef USE_MCP4725
-#ifdef USE_CENTERBTN
-void recenter() {  // milos, added - interrupt function
-  myEnc.Write(ROTATION_MID); // set X-axis to 0deg
-}
-
-ISR(INT1_vect) { // milos, added - triger interrupt on D2
-  recenter();
-}
-#endif // end of centerbtn
+  myEnc.Write(ROTATION_MID); // when using optical encoder set X-axis to 0deg (only if D2 is not used by i2C devices or z-index)
 #endif // end of mcp
 #endif // end of ads
 #endif // end of zindex
+#else // if no quad enc
+#ifdef USE_AS5600
+  cButtonPressed = true; // milos, set the flag to reset as5600 position to 0deg in main loop (because we can't use i2C bus while interrupts are stopped)
+#endif // end of as5600
+#endif // end of quad enc
+}
+
+ISR(INT1_vect) { // milos, triger interrupt on D2 (normaly used for center button, but see above ISR(INT3_vect) function)
+  recenter();
+}
+#endif // end of centerbtn

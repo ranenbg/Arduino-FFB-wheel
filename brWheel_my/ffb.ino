@@ -4,7 +4,7 @@
   Copyright 2012  Tero Loimuneva (tloimu [at] gmail [dot] com)
   Copyright 2013  Saku Kekkonen
   Copyright 2015  Etienne Saint-Paul  (esaintpaul [at] gameseed [dot] fr)
-  Copyright 2018-2024  Milos Rankovic (ranenbg [at] gmail [dot] com)
+  Copyright 2018-2025  Milos Rankovic (ranenbg [at] gmail [dot] com)
 
   Permission to use, copy, modify, distribute, and sell this
   software and its documentation for any purpose is hereby granted
@@ -26,12 +26,12 @@
 */
 
 #include "ffb.h"
-#include <arduino.h>
+//#include <arduino.h> // milos, commented out
 #include "USBCore.h"
 #include <stdint.h>
 #include "debug.h"
-#include "ffb_pro.h"
-#include "ConfigHID.h"
+//#include "ffb_pro.h" // milos, commented out
+//#include "ConfigHID.h" // milos, commented out
 
 //------------------------------------- Defines ----------------------------------------------------------
 u8 valueglobal = 55;
@@ -316,12 +316,14 @@ void FfbOnUsbData(uint8_t *data, uint16_t len)
     case 3:
       ffb->SetCondition((USB_FFBReport_SetCondition_Output_Data_t*) data, &gEffectStates[effectId]);
       //milos, added
-      LogText("SetCond - cpOff:");
+      LogText("SetCond - pbOff:");
+      LogBinary(&((USB_FFBReport_SetCondition_Output_Data_t*)data)->parameterBlockOffset, 1);
+      LogText(", cpOff:");
       LogBinary(&((USB_FFBReport_SetCondition_Output_Data_t*)data)->cpOffset, 2);
       LogText(", posC:");
       LogBinary(&((USB_FFBReport_SetCondition_Output_Data_t*)data)->positiveCoefficient, 2);
-      LogText(", posS:");
-      LogBinary(&((USB_FFBReport_SetCondition_Output_Data_t*)data)->positiveSaturation, 2);
+      //LogText(", posS:"); // milos, commented out
+      //LogBinary(&((USB_FFBReport_SetCondition_Output_Data_t*)data)->positiveSaturation, 2); // milos, commented out
       LogText(", deadB:");
       LogBinaryLf(&((USB_FFBReport_SetCondition_Output_Data_t*)data)->deadBand, 1);
       break;

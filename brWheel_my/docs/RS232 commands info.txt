@@ -1,8 +1,8 @@
 Milos Rankovic, ranenbg@gmail.com
 first created 25.03.2020.
-last update 14.10.2024.
+last update 19.03.2024.
 
-This txt file contains a list of all available RS232 serial interface commands implemented in my latest Arduino Leonardo FFB wheel firmware version (you can use this info to make your own control GUI)
+This txt file contains a list of all available RS232 serial interface commands implemented in my latest Arduino FFB wheel firmware version fw-v250 (you can use this info to make your own control GUI)
 
 Arduino boards are also recognized as a virtual serial communication device (COM port) through which we can send/receive commands to/from the ATmega32U4 microcontroller
 
@@ -18,24 +18,33 @@ RS232,   commands are not case sensitive (in this manual capital letters are use
          at each Arduino powerup firmware will automatically load and configure all settings from EEPROM (for load cell - it takes additional 2s for completing tare zeroing)
          FFB clip LED will quickly blink 3 times to indicate that everything is loaded, configured and ready to use
 
-versions, I have put some logic in firmware naming, so here is some basic explanation (if you plan to upgrade firmware, please respect this):
+versions, I have put some logic in firmware naming, so here is some basic explanation (if you plan to upgrade firmware, please respect this, only up to fw-v24X):
          fw-vXX,  two digits only are a test versions of new firmware features (not used anymore)
          fw-vXX0, three digits ending with 0 - the basic firmware with no external devices support, except for optical/magnetic encoder (has PWM signal as FFB output)
          fw-vXX1, three digits ending with 1 - adds support for external button box
          fw-vXX2, three digits ending with 2 - adds support for both external button box and load cell
          fw-vXX3, three digits ending with 3 - adds support for external button box, load cell and two external 12bit DAC - MCP4725 (has analog signal as FFB output)
 
-options, firmware version may include some letters after 3rd digit, their meaning is:
+versions from fw-v250, I've changed firmware naming logic such that all 3 digits in the name now represent firmware version only (everything else is an option, see bellow)
+
+options, firmware version string may include some letters after digits, their meaning is:
          a - pedal autocalibration enabled (if no a, then manual calibration is enabled)
+         b - 2 FFB axis support with physical output (4 channel digital PWM or 2 channel analog DAC outputs available)
 	 w - magnetic encoder AS5600 support
+         d - no optical encoder support
          z - optical encoder with z-index support
          h - enabled Hat Switch (uses first 4 buttons from button box)
-         s - enabled external 12bit ADC - ADS1015 (for analog inputs)
+         s - enabled external 12bit ADC for analog inputs (ADS1015 i2C)
          t - enabled 4x4 button matrix
          f - enabled XY analog H-pattern shifter
          i - enabled averaging of analog inputs
 	 e - support for two additional digital buttons (clutch and handbrake axis will be unavailable)
 	 x - enables the option to select to which (analog) axis is FFB tied to
+         r - support for external shift register chips for 24 buttons (3x SN74ALS166 wired in series)
+         n - support for external button box for 16 buttons via Arduino nano (with my button box firmware)
+         l - support HX711 chip for load cell
+         g - support for external 12bit DAC to be used for analog FFB output (2x MCP4725 i2C)
+	 p - no EEPROM support for loading/saving firmware settings (firmware defaults are loaded at each startup)
          m - replacement pinouts for ProMicro (for FFB clipping LED, buttons 3 and 4, PWM direction pin)
 
 [1] all wheel parameters read out
@@ -123,20 +132,33 @@ sent and received number is a decimal equivalent (form) of this byte
 command		example response	range
 E 1		1			0-31
 
-[12] adjust PWM settings - requires Arduino restart in order to apply changes (press reset button, or just re-plug Arduino to USB port)
-byte, bit0-phase correct (or fast mode), bit1-dir enabled (or PWM+-), bits 2-5 are frequency select, bits6-pwm0.50.100 mode enable, bit7 is unused
-PWM0.50.100. mode selection is done by setting bit1 LOW and bit6 HIGH
+[12] adjust PWM/DAC settings - only requires Arduino restart to apply PWM changes (press reset button, or just re-plug Arduino to USB port)
+byte, bit0-phase correct (or fast pwm), bit1-dir enabled (or pwm+-), bits 2-5 are frequency select, bits6-pwm0-50-100 mode enable, bit7 is unused
+PWM0-50-100 mode selection is done by setting bit1 LOW and bit6 HIGH
 RCM mode selection is done by setting both bit1 and bit6 HIGH (please note that not all frequencies are available, see firmware_info.txt for more details)
 
 bit0 pwm_type
 0    fast pwm
 1    phase correct
 
-bit1 bit6 pwm_mode
-0    0    pwm+-
-0    1    pwm0.50.100
-1    0    pwm+dir
-1    1    rcm
+bit1 bit6 pwm_mode	pwm_mode2 (2-ffb axis)
+0    0    pwm+-		2ch pwm+-
+0    1    pwm0.50.100   2ch pwm0.50.100
+1    0    pwm+dir       2ch pwm+dir
+1    1    rcm           2ch rcm (not used)
+
+IMPOPRTANT NOTE: if USE_MCP4725 is uncommented in Config.h then configuration byte has the following interpretation
+bits 0-4 unused, bits 5,6 dac mode (see bellow), bit7 dac output (enable/disable)
+
+bit7 dac_out
+0    disabled (set to 0V or 2.5V depending on dac mode)
+1    enabled
+
+bit6 bit5 dac_mode     dac_mode2 (2-ffb axis)
+0    0	  dac+-        1ch dac+- (xFFB)
+0    1    dac0-50-100  2ch dac0-50-100
+1    0    dac+dir      2ch dac+dir
+1    1    none	       none
 
 for available frequency selection see firmware info.txt
 sent number is a decimal equivalent (form) of this byte

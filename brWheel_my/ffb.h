@@ -6,6 +6,7 @@
   with some room for additional extra controls.
 
   Copyright 2012  Tero Loimuneva (tloimu [at] gmail [dot] com)
+  Copyright 2018-2025  Milos Rankovic (ranenbg [at] gmail [dot] com)
   MIT License.
 
   Permission to use, copy, modify, distribute, and sell this
@@ -31,6 +32,7 @@
 #define _FFB_
 
 #include <arduino.h>
+#include "Config.h" // milos, added
 
 /* Type Defines: */
 /** Type define for the joystick HID report structure, for creating and sending HID reports to the host PC.
@@ -64,10 +66,10 @@ typedef struct
   uint8_t	effectBlockIndex;	// 1..40
   uint8_t	effectType;	// 1..12 (effect usages: 26,27,30,31,32,33,34,40,41,42,43,28) //milos, total 11, 28 is removed (custom force)
   uint16_t duration; // 0..65535, exp -3, s
-  uint16_t triggerRepeatInterval; // 0..65535, exp -3, s //milos
+  //uint16_t triggerRepeatInterval; // 0..65535, exp -3, s //milos
   //uint16_t samplingPeriod;	// 0..65535, exp -3, s //milos, renamed from samplePeriod, removed
   int16_t gain; // 0..32767  (physical 0..32767) //milos, was 0(0)..(255)10000, uint8_t
-  uint8_t	triggerButton;	// button ID (0..8)
+  //uint8_t	triggerButton;	// button ID (0..8)
   uint8_t	enableAxis; // bits: 0=X, 1=Y, 2=DirectionEnable
   //uint8_t	directionX;	// angle (0=0 .. 255=360deg) //milos, commented
   //uint8_t	directionY;	// angle (0=0 .. 255=360deg) //milos, commented
@@ -94,7 +96,7 @@ typedef struct
   int16_t cpOffset;	// -32768..32767 (physical -32768..32767) //milos, was -128(-10000)..127(10000), int8_t
   int16_t	positiveCoefficient;	// -32767..32767 (physical -32767..32767) //milos, was -128(-10000)..127(10000), int8_t
   //  int16_t	negativeCoefficient;	// -32768..32767 (physical -32768..32767) //milos, was -128(-10000)..127(10000), int8_t, commented out
-  int16_t positiveSaturation;	// 0..32767 (physical 0..32767) //milos, was 0(0)..255(10000), int8_t, uncommented
+  //  int16_t positiveSaturation;	// 0..32767 (physical 0..32767) //milos, was 0(0)..255(10000), int8_t, commented out
   //  uint8_t	negativeSaturation;	// -128..127
   uint8_t deadBand;	// 0..255 (physical 0..32767) //milos, was 0(0)..255(10000)
 } USB_FFBReport_SetCondition_Output_Data_t;
@@ -293,13 +295,18 @@ typedef struct
 {
   u8 state;	// see constants MEffectState_*
   u8 type;	// see constants USB_EFFECT_*
+  u8 parameterBlockOffset; // milos, added
   u8 attackLevel, fadeLevel, deadBand, enableAxis; //milos, added deadBand and enableAxis
   s8 rampStart, rampEnd; //milos, added
   u16 gain, period, direction; // samplingPeriod;	// ms //milos, changed gain from u8 to u16, added samplingPeriod
   u16 duration, fadeTime, attackTime, startDelay; //milos, added attackTime and startDelay
-  s16 magnitude, positiveSaturation;  //milos, added positiveSaturation
+  s16 magnitude, positiveCoefficient;  //milos, added positiveCoefficient
   s16 offset;
   u8 phase; //milos, changed back to u8 from u16
+#ifdef USE_TWOFFBAXIS // milos, added - used for conditional block effects for yFFB axis
+  u8 deadBand2;
+  s16 magnitude2, offset2;
+#endif // end of 2 ffb axis
 } TEffectState;
 
 typedef struct

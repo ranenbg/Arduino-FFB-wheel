@@ -33,8 +33,8 @@ Joystick_ Joystick;
 //================================================================================
 #define RAWHID_USAGE_PAGE	0xFFC0
 #define RAWHID_USAGE		0x0C00
-#define RAWHID_TX_SIZE 64
-#define RAWHID_RX_SIZE 64
+#define RAWHID_TX_SIZE 0x40
+#define RAWHID_RX_SIZE 0x40
 
 //#define ADD_KEYBOARD
 //#define ADD_MOUSE
@@ -105,7 +105,7 @@ const u8 _hidReportDescriptor[] =
   0x81, 0x00,                   //   INPUT (Data,Ary,Abs)
   0xc0,                          // END_COLLECTION
 #endif
-#if RAWHID_ENABLED
+#ifdef RAWHID_ENABLED
   //	RAW HID
   0x06, LSB(RAWHID_USAGE_PAGE), MSB(RAWHID_USAGE_PAGE),	// 30
   0x0A, LSB(RAWHID_USAGE), MSB(RAWHID_USAGE),
@@ -116,14 +116,14 @@ const u8 _hidReportDescriptor[] =
   0x15, 0x00,				// logical minimum = 0
   0x26, 0xFF, 0x00,		// logical maximum = 255
 
-  0x95, 64,				// report count TX
+  0x95, RAWHID_TX_SIZE,				// report count TX
   0x09, 0x01,				// usage
   0x81, 0x02,				// Input (array)
 
-  0x95, 64,				// report count RX
+  0x95, RAWHID_RX_SIZE,				// report count RX
   0x09, 0x02,				// usage
   0x91, 0x02,				// Output (array)
-  0xC0					// end collection
+  0xC0,					// end collection
 #endif
 #ifdef ADD_JOYSTICK
   0x05, 0x01,	// USAGE_PAGE (Generic Desktop)
@@ -219,13 +219,13 @@ const u8 _hidReportDescriptor[] =
   0x09, 0x01,                    //   USAGE (Vendor Usage 1)
   0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
   0x26, 0xff, 0x00,              //   LOGICAL_MAXIMUM (255)
-  0x95, 0x3F, //0x20,                    //   REPORT_COUNT (32)
+  0x95, 0x3F, //0x20,            //   REPORT_COUNT (63)
   0x75, 0x08,                    //   REPORT_SIZE (8)
   0x91, 0x82,                    //   OUTPUT (Data,Var,Abs,Vol)	//8
 
   0x85, 0xf2,                    //   REPORT_ID (f2)
   0x09, 0x01,                    //   USAGE (Vendor Usage 3)
-  0x95, 0x3F, //0x20,                    //   REPORT_COUNT (32)
+  0x95, 0x3F, //0x20,            //   REPORT_COUNT (63)
   0x75, 0x08,                    //   REPORT_SIZE (8)
   0x81, 0x82,                    //   INPUT (Data,Var,Abs,Vol)	8
   0xc0, // END_COLLECTION

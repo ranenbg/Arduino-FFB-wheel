@@ -1,0 +1,34 @@
+Milos Rankovic, ranenbg@gmail.com
+created 05.03.2024
+last updated 19.03.2025.
+
+Changes from fw-v24X to fw-v250
+
+- added 2 FFB axis feature (firmware option "b")
+- firmware has 2 FFB axis in HID and 2 channel PWM+- outputs (new PWM mode available - with 4 PWM outputs)
+- 2nd channel PWM+- output is on pins D5 and D11 (timers 1 and 3 are utilized)
+- one mode available for 2 channel PWM+- output (only 2CH PWM+-, for now)
+- frequency and PWM type adjustments are available for 2CH PWM+- mode
+- restructured firmware to allow 2 FFB axis feature (2D vector structs and pointers are used for xy-axis, xy-FFB and xy-PWM)
+- optimized code when using 1 FFB axis (vector structs become 1D - saving some program memory)
+- 2 axis FFB feature is available only for following FFB effects: constant, spring and periodic sine (more effects may be supported if required)
+- as before, following FFB effects are only available on x-FFB axis: ramp, damper, inertia, friction and all remaining periodic (square, triangle, sawtoothup and sawtoothdown)
+- added conditional block effects for 2nd FFB axis (used for spring effect only, for now)
+- removed deadband from conditional effect block for spring (due to program memory limitation)
+- disabled deadband for all remaining conditional FFB effects: spring, damper, inertia and friction (commented out in firmware, but can be reused if enough memory is left)
+- available conditional block effects are: offset, positive coefficient and axis parameter block (no deadband, no negative coefficient, no negative/positive saturation)
+- added firmware option "d" where optical quadrature encoder support is disabled (you may comment out usage of quad enc in Config.h)
+- if no optical or magnetic encoders are used, x-axis is using analog input from z-axis (making it unavailable - half axis range is permanently set for z-axis)
+- added endstop spring force for yFFB axis (with the same strength as for xFFB)
+- endstop force for both FFB axis now starts slightly before axis ends (moved inwards by 1/64 of total axis range)
+- changed default PWM settings to: fast pwm, pwm+-, 8kHz (optimal settings for H-bridge motor drivers like BTS7960 -> higher PWM resolution -> higher FFB fidelity)
+- restructured part of firmware code for axis (their calibration) and ffb axis, by implementing usage of structs and pointers (some more program memory is free)
+- changed how firmware version is interpreted (all 3 digits are representing firmware version and everything else will be a firmware option)
+- added a few new firmware options ("d", "n", "l", "g", "p" see GitHub readme for description of each option)
+- added 2 channel equivalents for remaining pwm modes (2CH PWM+DIR, 2CH PWM0-50-100 and 2CH RCM) 
+- 2CH RCM pwm mode is commented out in firmware to save some program memory (it's rarely used)
+- serial (CDC) and HID configuration interface are now options in Config.h that may be commented out (configCDC is used by GUI, configHID is commented out or unused for now)
+- started implementing firmware configuration by native HID protocol (plan is to replace configCDC completely with configHID at some point)
+- implemented support for hardware re-center button when magnetic encoder is used, if no optical encoder is used (center button is re-mapped to TX pin instead of D2)
+- updated wirings, docs and manuals with new firmware features (milos, to DO: pinouts, bts and dac wirings)
+

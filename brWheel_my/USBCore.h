@@ -1,6 +1,7 @@
 
-// Copyright (c) 2010, Peter Barrett
-/*
+
+/* Copyright (c) 2010, Peter Barrett
+**  
 ** Permission to use, copy, modify, and/or distribute this software for
 ** any purpose with or without fee is hereby granted, provided that the
 ** above copyright notice and this permission notice appear in all copies.
@@ -302,4 +303,3 @@ typedef struct
 
 
 #endif
-

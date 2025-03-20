@@ -73,7 +73,6 @@ const u16 STRING_IMANUFACTURER[12] = {
 #elif USB_VID == 0x1b4f
   'S', 'p', 'a', 'r', 'k', 'F', 'u', 'n', ' ', ' ', ' '
 #else
-  //	'U','n','k','n','o','w','n',' ',' ',' ',' '
   'F', 'I', ' ', 'O', 'p', 'S', 'o', 'u', 'r', 'c', 'e'
 #endif
 };

@@ -3,14 +3,13 @@
 
 //--------------------------------------------------------------------------------------------------------
 
-u8 toUpper(u8 c)
-{
+u8 toUpper(u8 c) {
   if ((c >= 'a') && (c <= 'z'))
     return (c + 'A' - 'a');
   return (c);
 }
 
-void readSerial() {
+void configCDC() { // milos, virtual serial port firmware configuration interface
   if (CONFIG_SERIAL.available() > 0) {
     u8 c = toUpper(CONFIG_SERIAL.read());
     //DEBUG_SERIAL.println(c);
@@ -18,49 +17,31 @@ void readSerial() {
     f32 wheelAngle;
     u8 ffb_temp;
     switch (c) {
-      case 'U': // milos, show all FFB parameters
-        //CONFIG_SERIAL.println("Command      FFB parameters"); // milos
-        //CONFIG_SERIAL.print(" [G]       degrees of rotation:   ");
+      case 'U': // milos, send all firmware settings
         CONFIG_SERIAL.print(ROTATION_DEG);
         CONFIG_SERIAL.print(' ');
-        //CONFIG_SERIAL.print(" [FK]    min PWM:               ");
-        //CONFIG_SERIAL.println(MM_MIN_MOTOR_TORQUE);
-        //CONFIG_SERIAL.print(" [FJ]    max PWM:               ");
-        //CONFIG_SERIAL.println(MM_MAX_MOTOR_TORQUE);
-        //CONFIG_SERIAL.print(" [FG]    overal gain:           ");
         CONFIG_SERIAL.print(configGeneralGain);
         CONFIG_SERIAL.print(' ');
-        //CONFIG_SERIAL.print(" [FD]    damper gain:           ");
         CONFIG_SERIAL.print(configDamperGain);
         CONFIG_SERIAL.print(' ');
-        //CONFIG_SERIAL.print(" [FF]    friction gain:         ");
         CONFIG_SERIAL.print(configFrictionGain);
         CONFIG_SERIAL.print(' ');
-        //CONFIG_SERIAL.print(" [FC]    const force gain:      ");
         CONFIG_SERIAL.print(configConstantGain);
         CONFIG_SERIAL.print(' ');
-        //CONFIG_SERIAL.print(" [FS]    sine gain:             ");
         CONFIG_SERIAL.print(configPeriodicGain);
         CONFIG_SERIAL.print(' ');
-        //CONFIG_SERIAL.print(" [FM]    spring gain:           ");
         CONFIG_SERIAL.print(configSpringGain);
         CONFIG_SERIAL.print(' ');
-        //CONFIG_SERIAL.print(" [FI]    inertia gain:          ");
         CONFIG_SERIAL.print(configInertiaGain);
         CONFIG_SERIAL.print(' ');
-        //CONFIG_SERIAL.print(" [FA]    centering spring gain: ");
         CONFIG_SERIAL.print(configCenterGain);
         CONFIG_SERIAL.print(' ');
-        //CONFIG_SERIAL.print(" [FB]    edge stop gain:        ");
         CONFIG_SERIAL.print(configStopGain);
         CONFIG_SERIAL.print(' ');
-        //CONFIG_SERIAL.print(" [FJ]    min torque %PWM:        ");
         CONFIG_SERIAL.print(MM_MIN_MOTOR_TORQUE);
         CONFIG_SERIAL.print(' ');
-        //CONFIG_SERIAL.print("Brake pressure [1-255]: ");
         CONFIG_SERIAL.print(LC_scaling);
         CONFIG_SERIAL.print(' ');
-        //CONFIG_SERIAL.print("Desktop effects code: ");
         CONFIG_SERIAL.print(effstate, DEC); //milos, desktop effects in decimal form
         CONFIG_SERIAL.print(' ');
         CONFIG_SERIAL.print(MM_MAX_MOTOR_TORQUE); //milos, send max torque as parameter
@@ -71,7 +52,7 @@ void readSerial() {
         break;
       case 'V':
         CONFIG_SERIAL.print("fw-v");
-        CONFIG_SERIAL.print(VERSION, DEC);
+        CONFIG_SERIAL.print(FIRMWARE_VERSION, DEC);
         // milos, firmware options
 #ifdef USE_AUTOCALIB
         CONFIG_SERIAL.print("a");
@@ -81,17 +62,13 @@ void readSerial() {
 #endif
 #ifdef USE_ZINDEX
         CONFIG_SERIAL.print("z");
-#else // if no z-index
-#ifndef USE_ADS1015
-#ifndef USE_MCP4725
-#ifndef USE_AS5600
+#endif
 #ifdef USE_CENTERBTN
         CONFIG_SERIAL.print("c");
-#endif // end of as5600
-#endif // end of centerbtn
-#endif // end of mcp
-#endif // end of ads
-#endif // end of zindex
+#endif
+#ifndef USE_QUADRATURE_ENCODER
+        CONFIG_SERIAL.print("d"); // milos, if no optical encoder
+#endif
 #ifdef USE_AS5600
         CONFIG_SERIAL.print("w");
 #endif
@@ -107,9 +84,6 @@ void readSerial() {
 #ifdef USE_BTNMATRIX
         CONFIG_SERIAL.print("t");
 #endif
-#ifdef USE_SN74ALS166N
-        CONFIG_SERIAL.print("r");
-#endif
 #ifdef USE_XY_SHIFTER
         CONFIG_SERIAL.print("f");
 #endif
@@ -118,6 +92,21 @@ void readSerial() {
 #endif
 #ifdef USE_ANALOGFFBAXIS
         CONFIG_SERIAL.print("x");
+#endif
+#ifdef USE_SHIFT_REGISTER
+        CONFIG_SERIAL.print("n");
+#endif
+#ifdef USE_SN74ALS166N
+        CONFIG_SERIAL.print("r");
+#endif
+#ifdef USE_LOAD_CELL
+        CONFIG_SERIAL.print("l");
+#endif
+#ifdef USE_MCP4725
+        CONFIG_SERIAL.print("g");
+#endif
+#ifndef USE_EEPROM
+        CONFIG_SERIAL.print("p");
 #endif
 #ifdef USE_PROMICRO
         CONFIG_SERIAL.print("m");
@@ -133,61 +122,59 @@ void readSerial() {
       case 'B': // milos, added to adjust brake load cell pressure
         ffb_temp = CONFIG_SERIAL.parseInt();
         LC_scaling = constrain(ffb_temp, 1, 255);
-        //CONFIG_SERIAL.print("Brake pressure [1-255]: ");
-        //CONFIG_SERIAL.println(LC_scaling);
         CONFIG_SERIAL.println(1);
-        //SetParam(PARAM_ADDR_BRK_PRES, LC_scaling);//milos, update EEPROM
+        //SetParam(PARAM_ADDR_BRK_PRES, LC_scaling); // milos, update EEPROM
         break;
       case 'P': // milos, added to recalibrate pedals
 #ifdef USE_AUTOCALIB
-        accelMin = Z_AXIS_LOG_MAX, accelMax = 0;
-        brakeMin = Z_AXIS_LOG_MAX, brakeMax = 0;
-        clutchMin = RX_AXIS_LOG_MAX, clutchMax = 0;
-        hbrakeMin = RY_AXIS_LOG_MAX, hbrakeMax = 0;
+        accel.min = Z_AXIS_LOG_MAX, accel.max = 0;
+        brake.min = Z_AXIS_LOG_MAX, brake.max = 0;
+        clutch.min = RX_AXIS_LOG_MAX, clutch.max = 0;
+        hbrake.min = RY_AXIS_LOG_MAX, hbrake.max = 0;
         CONFIG_SERIAL.println(1);
-#else
+#else // if manual calib
         CONFIG_SERIAL.println(0);
-#endif
+#endif // end of autocalib
         break;
       case 'O': // milos, added to adjust optical encoder CPR
-        temp = CONFIG_SERIAL.parseInt();
-        temp = constrain(temp, 4, 600000); //milos, extended to 32bit (100000*6)
-#ifndef USE_AS5600 // milos, when no AS5600
-        temp1 = myEnc.Read() - ROTATION_MID + brWheelFFB.offset; // milos
-#else
+#ifdef USE_AS5600 // milos, with AS5600
         temp1 = as5600.getCumulativePosition() - ROTATION_MID; // milos
-#endif
+#else // if no as5600
+#ifdef USE_QUADRATURE_ENCODER
+        temp1 = myEnc.Read() - ROTATION_MID + brWheelFFB.offset; // milos
+#else // milos, if no digital encoders
+        temp1 = 0;
+#endif // end of quad enc
+#endif // end of as5600
+        temp = CONFIG_SERIAL.parseInt();
+        temp = constrain(temp, 4, 600000); // milos, extended to 32bit (100000*6)
         wheelAngle = float(temp1) * float(ROTATION_DEG) / float(ROTATION_MAX); // milos, current wheel angle
         CPR = temp; // milos, update CPR
-        ROTATION_MAX = int32_t(float(temp) / 360.0 * float(ROTATION_DEG)); // milos, updated
+        ROTATION_MAX = int32_t(float(CPR) / 360.0 * float(ROTATION_DEG)); // milos, updated
         ROTATION_MID = ROTATION_MAX >> 1; // milos, updated, divide by 2
-        //brWheelFFB.offset = 0; //milos
         temp1 = int32_t(wheelAngle * float(ROTATION_MAX) / float(ROTATION_DEG)); // milos, here we recover the old wheel angle
-#ifndef USE_AS5600 // milos, when no AS5600
-        myEnc.Write(ROTATION_MID + temp1 - brWheelFFB.offset); // milos
-#else
-        as5600.resetCumulativePosition(ROTATION_MID + temp1); // milos
-#endif
-        //CONFIG_SERIAL.print("encoder CPR[4-600000]: ");
-        //CONFIG_SERIAL.println(temp);
+#ifdef USE_AS5600 // milos, with AS5600
+        as5600.resetCumulativePosition(temp1 + ROTATION_MID); // milos
+#else // if no as5600
+#ifdef USE_QUADRATURE_ENCODER
+        myEnc.Write(temp1 + ROTATION_MID - brWheelFFB.offset); // milos
+#endif // end of quad enc
+#endif // end of as5600
         CONFIG_SERIAL.println(1);
-        //SetParam(PARAM_ADDR_ENC_CPR, CPR);//milos, update EEPROM
+        //SetParam(PARAM_ADDR_ENC_CPR, CPR); // milos, update EEPROM
         break;
       case 'C':
-        //temp1 = myEnc.Read() - ROTATION_MID - brWheelFFB.offset;  // milos
-        //temp1 = (temp1 *  X_AXIS_PHYS_MAX) / ROTATION_MAX; // milos
-        //myEnc.Write(ROTATION_MID + brWheelFFB.offset);
-        //CONFIG_SERIAL.print("Wheel centered from position: "); // milos
-        //CONFIG_SERIAL.println(temp1);  // milos
 #ifdef USE_ZINDEX
         brWheelFFB.offset = ROTATION_MID - myEnc.Read();
         //CONFIG_SERIAL.println(brWheelFFB.offset); // milos, saving some bytes in flash memory
         CONFIG_SERIAL.println(1);
-#else
-#ifndef USE_AS5600 // milos, when no AS5600
-        myEnc.Write(ROTATION_MID); // milos, just set at zero angle
-#else // milos, if we use AS5600
+#else // if no zindex
+#ifdef USE_AS5600 // milos, with AS5600
         as5600.resetCumulativePosition(ROTATION_MID);
+#else // milos, if no as5600
+#ifdef USE_QUADRATURE_ENCODER
+        myEnc.Write(ROTATION_MID); // milos, just set to zero angle
+#endif // end of quad enc
 #endif // end of use as5600
         CONFIG_SERIAL.println(0);
 #endif // end of use z index
@@ -195,65 +182,64 @@ void readSerial() {
       case 'Z': // milos, hard reset the z-index offset
 #ifdef USE_ZINDEX
         brWheelFFB.offset = 0;
-        SetParam(PARAM_ADDR_OFFSET, brWheelFFB.offset); // milos, update EEPROM right away
+        SetParam(PARAM_ADDR_ENC_OFFSET, brWheelFFB.offset); // milos, update EEPROM right away
         CONFIG_SERIAL.println(1);
-#else
+#else // if no zindex
         CONFIG_SERIAL.println(0);
-#endif
+#endif // end of zindex
         break;
-      case 'G': // milos, this was not working, fixed now
+      case 'G': // milos, set new rotation angle
+#ifdef USE_AS5600 // milos, with AS5600
+        temp1 = as5600.getCumulativePosition() - ROTATION_MID; // milos
+#else // if no as5600
+#ifdef USE_QUADRATURE_ENCODER
+        temp1 = myEnc.Read() - ROTATION_MID + brWheelFFB.offset; // milos
+#else // milos, if no digital encoders
+        temp1 = 0;
+#endif // end of quad enc
+#endif // end of as5600
         temp = CONFIG_SERIAL.parseInt();
         temp = constrain(temp, 30, 1800); // milos
-#ifndef USE_AS5600 // milos, when no AS5600
-        temp1 = myEnc.Read() - ROTATION_MID + brWheelFFB.offset; // milos
-#else
-        temp1 = as5600.getCumulativePosition() - ROTATION_MID; // milos
-#endif
         wheelAngle = float(temp1) * float(ROTATION_DEG) / float(ROTATION_MAX); // milos, current wheel angle
         ROTATION_DEG = temp; // milos, update degrees of rotation
-        ROTATION_MAX = int32_t(float(CPR) / 360.0 * float(temp)); // milos, updated
+        ROTATION_MAX = int32_t(float(CPR) / 360.0 * float(ROTATION_DEG)); // milos, updated
         ROTATION_MID = ROTATION_MAX >> 1; // milos, updated, divide by 2
-        //brWheelFFB.offset = 0; //milos
         temp1 = int32_t(wheelAngle * float(ROTATION_MAX) / float(ROTATION_DEG)); // milos, here we recover the old wheel angle
-#ifndef USE_AS5600 // milos, when no AS5600
-        myEnc.Write(ROTATION_MID + temp1 - brWheelFFB.offset); // milos
-#else
-        as5600.resetCumulativePosition(ROTATION_MID + temp1); // milos
-#endif
-        //CONFIG_SERIAL.print("Rotation [30-1800]deg: "); // milos
-        //CONFIG_SERIAL.println(temp);  // milos
+#ifdef USE_AS5600 // milos, with AS5600
+        as5600.resetCumulativePosition(temp1 + ROTATION_MID); // milos
+#else // if no as5600
+#ifdef USE_QUADRATURE_ENCODER
+        myEnc.Write(temp1 + ROTATION_MID - brWheelFFB.offset); // milos
+#endif // end of quad enc
+#endif // end of as5600
         CONFIG_SERIAL.println(1);
         //SetParam(PARAM_ADDR_ROTATION_DEG, temp);// milos, update EEPROM
         break;
-      case 'E': //milos, added - turn desktop effects on/off
+      case 'E': //milos, added - turn desktop effects and ffb monitor on/off
         ffb_temp = CONFIG_SERIAL.parseInt();
         ffb_temp = constrain(ffb_temp, 0, 255);
-        //CONFIG_SERIAL.print("Desktop effects byte: "); //milos, autocentering spring, damper, inertia, friction and ffb out
-        for (uint8_t i = 0; i <= 7; i++) { //milos, decode incomming number into individual switches
+        for (uint8_t i = 0; i < 8; i++) { //milos, decode incomming number into individual bits
           bitWrite(effstate, i, bitRead(ffb_temp, i));
         }
         CONFIG_SERIAL.println(effstate, BIN);
         //CONFIG_SERIAL.println(1);
-        //SetParam(PARAM_ADDR_DSK_EFFC, effstate);// milos, update EEPROM
+        //SetParam(PARAM_ADDR_DSK_EFFC, effstate); // milos, update EEPROM
         break;
       case 'W': //milos, added - configure PWM settings and frequency
+#ifdef USE_EEPROM
         ffb_temp = CONFIG_SERIAL.parseInt();
         ffb_temp = constrain(ffb_temp, 0, 255);
-        //CONFIG_SERIAL.print("PWM settings byte: "); // milos, dir enabled, phase correct and pwm frequency
         for (uint8_t i = 0; i < 8; i++) { // milos, decode incomming number into individual bits
           bitWrite(pwmstate, i, bitRead(ffb_temp, i));
         }
-#ifdef USE_EEPROM
         SetParam(PARAM_ADDR_PWM_SET, pwmstate); // milos, update EEPROM with new pwm settings
         temp = calcTOP(pwmstate) * minTorquePP; // milos, recalculate new min torque for curent min torque %
         SetParam(PARAM_ADDR_MIN_TORQ, temp); // milos, update min torque in EEPROM
-#endif
         CONFIG_SERIAL.println(calcTOP(pwmstate));
-        /*for (uint8_t i = 0; i < 8; i++) { //milos, decode incomming number into individual bits
-          CONFIG_SERIAL.print(bitRead(pwmstate, 7-i),BIN);
-          }
-          CONFIG_SERIAL.println("");*/
         //CONFIG_SERIAL.println(1);
+#else // milos, if no eeprom we can't configure pwm settings durring runtime, but we can set it manualy in setup loop
+        CONFIG_SERIAL.println(0);
+#endif // end of eeprom
         break;
       case 'H': // milos, added - configure the XY shifter calibration
 #ifdef USE_XY_SHIFTER
@@ -262,135 +248,135 @@ void readSerial() {
           case 'A':
             temp = CONFIG_SERIAL.parseInt();
             temp = constrain(temp, 0, 1023);
-            sCal[0] = temp;
+            shifter.cal[0] = temp;
             CONFIG_SERIAL.println(1);
             break;
           case 'B':
             temp = CONFIG_SERIAL.parseInt();
             temp = constrain(temp, 0, 1023);
-            sCal[1] = temp;
+            shifter.cal[1] = temp;
             CONFIG_SERIAL.println(1);
             break;
           case 'C':
             temp = CONFIG_SERIAL.parseInt();
             temp = constrain(temp, 0, 1023);
-            sCal[2] = temp;
+            shifter.cal[2] = temp;
             CONFIG_SERIAL.println(1);
             break;
           case 'D':
             temp = CONFIG_SERIAL.parseInt();
             temp = constrain(temp, 0, 1023);
-            sCal[3] = temp;
+            shifter.cal[3] = temp;
             CONFIG_SERIAL.println(1);
             break;
           case 'E':
             temp = CONFIG_SERIAL.parseInt();
             temp = constrain(temp, 0, 1023);
-            sCal[4] = temp;
+            shifter.cal[4] = temp;
             CONFIG_SERIAL.println(1);
             break;
           case 'F':
             temp = CONFIG_SERIAL.parseInt();
             temp = constrain(temp, 0, 255);
-            sConfig = temp;
+            shifter.cfg = temp;
             CONFIG_SERIAL.println(1);
             break;
           case 'G':
-            CONFIG_SERIAL.print(sCal[0]);
+            CONFIG_SERIAL.print(shifter.cal[0]);
             CONFIG_SERIAL.print(" ");
-            CONFIG_SERIAL.print(sCal[1]);
+            CONFIG_SERIAL.print(shifter.cal[1]);
             CONFIG_SERIAL.print(" ");
-            CONFIG_SERIAL.print(sCal[2]);
+            CONFIG_SERIAL.print(shifter.cal[2]);
             CONFIG_SERIAL.print(" ");
-            CONFIG_SERIAL.print(sCal[3]);
+            CONFIG_SERIAL.print(shifter.cal[3]);
             CONFIG_SERIAL.print(" ");
-            CONFIG_SERIAL.print(sCal[4]);
+            CONFIG_SERIAL.print(shifter.cal[4]);
             CONFIG_SERIAL.print(" ");
-            CONFIG_SERIAL.println(sConfig);
+            CONFIG_SERIAL.println(shifter.cfg);
             break;
           case 'R':
-            CONFIG_SERIAL.print(shifterX);
+            CONFIG_SERIAL.print(shifter.x);
             CONFIG_SERIAL.print(" ");
-            CONFIG_SERIAL.println(shifterY);
+            CONFIG_SERIAL.println(shifter.y);
             break;
         }
-#else
+#else // if no xy shifter
         CONFIG_SERIAL.println(0);
-#endif
+#endif // end of xy shifter
         break;
       case 'Y': // milos, added - configure manual calibration for pedals
-#ifndef USE_AUTOCALIB
+#ifndef USE_AUTOCALIB // milos, if manual pedal calibration
         c = toUpper(CONFIG_SERIAL.read());
         switch (c) {
           case 'A':
             temp = CONFIG_SERIAL.parseInt();
             temp = constrain(temp, 0, 4095);
-            brakeMin = temp;
+            brake.min = temp;
             CONFIG_SERIAL.println(1);
             break;
           case 'B':
             temp = CONFIG_SERIAL.parseInt();
             temp = constrain(temp, 0, 4095);
-            brakeMax = temp;
+            brake.max = temp;
             CONFIG_SERIAL.println(1);
             break;
           case 'C':
             temp = CONFIG_SERIAL.parseInt();
             temp = constrain(temp, 0, 4095);
-            accelMin = temp;
+            accel.min = temp;
             CONFIG_SERIAL.println(1);
             break;
           case 'D':
             temp = CONFIG_SERIAL.parseInt();
             temp = constrain(temp, 0, 4095);
-            accelMax = temp;
+            accel.max = temp;
             CONFIG_SERIAL.println(1);
             break;
           case 'E':
             temp = CONFIG_SERIAL.parseInt();
             temp = constrain(temp, 0, 4095);
-            clutchMin = temp;
+            clutch.min = temp;
             CONFIG_SERIAL.println(1);
             break;
           case 'F':
             temp = CONFIG_SERIAL.parseInt();
             temp = constrain(temp, 0, 4095);
-            clutchMax = temp;
+            clutch.max = temp;
             CONFIG_SERIAL.println(1);
             break;
           case 'G':
             temp = CONFIG_SERIAL.parseInt();
             temp = constrain(temp, 0, 4095);
-            hbrakeMin = temp;
+            hbrake.min = temp;
             CONFIG_SERIAL.println(1);
             break;
           case 'H':
             temp = CONFIG_SERIAL.parseInt();
             temp = constrain(temp, 0, 4095);
-            hbrakeMax = temp;
+            hbrake.max = temp;
             CONFIG_SERIAL.println(1);
             break;
           case 'R':
-            CONFIG_SERIAL.print(brakeMin);
+            CONFIG_SERIAL.print(brake.min);
             CONFIG_SERIAL.print(" ");
-            CONFIG_SERIAL.print(brakeMax);
+            CONFIG_SERIAL.print(brake.max);
             CONFIG_SERIAL.print(" ");
-            CONFIG_SERIAL.print(accelMin);
+            CONFIG_SERIAL.print(accel.min);
             CONFIG_SERIAL.print(" ");
-            CONFIG_SERIAL.print(accelMax);
+            CONFIG_SERIAL.print(accel.max);
             CONFIG_SERIAL.print(" ");
-            CONFIG_SERIAL.print(clutchMin);
+            CONFIG_SERIAL.print(clutch.min);
             CONFIG_SERIAL.print(" ");
-            CONFIG_SERIAL.print(clutchMax);
+            CONFIG_SERIAL.print(clutch.max);
             CONFIG_SERIAL.print(" ");
-            CONFIG_SERIAL.print(hbrakeMin);
+            CONFIG_SERIAL.print(hbrake.min);
             CONFIG_SERIAL.print(" ");
-            CONFIG_SERIAL.println(hbrakeMax);
+            CONFIG_SERIAL.println(hbrake.max);
             break;
         }
-#else
+#else // if autocalib
         CONFIG_SERIAL.println(0);
-#endif
+#endif // end of autocalib
         break;
       /*case 'Q': //milos, read and print out EEPROM contents
         uint8_t temp;
@@ -418,98 +404,75 @@ void readSerial() {
         ClearEEPROMConfig();
         Serial.println("EEPROM cleared");
         break;*/
-      case 'A': //milos, save all ffb parameters in EEPROM
+      case 'A': //milos, save all firmware settings in EEPROM
 #ifdef USE_EEPROM
         SaveEEPROMConfig ();
-        //CONFIG_SERIAL.println("ok");
         CONFIG_SERIAL.println(1);
-#else
-        //CONFIG_SERIAL.println("na");
+#else // if no eeprom
         CONFIG_SERIAL.println(0);
-#endif
+#endif // end of eeprom
         break;
       case 'F':
         c = toUpper(CONFIG_SERIAL.read());
         switch (c) {
           case 'G':
             ffb_temp = CONFIG_SERIAL.parseInt();
-            configGeneralGain = constrain(ffb_temp, 0, 200);
-            //CONFIG_SERIAL.print("General gain [0-200]%: "); // milos
-            //CONFIG_SERIAL.println(configGeneralGain);  // milos
+            configGeneralGain = constrain(ffb_temp, 0, 255);
             CONFIG_SERIAL.println(1);
             break;
           case 'C':
             ffb_temp = CONFIG_SERIAL.parseInt();
-            configConstantGain = constrain(ffb_temp, 0, 200);
-            //CONFIG_SERIAL.print("Constant gain [0-200]%: "); // milos
-            //CONFIG_SERIAL.println(configConstantGain);  // milos
+            configConstantGain = constrain(ffb_temp, 0, 255);
             CONFIG_SERIAL.println(1);
             break;
           case 'D':
             ffb_temp = CONFIG_SERIAL.parseInt();
-            configDamperGain = constrain(ffb_temp, 0, 200);
-            //CONFIG_SERIAL.print("Damper gain [0-200]%: ");
-            //CONFIG_SERIAL.println(configDamperGain);  // milos
+            configDamperGain = constrain(ffb_temp, 0, 255);
             CONFIG_SERIAL.println(1);
             break;
           case 'F':
             ffb_temp = CONFIG_SERIAL.parseInt();
-            configFrictionGain = constrain(ffb_temp, 0, 200);
-            //CONFIG_SERIAL.print("Friction gain [0-200]%: "); // milos
-            //CONFIG_SERIAL.println(configFrictionGain);  // milos
+            configFrictionGain = constrain(ffb_temp, 0, 255);
             CONFIG_SERIAL.println(1);
             break;
           case 'S':
             ffb_temp = CONFIG_SERIAL.parseInt();
-            configPeriodicGain = constrain(ffb_temp, 0, 200);
-            //CONFIG_SERIAL.print("Periodic gain [0-200]%: "); // milos
-            //CONFIG_SERIAL.println(configPeriodicGain);  // milos
+            configPeriodicGain = constrain(ffb_temp, 0, 255);
             CONFIG_SERIAL.println(1);
             break;
           case 'M':
             ffb_temp = CONFIG_SERIAL.parseInt();
-            configSpringGain = constrain(ffb_temp, 0, 200);
-            //CONFIG_SERIAL.print("Spring gain [0-200]%: "); // milos
-            //CONFIG_SERIAL.println(configSpringGain);  // milos
+            configSpringGain = constrain(ffb_temp, 0, 255);
             CONFIG_SERIAL.println(1);
             break;
           case 'I':
             ffb_temp = CONFIG_SERIAL.parseInt();
-            configInertiaGain = constrain(ffb_temp, 0, 200);
-            //CONFIG_SERIAL.print("Inertia gain [0-200]%: "); // milos
-            //CONFIG_SERIAL.println(configInertiaGain);  // milos
+            configInertiaGain = constrain(ffb_temp, 0, 255);
             CONFIG_SERIAL.println(1);
             break;
           case 'A':
             ffb_temp = CONFIG_SERIAL.parseInt();
-            configCenterGain = constrain(ffb_temp, 0, 200);
-            //CONFIG_SERIAL.print("Center gain [0-200]%: "); // milos
-            //CONFIG_SERIAL.println(configCenterGain);  // milos
+            configCenterGain = constrain(ffb_temp, 0, 255);
             CONFIG_SERIAL.println(1);
             break;
           case 'B':
             ffb_temp = CONFIG_SERIAL.parseInt();
-            configStopGain = constrain(ffb_temp, 0, 200);
-            //CONFIG_SERIAL.print("Stop gain [0-200]%: ");  // milos
-            //CONFIG_SERIAL.println(configStopGain);  // milos
+            configStopGain = constrain(ffb_temp, 0, 255);
             CONFIG_SERIAL.println(1);
             break;
           case 'J':
             ffb_temp = CONFIG_SERIAL.parseInt();
-            ffb_temp = constrain(ffb_temp, 0, 200); //milos
-            minTorquePP = (f32)ffb_temp * 0.001; // milos, max is 20% or 0.2
-            MM_MIN_MOTOR_TORQUE = (u16)(minTorquePP * (f32)MM_MAX_MOTOR_TORQUE); //milos
-            //CONFIG_SERIAL.print("Min torque PWM [0-200]*0.1%: ");  // milos
-            //CONFIG_SERIAL.println(MM_MIN_MOTOR_TORQUE);  // milos
+            ffb_temp = constrain(ffb_temp, 0, 255); //milos
+            minTorquePP = (f32)ffb_temp * 0.001; // milos, max is 25.5% or 0.255
+            MM_MIN_MOTOR_TORQUE = (u16)(minTorquePP * (f32)MM_MAX_MOTOR_TORQUE); // milos, we can set it during run time
             CONFIG_SERIAL.println(1);
             break;
-            /*case 'K': //milos, commented, once set at compile time this must not be changed anymore
+            /*case 'K': //milos, commented out, once set at compile time this must not be changed anymore
               temp = CONFIG_SERIAL.parseInt();
               if (temp > MM_MIN_MOTOR_TORQUE)
               {
                 MM_MAX_MOTOR_TORQUE = constrain(temp, 1, TOP);
               }
-              //CONFIG_SERIAL.print("Max torque: ");  // milos
               CONFIG_SERIAL.println(temp);  // milos
               break;*/
         }

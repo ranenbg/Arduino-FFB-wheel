@@ -54,14 +54,12 @@ class cSpeedObs {
     cSpeedObs()	{
       Init();
     }
-
-    void Init ();
+    void Init();
     f32 Update(s32 new_pos);
-
     s32 mLastPos;
-    f32 mLastSpeed; //s32
+    f32 mLastSpeed; //milo, was s32
     b8 mLastValueValid;
-    f32 mLastSpeeds[NB_TAPS]; //s32
+    f32 mLastSpeeds[NB_TAPS]; //milos, was s32
     u8 mCurrentLS;
 };
 
@@ -70,24 +68,21 @@ class cAccelObs {//milos, addded - acceleration
     cAccelObs()  {
       Init();
     }
-
-    void Init ();
+    void Init();
     f32 Update(f32 new_spd); //milos, was s32 new_spd
-
-    f32 mLastSpd; //s32
-    f32 mLastAccel; //s32
+    f32 mLastSpd; //milos, was s32
+    f32 mLastAccel; //milo, was s32
     b8 mLastValueValid;
-    f32 mLastAccels[NB_TAPS_A]; //s32
+    f32 mLastAccels[NB_TAPS_A]; //milos, was s32
     u8 mCurrentLA;
 };
 
 class cFFB {
   public:
     cFFB();
-
     //s32 CalcTorqueCommand (s32 pos); // milos, returns single force (1 axis) value
-    s32 CalcTorqueCommands (s32 pos, s32 pos2); // milos, returns 2 FFB values padded into one 32bit int, 1st 16bits are X axis force and 2nd 16bits are Y axis force
-
+    //s32 CalcTorqueCommands (s32 pos, s32 pos2); // milos, returns only xFFB value, yFFB is passed through global variable
+    s32v CalcTorqueCommands (s32v *pos); // milos, argument is pointer struct and returns struct holding xFFB and yFFB
     cSpeedObs mSpeed;
     cAccelObs mAccel; //milos, added
     b8 mAutoCenter;

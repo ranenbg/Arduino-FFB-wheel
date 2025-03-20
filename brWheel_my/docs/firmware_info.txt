@@ -1,6 +1,6 @@
 Milos Rankovic, ranenbg@gmail.com
 first created 21.11.2018.
-last updated 14.10.2024.
+last updated 19.03.2025.
 
 This txt file contains full details about Arduino FFB wheel firmware capabilities and features:
 
@@ -10,7 +10,7 @@ firmware	PWM freq	PWM mode	PWM res		steering	brake		throttle	clutch		handbrake	b
 
 ver24X		16KHz*		PWM+-*		500*		16bit	        16bit(LC,a,s)	12bit(a,s)	12bit(a,s)	12bit(a,s)	24(16 used)	1		10bit
 
-*fully configurable through RS232 or Wheel control v2.6.1
+*fully configurable through RS232 or Wheel control v2.6.3
 
 LC - load cell module HX711 24bit, 1 sample no-averaging, limited by Microsoft FFB driver to 16bits (0-65535)
 a - Arduino analog input, 10bit (0-1023)
@@ -36,7 +36,9 @@ USB poll. rate	FFB calc. rate	RS232 refresh	RS232 baud rate		axis update rate	LC
 Supported FFB effects: constant force, ramp, spring, damper, inertia, friction, sine, triangle, square, sawtoothup, sawtoothdown
 
 FFB mics: all effects are calculated with 32bit precision and scaled down to 16bit in HID; realistically calculated damper, inertia and friction; fully working periodic effects;
-fully implemented condition and envelope block effects, effect duration, start delay, direction for 2 axis FFB (2nd PWM channel output not implemented yet)
+fully implemented condition and envelope block effects, effect duration, start delay, direction for 2 axis FFB, *2channel PWM/DAC output for xFFB and yFFB
+
+*FFB effects that support 2 FFB axis are: constant force, sine and spring
 
 Internal FFB effects: auto centering spring, damper, inertia, friction and end stop spring (can be turned on/off through serial interface)
 
@@ -47,19 +49,22 @@ adjustment of encoder CPR, fully adjustable PWM settings that are stored in EEPR
 
 Wheel control GUI: made from scratch in Processing 3.5.4, visualizes all axis and buttons including serial commands sent and received from Arduino, full adjustment of FFB effect gains,
 FFB signal monitor graph, load/save last settings from EEPROM, recenter wheel, recalibrate pedals, encoder CPR adjustment, PWM adjustment, COM port CFG via dialog,
-Axis colors CFG txt, storing/loading FFB profiles to/from PC, autodetection of firmware version, XY analog shifter support, manual pedal axis calibration, PWM0.50.100 mode, hardware button wheel re-center, RCM PWM mode, Z-index reset button, FFB axis selector, XY shifter advanced config buttons, advanced info startup diagnostics, encoder type indicator, detection of available wheel buttons, latest version v2.6.1
+Axis colors CFG txt, storing/loading FFB profiles to/from PC, autodetection of firmware version, XY analog shifter support, manual pedal axis calibration, PWM0.50.100 mode, hardware button wheel re-center, RCM PWM mode, Z-index reset button, FFB axis selector, XY shifter advanced config buttons, advanced info startup diagnostics, encoder type indicator, detection of available wheel buttons, latest version is v2.6.3
 
-FFB output: fully configurable PWM settings - PWM frequency (tied to PWM resolution), PWM types (phase correct or fast TOP), PWM modes (PWM+-, PWM+dir, PWM0.50.100 or RCM),
-changes require restarting Arduino, analog 2ch external 12bit DAC MCP4725 available (requires recompiling)
+FFB output options (requires recompiling):
+[1] digital: 4 channel fully configurable PWM settings - PWM frequency (tied to PWM resolution), PWM types (phase correct or fast pwm), 1CH PWM modes (PWM+-, PWM+DIR, PWM0-50-100, RCM), 2CH PWM modes (2CH PWM+-, 2CH PWM+DIR, 2CH PWM0-50-100, 2CH RCM - not used), changes of PWM settings require restarting Arduino
+[2] analog: 2 external i2C 12bit MCP4725 DAC's, 1CH DAC modes (DAC+-, DAC+DIR, DAC0-50-100), 2CH DAC modes (1CH DAC+- (xFFB), 2CH DAC+DIR, 2CH DAC0-50-100), changes of DAC settings do not require restarting Arduino
 
           PWM freq  index: 0,   , 1    , 2    , 3   , 4   , 5     , 6     , 7    , 8    , 9    , 10   , 11   , 12
 Available PWM frequencies: 40kHz, 20kHz, 16kHz, 8kHz, 4kHz, 3.2kHz, 1.6kHz, 976Hz, 800Hz, 488Hz, 533Hz, 400Hz, 244Hz
-Available PWM resolutions: 400  , 800  , 1000 , 2000, 4000, 5000  , 10000 , 16383, 20000, 32767, 30000, 40000, 65535 (for fast top PWM type)
-                           200  , 400  , 500  , 1000, 2000, 2500  ,  5000 ,  8191, 10000, 16383, 15000, 20000, 32767 (for phase correct PWM type)
+Available PWM resolutions: 400  , 800  , 1000 , 2000, 4000, 5000  , 10000 , 16383, 20000, 32767, 30000, 40000, 65535 (for fast pwm - PWM type)
+                           200  , 400  , 500  , 1000, 2000, 2500  ,  5000 ,  8191, 10000, 16383, 15000, 20000, 32767 (for phase correct - PWM type)
           PWM freq  index: 0,   , 1    , 2    , 3   , 4    , 5    , 6    , 7     , 8    , 9    , 10   , 11   , 12
-Available RCM frequencies: na   , na   , na   , na  , 500Hz, 400Hz, 200Hz, 122Hz , 100Hz, 61Hz , 67Hz , 50Hz , 31Hz (for both fast top and phase correct type)
+Available RCM frequencies: na   , na   , na   , na  , 500Hz, 400Hz, 200Hz, 122Hz , 100Hz, 61Hz , 67Hz , 50Hz , 31Hz (for both fast pwm and phase correct types)
 na-not available
 
-Available PWM modes: PWM+- (H-bridge usage), PWM+dir (bldc or ac servo drive usage), PWM0.50.100 (various 3phase BLDC motor drivers, use fast top PWM type with this mode, 0-full left force, 50-zero force, 100-full left force), RCM mode (RC servo driver and some 3phase brushless drivers usage, 1.0ms pulse width - full left force, 1.5ms pulse width - zero force, 2.0ms pulse width - full right force)
+Usage of PWM modes: PWM+- (H-bridge usage), PWM+DIR (BLDC or AC servo drive usage), PWM0-50-100 (various 3 phase BLDC motor drivers, use fast pwm PWM type with this mode, 0-full left force, 50-zero force, 100-full left force), RCM mode (RC servo driver and some 3 phase brushless drivers usage, 1.0ms pulse width - full left force, 1.5ms pulse width - zero force, 2.0ms pulse width - full right force)
+
+Usage of DAC modes: DAC+- mode requires using a differential opamp in order to provide +-10V analog output, 1CH and 2CH DAC0-50-100 modes have zero force represented at half of DAC range 2.5V, 0V is full left/down and 5V is full right/up (usage of differential opamp is recommended if +- voltage output is desired)
 
 	

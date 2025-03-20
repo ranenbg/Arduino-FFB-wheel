@@ -176,3 +176,40 @@ version		features
 242chx		the same as v242hx, with hardware wheel recenter button on pin D2
 243ahx		the same as v242ahx, but has analog FFB output with 2x12bit DAC MCP4275
 
+- firmware HEX versions bellow require wheel control v2.6.3 or newer
+
+250x		encoder, 4 axis, 8 buttons, 100k CPR, wheel angle as metric for conditional effects, shift register fix, button matrix, 2 FFB axis, periodic effects timing fix, duration and start delay fix, 16bit direction, new HX711 library, debug FFB optimizations, 16x less strong spring, manual pedal axis calibration, pwm0-50-100 mode, rcm pwm mode, X-axis calibration 0-65k, encoder z-index reset, additional h-shifter options, FFB on analog axis selector, with variable pedal cal values, button pin mapping fixes, 2 axis FFB support (for constant, sine, spring), 4 channel PWM output (2CH PWM modes available), dac0-50-100 mode (and its 2CH equivalents)
+
+250ax		the same as v250x, with pedal autocalibration instead of manual calibration
+250bx		the same as v250x, with 2 FFB axis and 4 channel PWM output	
+250abx		the same as v250bx, with pedal autocalibration		
+250bcdwx	the same as v250bx, without optical encoder, with magnetic encoder (AS5600) and hardware wheel recenter button on pin TX
+250cx		the same as v250x, with hardware wheel recenter button on pin D2
+250zx		the same as v250x, with z-index support		
+250ix		the same as v250x, with averaging of analog inputs for pedals (4 samples)
+250sx		the same as v250x, with support for 12bit ADS1015 external ADC for pedals
+250fx		the same as v250x, with XY analog shifter support
+250zfx		the same as v250fx, with z-index support
+250acx		the same as v250cx, with pedal autocalibration
+250achx		the same as v250acx, with hat switch support	
+250cdwhx	similar to v250bcdwx, just with	only 1 FFB axis	
+250acdwhx	the same as 250cdwhx, with pedal autocalibration
+250htx		the same as v250x, with hat switch and 4x4 button matrix support	
+250chtx		the same as v250htx, with recenter button on pin D2
+250zhxn		the same as v250zx, with hat switch and shifter register (nano button box)
+250achxn	the same as v250cx, with pedal autocalibration, hat switch and shifter register (nano button box)
+250achexn	the same as v250achxn, with support for two extra buttons (on pins A4, A5) - SPECIAL EDITION FOR "MrCjxer"
+250azhxn	the same as v250zhxn, with pedal autocalibration	
+250xl		the same as v250x, with load cell support with HX711
+250hxl		the same as v250xl, with hat switch support
+250fxl		the same as v250xl, with XY analog shifter support		
+250hxnl		the same as v250hxl, with shifter register (nano button box)
+250hfxnl	the same as v250hxnl, with XY analog shifter support
+250ahxnl	the same as v250hxnl, with pedal autocalibration	
+250zhxnl	the same as v250hxnl, with z-index support
+250zhfxnl	the same as v250zhxnl, with XY analog shifter support
+250xg		the same as v250x, with analog FFB output via 2x12bit external DAC (MCP4275)
+250bxg		the same as v250xg, with 2 FFB axis and 2 channel analog DAC output	
+250bdxg		the same as v250bxg, without optical encoder (full analog firmware)
+250bcdwxg	the same as v250bdxg, with magnetic encoder (AS5600) and hardware wheel recenter button on pin TX 	
+250hxng		the same as v250xg, with hat switch and shifter register (nano button box)

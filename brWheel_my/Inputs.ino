@@ -1,7 +1,7 @@
 /*
   Copyright 2015  Etienne Saint-Paul
   Copyright 2017  Fernando Igor  (fernandoigor [at] msn [dot] com)
-  Copyright 2018-2024  Milos Rankovic (ranenbg [at] gmail [dot] com)
+  Copyright 2018-2025  Milos Rankovic (ranenbg [at] gmail [dot] com)
 
   Permission to use, copy, modify, distribute, and sell this
   software and its documentation for any purpose is hereby granted
@@ -22,13 +22,15 @@
   this software.
 */
 
-#include "debug.h"
-#include <Wire.h>
-#include <digitalWriteFast.h>
 #include "Config.h"
 #include "QuadEncoder.h"
-#include <HX711_ADC.h> // milos, credits to library creator Olav Kallhovd sept2017
+#include "debug.h"
 #include "USBDesc.h"
+#include <Arduino.h>
+#include <Wire.h>
+#include <digitalWriteFast.h>
+#include <HX711_ADC.h> // milos, credits to library creator Olav Kallhovd sept2017
+
 
 //--------------------------------------- Globals --------------------------------------------------------
 
@@ -153,6 +155,15 @@ void InitInputs() {
 #ifdef AVG_INPUTS //milos, include this only if used
   nb_mes = 0;
 #endif
+  // milos, re-map center button to TX pin (for the case where: no optical encoder, use as5600, use center button)
+#ifndef USE_QUADRATURE_ENCODER
+#ifdef USE_AS5600
+#ifdef USE_CENTERBTN
+  pinMode(QUAD_ENC_PIN_B, INPUT_PULLUP); // milos, prevent false trigerring
+  EnableInterrupt(CORE_PIN1_INT, RISING); // digital interrupt on pin TX rising edge
+#endif // end of centerbtn
+#endif // end of as5600
+#endif // end of quad enc
 }
 
 //--------------------------------------------------------------------------------------------------------
@@ -425,15 +436,15 @@ bool readSingleButton (uint8_t i) { // milos, added
 #endif // end of shift register
 
 #ifdef USE_BTNMATRIX
-void setMatrixRow (uint8_t j, uint8_t val) { // milos, added
+void setMatrixRow (uint8_t j, uint8_t k) { // milos, added
   if (j == 0) {
-    digitalWriteFast(BUTTON4, val);
+    digitalWriteFast(BUTTON4, k);
   } else if (j == 1) {
-    digitalWriteFast(BUTTON5, val);
+    digitalWriteFast(BUTTON5, k);
   } else if (j == 2) {
-    digitalWriteFast(BUTTON6, val);
+    digitalWriteFast(BUTTON6, k);
   } else if (j == 3) {
-    digitalWriteFast(BUTTON7, val);
+    digitalWriteFast(BUTTON7, k);
   }
 }
 #endif // end of button matrix
@@ -448,13 +459,13 @@ void ClearAnalogInputs() {
   nb_mes = 0;
 }
 
-uint16_t ReadAnalogInputs() {
+void ReadAnalogInputs() { // milos, changed to void from uint16_t
   for (u8 i = 0; i < sizeof(analog_inputs_pins); i++) {
     analog_inputs[i] += analogRead(analog_inputs_pins[i]);
   }
   nb_mes++;
 
-  return nb_mes;
+  //return nb_mes; // milos, commented out
 }
 
 void AverageAnalogInputs() {

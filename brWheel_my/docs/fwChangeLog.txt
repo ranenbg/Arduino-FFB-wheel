@@ -30,5 +30,5 @@ Changes from fw-v24X to fw-v250
 - serial (CDC) and HID configuration interface are now options in Config.h that may be commented out (configCDC is used by GUI, configHID is commented out or unused for now)
 - started implementing firmware configuration by native HID protocol (plan is to replace configCDC completely with configHID at some point)
 - implemented support for hardware re-center button when magnetic encoder is used, if no optical encoder is used (center button is re-mapped to TX pin instead of D2)
-- updated wirings, docs and manuals with new firmware features (milos, to DO: pinouts, bts and dac wirings)
+- updated wirings, docs and manuals with new firmware features
 

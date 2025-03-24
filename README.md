@@ -15,7 +15,7 @@ Firmware features:
 - fully adjustable FFB output in the form of 4-channel digital 16bit PWM or 2-channel analog 12bit DAC signals
 - available PWM modes: PWM+-, PWM+dir, PWM0-50-100, RCM (if 2 FFB axis: 2CH PWM+-, 2CH PWM+dir, 2CH PWM0-50-100, 2CH RCM)
 - available DAC modes: DAC+-, DAC+dir, DAC0-50-100 (if 2 FFB axis: 1CH DAC+-, 2CH DAC+dir, 2CH DAC0-50-100)
-- load cell support for 24bit HX711 chip (only on the y-axis: brake pedal)
+- load cell support for 24bit HX711 chip (for y-axis only)
 - all firmware settings are stored in EEPROM (and automatically loaded at each Arduino powerup)
 - original wheel control user interface **[Arduino FFB gui](https://github.com/ranenbg/Arduino-FFB-gui)** for an easy configuration and monitoring of all inputs/outputs 
 
@@ -46,7 +46,7 @@ Detailed documentation and more information about the firmware can be found in t
 ## Firmware option description
 Due to the 32k flash memory limitation in Arduino Leonardo (ATmega32U4), each HEX file is compiled with a certain firmware option. A one-letter abbreviation for each option is placed in the firmware version string and one needs to consider carefully which one to choose. In the release, I've compiled a few of the most often-used firmware option combinations for you.
 
-Firmware versions (old), I have put some logic in firmware naming, so here is some basic explanation (if you plan to upgrade firmware, please respect this, only up to fw-v24X):
+Firmware versions (old), I have put some logic in firmware naming, so here is some basic explanation (if you plan to upgrade old firmware until fw-v24X please respect this):
 -  	 fw-vXX,  two digits only are test versions of new firmware features (not used anymore)
 -  	 fw-vXX0, three digits ending with 0 - the basic firmware with no external devices support, except for optical/magnetic encoder (has PWM signal as FFB output)
 -  	 fw-vXX1, three digits ending with 1 - adds support for the external button box
@@ -58,17 +58,17 @@ Firmware versions (new) from fw-v250, I've changed firmware naming logic such th
 - b - 2 FFB axis support with physical output (4-channel digital PWM or 2-channel analog DAC outputs available)
 -	w - magnetic encoder AS5600 support
 - d - no optical encoder support
-- z - optical encoder with z-index support
+- z - support 3rd channel or z-index on optical encoders
 - h - enabled Hat Switch (uses first 4 buttons)
 - s - enabled external 12bit ADC for analog inputs (ADS1015 i2C)
 - t - enabled 4x4 button matrix
 - f - enabled XY analog H-pattern shifter
-- i - enabled averaging of analog inputs
--	e - support for two additional digital buttons (clutch and handbrake axis will be unavailable)
+- i - enabled averaging of analog inputs (with 4 samples - 12bit resolution)
+-	e - support for two additional digital buttons (on pins A2, A3 - clutch and handbrake axis will be unavailable)
 -	x - enables the option to select to which (analog) axis FFB is tied to
 - r - support for external shift register chips for 24 buttons (3x SN74ALS166 wired in series)
-- n - support for external button box for 16 buttons via Arduino nano (with my button box firmware)
-- l - support HX711 chip for load cell
+- n - support for external button box for 16 buttons via Arduino Nano (with my button box firmware)
+- l - support for HX711 chip and load cell (on the y-axis)
 - g - support for external 12bit DAC to be used for analog FFB output (2x MCP4725 i2C)
 -	p - no EEPROM support for loading/saving firmware settings (firmware defaults are loaded at each startup)
 - m - replacement pinouts for ProMicro (for FFB clipping LED, buttons 3 and 4, PWM direction pin)

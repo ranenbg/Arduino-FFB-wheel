@@ -179,7 +179,6 @@ version		features
 - firmware HEX versions bellow require wheel control v2.6.3 or newer
 
 250x		encoder, 4 axis, 8 buttons, 100k CPR, wheel angle as metric for conditional effects, shift register fix, button matrix, 2 FFB axis, periodic effects timing fix, duration and start delay fix, 16bit direction, new HX711 library, debug FFB optimizations, 16x less strong spring, manual pedal axis calibration, pwm0-50-100 mode, rcm pwm mode, X-axis calibration 0-65k, encoder z-index reset, additional h-shifter options, FFB on analog axis selector, with variable pedal cal values, button pin mapping fixes, 2 axis FFB support (for constant, sine, spring), 4 channel PWM output (2CH PWM modes available), dac0-50-100 mode (and its 2CH equivalents)
-
 250ax		the same as v250x, with pedal autocalibration instead of manual calibration
 250bx		the same as v250x, with 2 FFB axis and 4 channel PWM output	
 250abx		the same as v250bx, with pedal autocalibration		
@@ -198,7 +197,7 @@ version		features
 250chtx		the same as v250htx, with recenter button on pin D2
 250zhxn		the same as v250zx, with hat switch and shifter register (nano button box)
 250achxn	the same as v250cx, with pedal autocalibration, hat switch and shifter register (nano button box)
-250achexn	the same as v250achxn, with support for two extra buttons (on pins A4, A5) - SPECIAL EDITION FOR "MrCjxer"
+250achexn	the same as v250achxn, with support for two extra buttons (on pins A2, A3)
 250azhxn	the same as v250zhxn, with pedal autocalibration	
 250xl		the same as v250x, with load cell support with HX711
 250hxl		the same as v250xl, with hat switch support

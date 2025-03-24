@@ -27,6 +27,7 @@
 */
 
 #include "ffb_pro.h"
+//#include "ffb.h" // milos, commented out
 #include "QuadEncoder.h"
 #include <util/delay.h>
 
@@ -424,7 +425,7 @@ s32v cFFB::CalcTorqueCommands (s32v *pos) { // milos, pointer struct agument, re
               break;
             case USB_EFFECT_SPRING:
               command.x += SpringEffect(pos->x - (s16)((s32(ef.offset) * ROTATION_MID) >> 15), mag * configSpringGain / 100 / 16); //milos, for spring, damper, inertia and friction forces ef.offset is cpOffset, here we scale it to ROTATION_MID
-#ifdef USE_TWOFFBAXIS //
+#ifdef USE_TWOFFBAXIS
               command.y += SpringEffect(pos->y - (s16)((s32(ef.offset2) * ROTATION_MID) >> 15), mag2 * configSpringGain / 100 / 16); //milos, for yFFB spring
 #endif // end of 2 ffb axis
               //milos, with implemented cpOffset and dead band

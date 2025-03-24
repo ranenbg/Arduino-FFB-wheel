@@ -66,10 +66,10 @@ typedef struct
   uint8_t	effectBlockIndex;	// 1..40
   uint8_t	effectType;	// 1..12 (effect usages: 26,27,30,31,32,33,34,40,41,42,43,28) //milos, total 11, 28 is removed (custom force)
   uint16_t duration; // 0..65535, exp -3, s
-  //uint16_t triggerRepeatInterval; // 0..65535, exp -3, s //milos
+  uint16_t triggerRepeatInterval; // 0..65535, exp -3, s // milos, do not comment out this (ffb stops working)
   //uint16_t samplingPeriod;	// 0..65535, exp -3, s //milos, renamed from samplePeriod, removed
   int16_t gain; // 0..32767  (physical 0..32767) //milos, was 0(0)..(255)10000, uint8_t
-  //uint8_t	triggerButton;	// button ID (0..8)
+  uint8_t	triggerButton;	// button ID (0..8) // milos, do not comment out this (ffb stops working)
   uint8_t	enableAxis; // bits: 0=X, 1=Y, 2=DirectionEnable
   //uint8_t	directionX;	// angle (0=0 .. 255=360deg) //milos, commented
   //uint8_t	directionY;	// angle (0=0 .. 255=360deg) //milos, commented

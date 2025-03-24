@@ -27,6 +27,7 @@
 #include "ConfigHID.h"
 #include "debug.h"
 #include "ffb_pro.h"
+//#include "ffb.h" // milos, commented out
 #include "USBDesc.h"
 #ifdef USE_QUADRATURE_ENCODER
 #include "QuadEncoder.h"

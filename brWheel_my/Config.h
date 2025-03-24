@@ -19,7 +19,7 @@
 #define USE_SHIFT_REGISTER			// 2x8-bit parallel-load shift registers G27 board steering wheel (milos, this one is modified for 16 buttons, caution can not be used with TWOFFBAXIS)
 //#define USE_DUAL_SHIFT_REGISTER		// Dual 8-bit Parallel-load shift registers G27 board shifter  (milos, not available curently)
 //#define USE_SN74ALS166N          // milos, uncomment to use 3x8bit parralel-in serial-out shift register chip for 24 buttons, otherwise it's 16 buttons with ard nano-butto nbox (must be used with USE_SHIFT_REGISTER - not implemented fully yet)
-#define USE_XY_SHIFTER    // milos, uncomment to use XY analog shifter (can not be used with USE_BTNMATRIX, note that for proMicro clutch and handbrake will be unavailable)
+//#define USE_XY_SHIFTER    // milos, uncomment to use XY analog shifter (can not be used with USE_BTNMATRIX, note that for proMicro clutch and handbrake will be unavailable
 #define USE_HATSWITCH        // milos, uncomment to use first 4 buttons for hat switch (D-pad)
 //#define USE_BTNMATRIX        // milos, uncomment to use 8 pins as a 4x4 button matrix for total of 16 buttons (can not be used with load cell, shift register or XY shifter)
 //#define AVG_INPUTS        // milos, uncomment to use averaging of arduino analog inputs (can not be used with USE_ADS1015)

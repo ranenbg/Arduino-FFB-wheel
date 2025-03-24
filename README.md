@@ -59,7 +59,7 @@ Firmware versions (new) from fw-v250, I've changed firmware naming logic such th
 -	w - magnetic encoder AS5600 support
 - d - no optical encoder support
 - z - optical encoder with z-index support
-- h - enabled Hat Switch (uses first 4 buttons from button box)
+- h - enabled Hat Switch (uses first 4 buttons)
 - s - enabled external 12bit ADC for analog inputs (ADS1015 i2C)
 - t - enabled 4x4 button matrix
 - f - enabled XY analog H-pattern shifter

@@ -12,7 +12,7 @@ Firmware features:
 - FFB calculation and axis/button update rate 500Hz (2ms period)
 - many firmware options (external 12bit ADC/DAC, automatic/manual pedal calibration, z-index support/offset/reset, hat switch, button matrix, external shift register, hardware wheel re-center, xy analog H shifter, FFB on analog axis)
 - RS232 serial interface for configuring many firmware settings (10ms period)
-- fully adjustable FFB output in the form of 2-channel digital 16bit PWM or analog 12bit DAC signals
+- fully adjustable FFB output in the form of 4-channel digital 16bit PWM or 2-channel analog 12bit DAC signals
 - available PWM modes: PWM+-, PWM+dir, PWM0-50-100, RCM (if 2 FFB axis: 2CH PWM+-, 2CH PWM+dir, 2CH PWM0-50-100, 2CH RCM)
 - available DAC modes: DAC+-, DAC+dir, DAC0-50-100 (if 2 FFB axis: 1CH DAC+-, 2CH DAC+dir, 2CH DAC0-50-100)
 - load cell support for 24bit HX711 chip (for brake pedal axis only)

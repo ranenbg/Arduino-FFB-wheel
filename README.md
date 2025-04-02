@@ -7,6 +7,7 @@ Firmware features:
 - for 2 FFB axis mode - 2 magnetic encoders are used (for X and Y axis)
 - automatic or manual analog axis calibration
 - up to 16 buttons by 4x4 matrix or via **[button box firmware](https://github.com/ranenbg/Arduino-FFB-wheel/tree/master/tx_rw_ferrari_458_wheel_emu_16buttons)** uploaded to Arduino Nano/Uno
+- up to 24 buttons by 3x8bit shift register chips
 - analog XY H-pattern shifter (configurable to 6 or 8 gears + reverse gear, XY axis invert, reverse gear button invert)
 - fully supported 16bit FFB effects (custom force effect not implemented)
 - envelope and conditional block effects, start delay, duration, deadband, and direction enable

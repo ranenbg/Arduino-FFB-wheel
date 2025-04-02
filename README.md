@@ -77,7 +77,8 @@ Firmware versions (new) from fw-v250, I've changed firmware naming logic such th
 -	u - support for 2 magnetic encoders (AS5600) via i2C multiplexer chip (TCA9548A)
 - m - replacement pinouts for ProMicro (for FFB clipping LED, buttons 3 and 4, PWM direction pin)
 
-note* some combinations are not possible at the same time, while some are not possible due to ATmega32U4 32k memory limit
+Note* Some combinations are not possible at the same time, while some are not possible due to ATmega32U4 32k memory limit.
+      If you decide to compile the source code yourself, enabling these options is just a matter of commenting/uncommenting their corresponding lines at the beginning of Config.h
 
 ## Firmware download
 

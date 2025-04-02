@@ -3,7 +3,8 @@ A stand-alone DirectInput USB device is recognized in Windows as a joystick with
 
 Firmware features:
 - supported Arduino boards: Leonardo, Micro, and ProMicro (ATmega32U4, 5V, 16MHz)
-- 4 analog axes + 1 for an optical or magnetic encoder, 2 FFB axes (with multichannel PWM or DAC output)
+- 4 analog axis + 1 for an optical or magnetic encoder, 2 FFB axis (with multichannel PWM or DAC output)
+- for 2 FFB axis mode - 2 magnetic encoders are used (for X and Y axis)
 - automatic or manual analog axis calibration
 - up to 16 buttons by 4x4 matrix or via **[button box firmware](https://github.com/ranenbg/Arduino-FFB-wheel/tree/master/tx_rw_ferrari_458_wheel_emu_16buttons)** uploaded to Arduino Nano/Uno
 - analog XY H-pattern shifter (configurable to 6 or 8 gears + reverse gear, XY axis invert, reverse gear button invert)

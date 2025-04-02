@@ -17,7 +17,7 @@ Firmware features:
 - fully adjustable FFB output in the form of 4-channel digital 16bit PWM or 2-channel analog 12bit DAC signals
 - available PWM modes: PWM+-, PWM+dir, PWM0-50-100, RCM (if 2 FFB axis: 2CH PWM+-, 2CH PWM+dir, 2CH PWM0-50-100, 2CH RCM)
 - available DAC modes: DAC+-, DAC+dir, DAC0-50-100 (if 2 FFB axis: 1CH DAC+-, 2CH DAC+dir, 2CH DAC0-50-100)
-- load cell support for 24bit HX711 chip (for y-axis only)
+- load cell support for 24bit HX711 chip (for Y axis only)
 - all firmware settings are stored in EEPROM (and automatically loaded at each Arduino powerup)
 - original wheel control user interface **[Arduino FFB gui](https://github.com/ranenbg/Arduino-FFB-gui)** for an easy configuration and monitoring of all inputs/outputs 
 

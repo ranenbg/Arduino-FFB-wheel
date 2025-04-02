@@ -179,10 +179,10 @@ u8 bitVal; // milos, added - current bit readout from shift register
 
 #ifdef USE_SHIFT_REGISTER
 void InitShiftRegister() {
-  pinModeFast(SHIFTREG_CLK, OUTPUT); //milos, changed to fast
-  pinMode(SHIFTREG_DATA_SW, INPUT);
-  //pinMode(SHIFTREG_DATA_H, INPUT);  //milos, commented
-  pinModeFast(SHIFTREG_PL, OUTPUT); //milos, changed to fast
+  pinModeFast(SHIFTREG_CLK, OUTPUT); // milos, changed to fast
+  pinModeFast(SHIFTREG_DATA_SW, INPUT); // milos, changed to fast
+  //pinMode(SHIFTREG_DATA_H, INPUT);  // milos, commented out
+  pinModeFast(SHIFTREG_PL, OUTPUT); // milos, changed to fast
   SHIFTREG_STATE = 0;
   //bytesVal_SW = 0; // milos, commented
   //bytesVal_H = 0;
@@ -246,17 +246,28 @@ void nextInputState() {
     i = 0;
   }
   if (SHIFTREG_STATE < 2) {
-    if (SHIFTREG_STATE == 0) digitalWriteFast(SHIFTREG_PL, HIGH); //milos, changed to fast, was LOW
+    if (SHIFTREG_STATE == 0) {
+#ifndef USE_SN74ALS166N // milos, default
+      digitalWriteFast(SHIFTREG_PL, HIGH); // milos, nano button box protocol)
+#else // milos, with a shift register chips(s)
+      digitalWriteFast(SHIFTREG_PL, LOW); // milos, parralel loading is done on LOW
+      digitalWriteFast(SHIFTREG_CLK, HIGH); // milos, when we have a rising edge of clock
+      digitalWriteFast(SHIFTREG_CLK, LOW); // milos
+#endif // end of sn74
+    }
     if (SHIFTREG_STATE == 1) {
-      digitalWriteFast(SHIFTREG_PL, LOW); // milos, changed to fast, was HIGH
-#ifdef USE_SN74ALS166N
-      delayMicroseconds(5);
-      digitalWriteFast(SHIFTREG_PL, HIGH); // milos, load parralel inputs
-#endif
+#ifndef USE_SN74ALS166N // milos, default
+      digitalWriteFast(SHIFTREG_PL, LOW); // milos, nano button box protocol
+#else // milos, with a shift register chips(s)
+      digitalWriteFast(SHIFTREG_PL, HIGH); // milos, serial loading is done on HIGH (data from other chips stacked chips)
+#endif // end of sn74
     }
   } else {
     if (SHIFTREG_STATE % 2 == 0) {
       bitVal = bitRead(digitalReadFast(SHIFTREG_DATA_SW), 7); // milos, faster reading (bit7 of PIND register is pin D6)
+      #ifdef USE_SN74ALS166N
+      bitVal = !bitVal; // milos, invert the buttons
+      #endif // end of sn74
       //if (i < 16) bytesVal_SW |= (bitVal << ((16 - 1) - i)); //milos, was 8 (we read first 2 bytes) // milos, commented old
       //if (i < 16) bitWrite(bytesVal_SW, i, bitVal); // milos, added
 

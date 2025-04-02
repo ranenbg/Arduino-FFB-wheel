@@ -269,6 +269,7 @@ void SetPWM (s32v *torque) { // milos, takes pointer struct as argument - 2 axis
           //PWM16D(0);
         }*/
       } else {  // milos, 2CH PWM0.50.100 mode (pwmstate bit1=0, bit6=1)
+#ifndef USE_TCA9548 // milos, only available if not using 2 mag encoders via i2C multilexer
         //PWM16C(0);
         //PWM16D(0);
         //digitalWriteFast(PWM_PIN_D, LOW);
@@ -291,8 +292,10 @@ void SetPWM (s32v *torque) { // milos, takes pointer struct as argument - 2 axis
         } /*else {
           PWM16B(MM_MAX_MOTOR_TORQUE / 2);
         }*/
+#endif // end of tca
       }
     } else { // milos, if pwmstate bit1=1
+#ifndef USE_TCA9548 // milos, only available if not using 2 mag encoders via i2C multilexer
       if (!bitRead(pwmstate, 6)) { // milos, if 2CH PWM+DIR mode (pwmstate bit1=1, bit6=0)
         // milos, toDO: implement 2CH PWM+DIR mode
         if (torque->x >= 0) {
@@ -310,7 +313,7 @@ void SetPWM (s32v *torque) { // milos, takes pointer struct as argument - 2 axis
         torque->y = map(abs(torque->y), 0, MM_MAX_MOTOR_TORQUE, MM_MIN_MOTOR_TORQUE, MM_MAX_MOTOR_TORQUE);
         PWM16B(torque->y); // milos, use pin D10 for yFFB
       } else { // milos, if 2CH RCM mode (pwmstate bit1=1, bit6=1)
-        // milos, toDO: implement 2CH RCM mode (unfortunately, not enough memory left for it)
+        // milos, 2CH RCM mode (unfortunately, not enough memory left for it so I commented it out)
         /*if (torque->x > 0) {
           torque->x = map(torque->x, 0, MM_MAX_MOTOR_TORQUE, RCM_zer * (1.0 + minTorquePP), RCM_max);
           PWM16A(torque->x);
@@ -332,6 +335,7 @@ void SetPWM (s32v *torque) { // milos, takes pointer struct as argument - 2 axis
         PWM16A(RCM_zer); // milos, for now only zero it out
         PWM16B(RCM_zer);
       }
+#endif // end of tca
     }
 #endif // end of 2 ffb axis
 #endif // end of use mcp4275

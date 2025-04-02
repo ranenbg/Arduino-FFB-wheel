@@ -2,7 +2,7 @@
 #define _CONFIG_H_
 
 
-//------------------------------------- Options ----------------------------------------------------------
+//------------------------------------- Firmware options -------------------------------------------------
 
 #define USE_CONFIGCDC      // milos, use virtual RS232 serial port for configuring firmware settings
 //#define USE_CONFIGHID      // milos, use native USB HID protocol for configuring firmware settings (not implemented fully yet)
@@ -11,27 +11,28 @@
 //#define USE_LCD					// milos, LCD via i2C (not implemented yet)
 //#define USE_ADS1015       // milos, uncomment for 12bit pedals, when commented out it's 10bit from arduino inputs (can not be used with AVG_INPUTS)
 //#define USE_DSP56ADC16S			// 16 bits Stereo ADC (milos, not implemented fully yet)
-#define USE_QUADRATURE_ENCODER		// milos, optical quadrature encoder (you may comment it out)
-//#define USE_TWOFFBAXIS        // milos, uncomment to enable 2nd FFB axis and PWM/DAC output for flight sticks (can't be used with USE_LOAD_CELL and without USE_ANALOGFFBAXIS)
-//#define USE_AS5600          // milos, uncomment to enable magnetic encoder via i2C instead of optical encoder
-#define USE_ZINDEX          // milos, use Z-index encoder channel (caution, can not be used with USE_ADS1015, USE_MCP4725 or USE_AS5600)
-#define USE_LOAD_CELL				// Load cell shield // milos, new library for LC (caution can not be used with TWOFFBAXIS)
-#define USE_SHIFT_REGISTER			// 2x8-bit parallel-load shift registers G27 board steering wheel (milos, this one is modified for 16 buttons, caution can not be used with TWOFFBAXIS)
-//#define USE_DUAL_SHIFT_REGISTER		// Dual 8-bit Parallel-load shift registers G27 board shifter  (milos, not available curently)
-//#define USE_SN74ALS166N          // milos, uncomment to use 3x8bit parralel-in serial-out shift register chip for 24 buttons, otherwise it's 16 buttons with ard nano-butto nbox (must be used with USE_SHIFT_REGISTER - not implemented fully yet)
-//#define USE_XY_SHIFTER    // milos, uncomment to use XY analog shifter (can not be used with USE_BTNMATRIX, note that for proMicro clutch and handbrake will be unavailable
-#define USE_HATSWITCH        // milos, uncomment to use first 4 buttons for hat switch (D-pad)
+//#define USE_QUADRATURE_ENCODER		// milos, optical quadrature encoder (you may comment it out)
+#define USE_TWOFFBAXIS        // milos, uncomment to enable 2nd FFB axis and PWM/DAC output for flight sticks (can't be used with USE_LOAD_CELL and without USE_ANALOGFFBAXIS)
+#define USE_AS5600          // milos, uncomment to enable magnetic encoder via i2C instead of optical encoder
+#define USE_TCA9548        // milos, uncomment to enable i2C multiplexer chip for using more than one AS5600 magnetic sensor via i2C (for now only used as y-axis input, must use with AS5600 and TWOFFBAXIS) 
+//#define USE_ZINDEX          // milos, use Z-index encoder channel (caution, can not be used with USE_ADS1015, USE_MCP4725 or USE_AS5600)
+//#define USE_LOAD_CELL				// Load cell shield // milos, new library for LC (caution can not be used with TWOFFBAXIS)
+//#define USE_SHIFT_REGISTER			// 2x8-bit parallel-load shift registers G27 board steering wheel (milos, this one I modified for 16 buttons, caution can not be used with TWOFFBAXIS)
+//#define USE_DUAL_SHIFT_REGISTER		// Dual 8-bit Parallel-load shift registers G27 board shifter  (milos, not available curently, instead use SN74ALS166N for 24 buttons)
+//#define USE_SN74ALS166N          // milos, uncomment to use 3x8bit parralel-in serial-out shift register chips for 24 buttons, otherwise it's 16 buttons with ard nano-button box (must be used with USE_SHIFT_REGISTER)
+//#define USE_XY_SHIFTER    // milos, uncomment to use XY analog shifter (can not be used with USE_BTNMATRIX, note that for proMicro clutch and handbrake will be unavailable)
+//#define USE_HATSWITCH        // milos, uncomment to use first 4 buttons for hat switch (D-pad)
 //#define USE_BTNMATRIX        // milos, uncomment to use 8 pins as a 4x4 button matrix for total of 16 buttons (can not be used with load cell, shift register or XY shifter)
 //#define AVG_INPUTS        // milos, uncomment to use averaging of arduino analog inputs (can not be used with USE_ADS1015)
 //#define USE_AUTOCALIB        // milos, uncomment to use autocalibration for pedal axis (if left commented manual calibration is enabled)
-//#define USE_CENTERBTN    // milos, uncomment to assign digital input pin D2 for hardware wheel recenter to 0deg (caution, can not be used with USE_ZINDEX, USE_ADS1015, USE_MCP4725 or USE_AS5600)
+#define USE_CENTERBTN    // milos, uncomment to assign digital input pin D2 (or TX) for hardware wheel recenter to 0deg (caution, can only be used if quad encoder usage is commented out)
 //#define USE_EXTRABTN    // milos, uncomment to configure analog inputs on pins A2 and A3 as a digital button inputs (2 extra buttons, note that clutch and handbrake will be unavailable)
 //#define USE_MCP4725      // milos, 12bit DAC (0-5V), uncomment to enable output of FFB signal as 2ch DAC voltage output
 #define USE_ANALOGFFBAXIS // milos, uncomment to enable other than X-axis to be tied with xFFB axis (you can use analog inputs instead of digital encoders)
 //#define USE_PROMICRO    // milos, uncomment if you are using Arduino ProMicro board (leave commented for Leonardo or Micro variants)
-#define USE_EEPROM // milos, uncomment to enable loading/saving settings from EEPROM (if commented out, default settings will be loaded on each powerup, one needs to reconfigure firmware defautls or use GUI configuration after each powerup) 
+#define USE_EEPROM     // milos, uncomment to enable loading/saving settings from EEPROM (if commented out, default settings will be loaded on each powerup, one needs to reconfigure firmware defautls or use GUI configuration after each powerup) 
 
-#define CALIBRATE_AT_INIT	0 //milos, was 1
+#define CALIBRATE_AT_INIT	0 // milos, was 1
 
 //------------------------------------- Pins -------------------------------------------------------------
 
@@ -77,7 +78,10 @@
 #define SHIFTREG_DATA_SW 6 // DATA from Steering Wheel
 //#define SHIFTREG_DATA_H 7 // DATA from Shifter H (Dual 8-bit) //milos, not in use
 //#define SHIFTREG_DATA_OUT 13 // DATA Shift-Out LED (8-bit)   ###### NOT YET IMPLEMENTED ###### //milos, was 3
-#define SHIFTS_NUM  33 // milos, added - defines number of shifts for shift register from the button box (depends on number of buttons we want to read, see inputs.ino)
+#define SHIFTS_NUM 33 // milos, defines number of shifts (16) from the nano button box (depends on number of buttons we want to read, max is 65 for 32 buttons but we have only 24 ih hid, see inputs.ino and hid.cpp)
+#ifdef USE_SN74ALS166N
+#define SHIFTS_NUM 49 // milos, for 24 shifts (3x8bit shift register chips)
+#endif // end of sn74
 #else // milos, if no shift reg re-alocate some pins for buttons 4-6 instead
 #define BUTTON4 6 // D6 or bit7 of PIND
 #define B4PORTBIT 7 // bit7
@@ -262,6 +266,7 @@ typedef struct fwOpt { // milos, added - firmware option stuct
   boolean r = false; // shift register (SN74ALS166N)
   boolean s = false; // exernal adc (ads1015 or ads1115)
   boolean t = false; // button matrix
+  boolean u = false; // i2C multiplexer chip (tca9548), for 2nd as5600
   boolean w = false; // magnetic encoder (as5600)
   boolean x = false; // analog axis for ffb
   boolean z = false; // z-index
@@ -349,7 +354,7 @@ byte indxFFBAxis(byte value) { // milos, argument should be effstate
 
 u8 pwmstate; // =0b00000101; // milos, PWM settings configuration byte, bit7 is MSB
 //---------------------
-// bit0-phase correct (0 is fast pwm), bit1-dir enabled (0 is pwm+-), bits 2-5 are frequency select, bit6-enable pwm0-50-100, bit7 is unused 
+// bit0-phase correct (0 is fast pwm), bit1-dir enabled (0 is pwm+-), bits 2-5 are frequency select, bit6-enable pwm0-50-100, bit7 is unused
 // bit0 pwm_type
 // 0    fast pwm
 // 1    phase correct
@@ -626,5 +631,24 @@ const uint16_t maxCal = 2047;
 const uint16_t maxCal = 1023;
 #endif // end of ads
 #endif // end of avg inputs
+
+#ifdef USE_TCA9548 // milos, added
+#include <Wire.h> // milos, we need it here also
+// i2c address of TCA9548A i2c multiplexer chip (each chip has to have appropriate address bits configured)
+#define baseTCA0 0x70 // A0,A1,A2 = 000 // base addrress (there are 8)
+//          TCA1 0x71 // A0,A1,A2 = 100
+//          TCA2 0x72 // A0,A1,A2 = 010
+//          TCA3 0x73 // A0,A1,A2 = 110
+//          TCA4 0x74 // A0,A1,A2 = 001
+//          TCA5 0x75 // A0,A1,A2 = 101
+//          TCA6 0x76 // A0,A1,A2 = 011
+//          TCA7 0x77 // A0,A1,A2 = 111
+// send to i2C info about which TCA chip and which i2C channel to select
+void TcaChannelSel(uint8_t addr, uint8_t ch) {
+  Wire.beginTransmission(addr);
+  Wire.write(1 << ch);
+  Wire.endTransmission();
+}
+#endif // end of tca
 
 #endif // _CONFIG_H_

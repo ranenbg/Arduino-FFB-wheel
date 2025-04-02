@@ -1,6 +1,6 @@
 Milos Rankovic, ranenbg@gmail.com
 first created 21.11.2018.
-last updated 19.03.2025.
+last updated 31.03.2025.
 
 This txt file contains full details about Arduino FFB wheel firmware capabilities and features:
 
@@ -8,9 +8,9 @@ Supported Arduino boards - Leonardo, Micro or ProMicro (5V, 16MHz clock)
 
 firmware	PWM freq	PWM mode	PWM res		steering	brake		throttle	clutch		handbrake	buttons		HAT Switch	XYshifter
 
-ver24X		16KHz*		PWM+-*		500*		16bit	        16bit(LC,a,s)	12bit(a,s)	12bit(a,s)	12bit(a,s)	24(16 used)	1		10bit
+ver250		8KHz*		PWM+-*		2047*		16bit	        16bit(LC,a,s)	12bit(a,s)	12bit(a,s)	12bit(a,s)	24(16)		1		10bit
 
-*fully configurable through RS232 or Wheel control v2.6.3
+*fully configurable through RS232 or Wheel control v2.6.4
 
 LC - load cell module HX711 24bit, 1 sample no-averaging, limited by Microsoft FFB driver to 16bits (0-65535)
 a - Arduino analog input, 10bit (0-1023)
@@ -21,6 +21,7 @@ be careful! 5V to 3.3V logic level converter is needed from Arduino wheel base b
 first 6 buttons are reserved for recognition of Thrustmaster wheel rims
 Leonardo, Micro or ProMicro - up to 8 buttons are available on the main Arduino board (may be less depending on firmware options)
 With external Arduino Nano board acting as a button box, up to 16 buttons can be used (button box firmware included in a separate *.ino file)
+Only with external 8bit shift register chips 24 buttons can be used (if 3 are stacked together)
 
 Axis readout adjustment (LC, a, s) and auto calibration (on/off) - requires recompiling
 
@@ -45,11 +46,11 @@ Internal FFB effects: auto centering spring, damper, inertia, friction and end s
 Firmware features: RS232 interface for adjusting all FFB parameters, LC brake pressure, pedal autocalibration, minimal PWM value, rotation angle, recenter wheel,
 recalibrate wheel, recalibrate pedals, wheel version info reporting, turning various desktop effects on/off, turn on/off real-time FFB signal monitor, save FFB config to EEPROM,
 adjustment of encoder CPR, fully adjustable PWM settings that are stored in EEPROM, FFB clip LED indicator (lights up gradually from last 10% of FFB signal level),
-4x4 button matrix, CPR range up to 100k, wheel angle used as metric for spring, damper, inertia and friction effects, encoder z-index reset, PWM motor enable pin feature, magnetic encoder support
+4x4 button matrix, CPR range up to 100k, wheel angle used as metric for spring, damper, inertia and friction effects, encoder z-index reset, PWM motor enable pin feature, single or double magnetic encoder support, 2 FFB axis and 4 channel PWM or 2 channel DAC output, 3x8bit shift register chip support for 24 buttons
 
 Wheel control GUI: made from scratch in Processing 3.5.4, visualizes all axis and buttons including serial commands sent and received from Arduino, full adjustment of FFB effect gains,
 FFB signal monitor graph, load/save last settings from EEPROM, recenter wheel, recalibrate pedals, encoder CPR adjustment, PWM adjustment, COM port CFG via dialog,
-Axis colors CFG txt, storing/loading FFB profiles to/from PC, autodetection of firmware version, XY analog shifter support, manual pedal axis calibration, PWM0.50.100 mode, hardware button wheel re-center, RCM PWM mode, Z-index reset button, FFB axis selector, XY shifter advanced config buttons, advanced info startup diagnostics, encoder type indicator, detection of available wheel buttons, latest version is v2.6.3
+Axis colors CFG txt, storing/loading FFB profiles to/from PC, autodetection of firmware version, XY analog shifter support, manual pedal axis calibration, PWM0.50.100 mode, hardware button wheel re-center, RCM PWM mode, Z-index reset button, FFB axis selector, XY shifter advanced config buttons, advanced info startup diagnostics, encoder type indicator, detection of available wheel buttons, latest version is v2.6.4
 
 FFB output options (requires recompiling):
 [1] digital: 4 channel fully configurable PWM settings - PWM frequency (tied to PWM resolution), PWM types (phase correct or fast pwm), 1CH PWM modes (PWM+-, PWM+DIR, PWM0-50-100, RCM), 2CH PWM modes (2CH PWM+-, 2CH PWM+DIR, 2CH PWM0-50-100, 2CH RCM - not used), changes of PWM settings require restarting Arduino

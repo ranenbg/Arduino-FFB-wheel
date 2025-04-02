@@ -66,8 +66,11 @@ s16a accel, clutch, hbrake; // milos, changed from s16
 xysh shifter; // milos, added
 #endif // end of xy shifter
 s32a brake; // milos, we need 32bit due to 24 bits on load cell ADC, changed from s32
-s32 turn; // milos, x-axis (for optical or magnetic encoder)
+//s32 turn.x; // milos, x-axis (for optical or magnetic encoder)
+//s32 turn.y; // milos, y-axis (for 2nd magnetic encoder)
+s32v turn; // milos, struct containing scaled x and y-axis for usb send report (for one optical or two magnetic encoders)
 s32v axis; // milos, struct containing x and y-axis position input for calculating xy ffb
+s32v ffbs; // milos, instance of struct holding 2 axis FFB data
 u32 button = 0; // milos, added
 
 //milos, added
@@ -92,7 +95,6 @@ u8 asc = 0; // milos, added - sample counter for averaging of analog inputs
 
 u32 last_ConfigSerial = 0;
 u32 last_refresh = 0;
-s32v ffbs; // milos, instance of struct holding 2 axis FFB data
 u32 now_micros = micros();
 u32 timeDiffConfigSerial = now_micros;
 
@@ -127,9 +129,14 @@ void stopIfFault() {
 }
 #endif
 
-#ifdef USE_AS5600 // milos, added
-AS5600L as5600(0x36); // uses default wire.h, milos added fixed i2C address of AS5600
-#endif
+#ifdef USE_AS5600 // milos, added i2C magnetic angular sensor
+AS5600L as5600x(0x36); // uses default wire.h, milos added, it has a fixed i2C address
+#ifdef USE_TWOFFBAXIS
+#ifdef USE_TCA9548
+AS5600L as5600y(0x36); // milos, we need 2nd instance of the class because cumulative position can't be shared
+#endif // end of tca
+#endif // end of 2 ffb axis
+#endif // end of as5600
 
 //--------------------------------------------------------------------------------------------------------
 //-------------------------------------------- SETUP -----------------------------------------------------
@@ -141,10 +148,15 @@ void setup() {
   accel.val = 0;
   brake.val = 0;
   clutch.val = 0;
-  turn = 0;
+  //turn.x = 0;
+#ifdef USE_TCA9548
+  //turn.y = 0; // milos
+#endif // end of tca
   axis.x = 0;
+  turn.x = 0;
 #ifdef USE_TWOFFBAXIS
   axis.y = 0;
+  turn.y = 0;
 #endif // end of 2 ffb axis
 
   //pinModeFast(LCSYNC_LED_PIN,OUTPUT);
@@ -290,14 +302,28 @@ void setup() {
 #ifdef USE_AS5600
 #ifndef USE_ADS1015
   Wire.begin(); // milos, D2-SDA and D3-SCL by default on Leonardo, Micro and proMicro boards
-#endif
-  as5600.begin();
-  as5600.setFastFilter(0); // milos, configure fast filter threshold (0-OFF is slow filter enable)
-  as5600.setSlowFilter(0); // milos, configure slow filter or readout precision: 0-best(slowest), 3-worst(fastest)
-  //as5600.setAddress(0x36); // milos, not needed here, i2C address already defined in function constructor
-  //as5600.setDirection(AS5600_CLOCK_WISE); // milos, not needed, but DIR pin should be on GND (not sure if it has a pulldown resistor)
-  as5600.resetCumulativePosition(ROTATION_MID); // milos, initialize at 0deg at startup
-#endif
+#endif // end of ads1015
+#ifdef USE_TWOFFBAXIS
+#ifdef USE_TCA9548
+  TcaChannelSel(baseTCA0, 0); // milos, select 1st i2C channel for AS5600(0x36) on x-axis
+#endif // end of tca
+#endif // end of 2 ffb axis
+  as5600x.begin();
+  as5600x.setFastFilter(0); // milos, configure fast filter threshold (0-OFF is slow filter enable)
+  as5600x.setSlowFilter(0); // milos, configure slow filter or readout precision: 0-best(slowest), 3-worst(fastest)
+  //as5600x.setAddress(0x36); // milos, not needed here, i2C address already defined in function constructor
+  //as5600x.setDirection(AS5600_CLOCK_WISE); // milos, not needed, but DIR pin should be on GND (not sure if it has a pulldown resistor)
+  as5600x.resetCumulativePosition(ROTATION_MID); // milos, initialize at 0deg at startup
+#ifdef USE_TWOFFBAXIS // milos, add a 2nd AS5600 sensor if we use 2 ffb axis and tca i2C multiplexer chip (we can use two i2C devices with the same i2C address)
+#ifdef USE_TCA9548 // milos, we just need to select i2C channel first on multiplexer and do the rest as usual
+  TcaChannelSel(baseTCA0, 1); // milos, select 2nd i2C channel for AS5600(0x36) on y-axis and configure 2nd AS5600 the same way
+  as5600y.begin();
+  as5600y.setFastFilter(0);
+  as5600y.setSlowFilter(0);
+  as5600y.resetCumulativePosition(ROTATION_MID);
+#endif // end of tca
+#endif // end of 2 ffb axis
+#endif // end of as5600
   last_refresh = micros();
 }
 
@@ -331,25 +357,41 @@ void loop() {
 #ifndef USE_AS5600 // milos, if AS5600 is not enabled quadrature encoder is used
 #ifdef USE_QUADRATURE_ENCODER
       if (zIndexFound) {
-        turn = myEnc.Read() - ROTATION_MID + brWheelFFB.offset; // milos, only apply z-index offset if z-index pulse is found
+        turn.x = myEnc.Read() - ROTATION_MID + brWheelFFB.offset; // milos, only apply z-index offset if z-index pulse is found
       } else {
-        turn = myEnc.Read() - ROTATION_MID;
+        turn.x = myEnc.Read() - ROTATION_MID;
       }
 #else // milos, if no optical enc and no as5600, use pot for X-axis
-      turn = map(accel.val, 0, Z_AXIS_PHYS_MAX, -ROTATION_MID - 1, ROTATION_MID); // milos, X-axis on accelerator
+      turn.x = map(accel.val, 0, Z_AXIS_PHYS_MAX, -ROTATION_MID - 1, ROTATION_MID); // milos, X-axis on accelerator
 #endif // end of quad enc
 #else // if we use as5600
 #ifdef USE_CENTERBTN
-      if (cButtonPressed) {
-        as5600.resetCumulativePosition(ROTATION_MID);  // when using magnetic encoder set X-axis to 0deg
+      if (cButtonPressed) { // milos, reset magnetic encoders to 0 deg
+#ifdef USE_TCA9548
+        TcaChannelSel(baseTCA0, 0); // milos, select 1st i2C channel for AS5600(0x36) on x-axis
+#endif // end of tca
+        turn.x = as5600x.resetCumulativePosition(ROTATION_MID);  // when using 1st magnetic encoder set X-axis to 0deg
+#ifdef USE_TCA9548
+        TcaChannelSel(baseTCA0, 1); // milos, select 1st i2C channel for AS5600(0x36) on x-axis
+        turn.y = as5600y.resetCumulativePosition(ROTATION_MID);  // when using 2nd magnetic encoder set Y-axis to 0deg
+#endif // end of tca
         cButtonPressed = false;
       }
 #endif // end of center btn
-      turn = as5600.getCumulativePosition() - ROTATION_MID; // milos, AS5600 angle readout
+#ifdef USE_TCA9548
+      TcaChannelSel(baseTCA0, 0); // milos, select 1st i2C channel for AS5600(0x36) on x-axis
+#endif // end of tca
+      turn.x = as5600x.getCumulativePosition() - ROTATION_MID; // milos, AS5600 angle readout
 #endif // end of as5600
-      axis.x = turn; // milos, xFFB on X-axis (optical or magnetic encoder)
+      axis.x = turn.x; // milos, xFFB on X-axis (optical or magnetic encoder)
 #ifdef USE_TWOFFBAXIS // milos, if 2 ffb axis, use Y-axis as input for yFFB axis
+#ifndef USE_TCA9548 // milos, if we don't use i2C multiplexer
       axis.y = map(brake.val, 0, Y_AXIS_PHYS_MAX, -ROTATION_MID - 1, ROTATION_MID); // milos, temporary Y axis for yFFB force, scaled according to the encoder step size
+#else // if we use tca9548 read 2nd AS5600
+      TcaChannelSel(baseTCA0, 1); // milos, select 2nd i2C channel for AS5600(0x36) on y-axis
+      turn.y = as5600y.getCumulativePosition() - ROTATION_MID; // milos, 2nd AS5600 angle readout
+      axis.y = turn.y; // milos, yFFB on Y-axis (2nd magnetic encoder only)
+#endif // end of tca
 #endif // end of 2 ffb axis
 
 #ifdef USE_ANALOGFFBAXIS
@@ -364,8 +406,12 @@ void loop() {
       }
 #endif // end of analog ffb axis
       ffbs = gFFB.CalcTorqueCommands(&axis); // milos, passing pointer struct with x and y-axis, in encoder raw units -inf,0,inf
-      turn *= f32(X_AXIS_PHYS_MAX) / f32(ROTATION_MAX); // milos, conversion to physical HID units
-      turn = constrain(turn, -MID_REPORT_X - 1, MID_REPORT_X); // milos, -32768,0,32767 constrained to signed 16bit range
+      turn.x *= f32(X_AXIS_PHYS_MAX) / f32(ROTATION_MAX); // milos, conversion to physical HID units
+      turn.x = constrain(turn.x, -MID_REPORT_X - 1, MID_REPORT_X); // milos, -32768,0,32767 constrained to signed 16bit range
+#ifdef USE_TCA9548 // milos, do the same for y-axis
+      turn.y *= f32(Y_AXIS_PHYS_MAX) / f32(ROTATION_MAX);
+      turn.y = constrain(turn.y, -MID_REPORT_Y - 1, MID_REPORT_Y);
+#endif // end of tca
 
       SetPWM(&ffbs); // milos, FFB signal is generated as digital PWM or analog DAC output (ffbs is a struct containing 2-axis FFB, here we pass it as pointer for calculating PWM or DAC signals)
       //SYNC_LED_LOW(); //milos
@@ -514,13 +560,17 @@ void loop() {
         button = decodeXYshifter(button, &shifter); // milos, added - convert analog XY shifter values into last 8 buttons
 #endif //end of xy shifter
 
-#ifdef USE_QUADRATURE_ENCODER // milos, if we have quad enc
-        SendInputReport(turn + MID_REPORT_X + 1, brake.val, accel.val, clutch.val, hbrake.val, button); // milos, X, Y, Z, RX, RY, hat+button; (0-65535) X-axis range, center at 32768
+#ifdef USE_QUADRATURE_ENCODER // milos, if we use quad enc
+        SendInputReport(turn.x + MID_REPORT_X + 1, brake.val, accel.val, clutch.val, hbrake.val, button); // milos, X, Y, Z, RX, RY, hat+button; (0-65535) X-axis range, center at 32768
 #else // milos, if no quad enc
-#ifdef USE_AS5600 // milos, if we have as5600
-        SendInputReport(turn + MID_REPORT_X + 1, brake.val, accel.val, clutch.val, hbrake.val, button); // milos
+#ifdef USE_AS5600 // milos, if we use one as5600
+#ifndef USE_TCA9548 // milos, if we don't use two as5600
+        SendInputReport(turn.x + MID_REPORT_X + 1, brake.val, accel.val, clutch.val, hbrake.val, button); // milos, one as5600 at x-axis
+#else // with tca, if two as5600
+        SendInputReport(turn.x + MID_REPORT_Y + 1, turn.y + MID_REPORT_Y + 1, accel.val, clutch.val, hbrake.val, button); // milos, we use two as5600, send 2nd as5600 at y-axis instead of brake pedal
+#endif // end of tca
 #else // milos, if no quad enc and no as5600, Z-axis (accel) is used for X-axis, but we have have to send something instead of Z-axis -> half axis value for example
-        SendInputReport(turn + MID_REPORT_X + 1, brake.val, Z_AXIS_PHYS_MAX >> 1, clutch.val, hbrake.val, button); // milos
+        SendInputReport(turn.x + MID_REPORT_X + 1, brake.val, Z_AXIS_PHYS_MAX >> 1, clutch.val, hbrake.val, button); // milos
 #endif // end of as5600
 #endif // end of quad enc
 

@@ -1,6 +1,6 @@
 Milos Rankovic, ranenbg@gmail.com
 created 05.03.2024
-last updated 19.03.2025.
+last updated 02.04.2025.
 
 Changes from fw-v24X to fw-v250
 
@@ -31,4 +31,23 @@ Changes from fw-v24X to fw-v250
 - started implementing firmware configuration by native HID protocol (plan is to replace configCDC completely with configHID at some point)
 - implemented support for hardware re-center button when magnetic encoder is used, if no optical encoder is used (center button is re-mapped to TX pin instead of D2)
 - updated wirings, docs and manuals with new firmware features
+
+Changes from fw-v250 to fw-v250x
+
+- uncommented usage of trigger repeat interval and trigger buttons items in the struct for ffb effects (fix for non working FFB effects with non-infinite duration)
+
+Changes from fw-v250x to fw-v250xnr
+
+- added support for i2C multiplexer chip TCA9548A (new firmware option "u")
+- added support for using two AS5600 magnetic encoders
+- 2nd magnetic encoder is on y-axis only and is used as input for yFFB
+- added vector struct for scaled x- and y-axis for USB send report
+- changing CPR and rotation angle affects both magnetic encoders in the same way (angle from x-axis before change is copied to y-axis)
+- center button (both software and hardware) return both magnetic encoders to zero axis value
+- encoder calibration is only done for x-axis (even if 2 FFB axis and two magnetic encoders are used)
+- added full support for shift register chips SN74ALS166N or SN74HC165N, for 24 buttons with 3 stacked chips (options "n" + "r")
+- created wiring diagram for shift register chips (options "n" + "r")
+- created wiring diagram for double AS5600 (options "b" + "w" + "u")
+- removed following 2CH PWM modes: PWM+DIR, PWM0-50-100 and RCM to free up memory when 2 magnetic encoders (AS5600) are used, 2CH PWM+- mode is still available (only for firmware options "b" + "w" + "u")
+- compiled additional firmware HEX combinations utilizing newly available features
 

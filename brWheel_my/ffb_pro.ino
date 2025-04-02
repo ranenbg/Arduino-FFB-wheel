@@ -538,7 +538,6 @@ s32v cFFB::CalcTorqueCommands (s32v *pos) { // milos, pointer struct agument, re
       CONFIG_SERIAL.print(" ");
       CONFIG_SERIAL.println(command.y); // milos, FFB Y axis
     }
-    //torqueY = command2; // milos, added (commented out)
 #endif // end of 2 ffb axis
   }
   return (command); // milos, passing the struct
@@ -546,14 +545,14 @@ s32v cFFB::CalcTorqueCommands (s32v *pos) { // milos, pointer struct agument, re
 
 //--------------------------------------------------------------------------------------------------------
 /* Turn Steering right only */
-void BRFFB::calibrate() {
+void BRFFB::calibrate() { // milos, we are only calibrating encoder on x-axis (even if 2 ffb axis are used)
   cal_print("cal:");
   s32 rightGap;
 #ifdef USE_QUADRATURE_ENCODER
   rightGap = myEnc.Read();
 #else
 #ifdef USE_AS5600
-  rightGap = as5600.getCumulativePosition();
+  rightGap = as5600x.getCumulativePosition();
 #endif // end of as5600
 #endif // end of quad enc
   s32 startpos = rightGap;
@@ -572,7 +571,7 @@ void BRFFB::calibrate() {
     actual = myEnc.Read();
 #else
 #ifdef USE_AS5600
-    actual = as5600.getCumulativePosition();
+    actual = as5600x.getCumulativePosition();
 #endif // end of as5600
 #endif // end of quad enc
     if (rightGap >= actual) {
@@ -590,7 +589,7 @@ void BRFFB::calibrate() {
   myEnc.Write(ROTATION_MAX); // milos, set quadrature encoder to right edge
 #endif // end of quad enc
 #else
-  as5600.resetCumulativePosition(ROTATION_MAX); // milos, set magnetic encoder to right edge
+  as5600x.resetCumulativePosition(ROTATION_MAX); // milos, set magnetic encoder to right edge
 #endif
   if (startpos == actual) {
     cal_println("er");

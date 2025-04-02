@@ -155,8 +155,17 @@ version		features
 250ahxnlm	the same as v250hxnlm, with pedal autocalibration	
 250zhxnlm	the same as v250hxnlm, with z-index support
 250zhfxnlm	the same as v250zhxnlm, with XY analog shifter support
+250bdwuxm	the same as v250bxm, with support for 2 magnetic encoders (AS5600) via i2C multiplexer (TCA9548A)
+250bdcwuxm	the same as v250bdwuxm, with hardware wheel recenter button on pin TX
 250xgm		the same as v250xm, with analog FFB output via 2x12bit external DAC (MCP4275)
 250bxgm		the same as v250xgm, with 2 FFB axis and 2 channel analog DAC output	
 250bdxgm	the same as v250bxgm, without optical encoder (full analog firmware)
 250bcdwxgm	the same as v250bdxgm, with magnetic encoder (AS5600) and hardware wheel recenter button on pin TX 	
 250hxngm	the same as v250xgm, with hat switch and shifter register (nano button box)
+
+- firmware HEX versions bellow require wheel control v2.6.4 or newer
+
+250xnrm		the same as v250xm, with support for 3x8bit shift register chip SN74ALS166N for 24 buttons
+250hxnrm	the same as v250xnrm, with hat switch support
+250bdwuxgm	the same as v250bdxgm, with support for 2 magnetic encoders (AS5600) via i2C multiplexer (TCA9548A)
+250bcdwuxgm	the same as v250bdwxgm, with hardware wheel recenter button on pin TX 

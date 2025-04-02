@@ -72,6 +72,9 @@ void configCDC() { // milos, virtual serial port firmware configuration interfac
 #ifdef USE_AS5600
         CONFIG_SERIAL.print("w");
 #endif
+#ifdef USE_TCA9548
+        CONFIG_SERIAL.print("u"); // milos, if tca9548
+#endif
 #ifdef USE_HATSWITCH
         CONFIG_SERIAL.print("h");
 #endif
@@ -138,7 +141,10 @@ void configCDC() { // milos, virtual serial port firmware configuration interfac
         break;
       case 'O': // milos, added to adjust optical encoder CPR
 #ifdef USE_AS5600 // milos, with AS5600
-        temp1 = as5600.getCumulativePosition() - ROTATION_MID; // milos
+#ifdef USE_TCA9548
+        TcaChannelSel(baseTCA0, 0); // milos, select 1st i2C channel for AS5600(0x36) on x-axis
+#endif // end of tca
+        temp1 = as5600x.getCumulativePosition() - ROTATION_MID; // milos
 #else // if no as5600
 #ifdef USE_QUADRATURE_ENCODER
         temp1 = myEnc.Read() - ROTATION_MID + brWheelFFB.offset; // milos
@@ -154,7 +160,14 @@ void configCDC() { // milos, virtual serial port firmware configuration interfac
         ROTATION_MID = ROTATION_MAX >> 1; // milos, updated, divide by 2
         temp1 = int32_t(wheelAngle * float(ROTATION_MAX) / float(ROTATION_DEG)); // milos, here we recover the old wheel angle
 #ifdef USE_AS5600 // milos, with AS5600
-        as5600.resetCumulativePosition(temp1 + ROTATION_MID); // milos
+#ifdef USE_TCA9548
+        TcaChannelSel(baseTCA0, 0); // milos, select 1st i2C channel for AS5600(0x36) on x-axis
+#endif // end of tca
+        as5600x.resetCumulativePosition(temp1 + ROTATION_MID); // milos
+#ifdef USE_TCA9548
+        TcaChannelSel(baseTCA0, 1); // milos, select 2nd i2C channel for AS5600(0x36) on y-axis
+        as5600y.resetCumulativePosition(temp1 + ROTATION_MID); // milos, 2nd as5600
+#endif // end of tca
 #else // if no as5600
 #ifdef USE_QUADRATURE_ENCODER
         myEnc.Write(temp1 + ROTATION_MID - brWheelFFB.offset); // milos
@@ -170,7 +183,14 @@ void configCDC() { // milos, virtual serial port firmware configuration interfac
         CONFIG_SERIAL.println(1);
 #else // if no zindex
 #ifdef USE_AS5600 // milos, with AS5600
-        as5600.resetCumulativePosition(ROTATION_MID);
+#ifdef USE_TCA9548
+        TcaChannelSel(baseTCA0, 0); // milos, select 1st i2C channel for AS5600(0x36) on x-axis
+#endif // end of tca
+        as5600x.resetCumulativePosition(ROTATION_MID);
+#ifdef USE_TCA9548
+        TcaChannelSel(baseTCA0, 1); // milos, select 2nd i2C channel for AS5600(0x36) on y-axis
+        as5600y.resetCumulativePosition(ROTATION_MID);
+#endif // end of tca
 #else // milos, if no as5600
 #ifdef USE_QUADRATURE_ENCODER
         myEnc.Write(ROTATION_MID); // milos, just set to zero angle
@@ -190,7 +210,10 @@ void configCDC() { // milos, virtual serial port firmware configuration interfac
         break;
       case 'G': // milos, set new rotation angle
 #ifdef USE_AS5600 // milos, with AS5600
-        temp1 = as5600.getCumulativePosition() - ROTATION_MID; // milos
+#ifdef USE_TCA9548
+        TcaChannelSel(baseTCA0, 0); // milos, select 1st i2C channel for AS5600(0x36) on x-axis
+#endif // end of tca
+        temp1 = as5600x.getCumulativePosition() - ROTATION_MID; // milos
 #else // if no as5600
 #ifdef USE_QUADRATURE_ENCODER
         temp1 = myEnc.Read() - ROTATION_MID + brWheelFFB.offset; // milos
@@ -206,7 +229,14 @@ void configCDC() { // milos, virtual serial port firmware configuration interfac
         ROTATION_MID = ROTATION_MAX >> 1; // milos, updated, divide by 2
         temp1 = int32_t(wheelAngle * float(ROTATION_MAX) / float(ROTATION_DEG)); // milos, here we recover the old wheel angle
 #ifdef USE_AS5600 // milos, with AS5600
-        as5600.resetCumulativePosition(temp1 + ROTATION_MID); // milos
+#ifdef USE_TCA9548
+        TcaChannelSel(baseTCA0, 0); // milos, select 1st i2C channel for AS5600(0x36) on x-axis
+#endif // end of tca
+        as5600x.resetCumulativePosition(temp1 + ROTATION_MID); // milos, 1st as5600
+#ifdef USE_TCA9548
+        TcaChannelSel(baseTCA0, 1); // milos, select 2nd i2C channel for AS5600(0x36) on y-axis
+        as5600y.resetCumulativePosition(temp1 + ROTATION_MID); // milos, 2nd as5600
+#endif // end of tca
 #else // if no as5600
 #ifdef USE_QUADRATURE_ENCODER
         myEnc.Write(temp1 + ROTATION_MID - brWheelFFB.offset); // milos

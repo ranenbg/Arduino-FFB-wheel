@@ -27,11 +27,14 @@ Detailed documentation and more information about the firmware can be found in t
 ![plot](./brWheel_my/wirings/encoder_ffb_clip_led_wiring_diagram.png)
 ## Magnetic encoder wiring
 ![plot](./brWheel_my/wirings/as5600_wiring_diagram.png)
+![plot](./brWheel_my/wirings/double_as5600_wiring_diagram.png)
 ## Motor driver wiring
 ![plot](./brWheel_my/wirings/bts7960_wiring_diagram.png)
 ![plot](./brWheel_my/wirings/double_bts7960_wiring_diagram.png)
 ## Button box firmware pinouts - for Arduino Nano/Uno
 ![plot](./brWheel_my/wirings/Firmware-vXX1%20button%20box%20pinout.png)
+## Button box firmware pinouts - for shift register chips
+![plot](./brWheel_my/wirings/shift_register_wiring_diagram.png)
 ## Button matrix pinouts
 ![plot](./brWheel_my/wirings/button_matrix_wiring_diagram.png)
 ## External i2C device pinouts
@@ -71,6 +74,7 @@ Firmware versions (new) from fw-v250, I've changed firmware naming logic such th
 - l - support for HX711 chip and load cell (on the y-axis)
 - g - support for external 12bit DAC to be used for analog FFB output (2x MCP4725 i2C)
 -	p - no EEPROM support for loading/saving firmware settings (firmware defaults are loaded at each startup)
+-	u - support for 2 magnetic encoders (AS5600) via i2C multiplexer chip (TCA9548A)
 - m - replacement pinouts for ProMicro (for FFB clipping LED, buttons 3 and 4, PWM direction pin)
 
 note* some combinations are not possible at the same time, while some are not possible due to ATmega32U4 32k memory limit

@@ -220,3 +220,4 @@ version		features
 250xnr		the same as v250x, with support for 3x8bit shift register chip SN74ALS166N for 24 buttons
 250hxnr		the same as v250xnr, with hat switch support
 250bdwuxg	the same as v250bdxg, with support for 2 magnetic encoders (AS5600) via i2C multiplexer (TCA9548A)
+250chfxn	the same as v250cx, with support for hat switch, XY analog shifter and shifter register (nano button box)

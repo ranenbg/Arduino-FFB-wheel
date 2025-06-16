@@ -11,11 +11,11 @@
 //#define USE_LCD					// milos, LCD via i2C (not implemented yet)
 //#define USE_ADS1015       // milos, uncomment for 12bit pedals, when commented out it's 10bit from arduino inputs (can not be used with AVG_INPUTS)
 //#define USE_DSP56ADC16S			// 16 bits Stereo ADC (milos, not implemented fully yet)
-//#define USE_QUADRATURE_ENCODER		// milos, optical quadrature encoder (you may comment it out)
-#define USE_TWOFFBAXIS        // milos, uncomment to enable 2nd FFB axis and PWM/DAC output for flight sticks (can't be used with USE_LOAD_CELL and without USE_ANALOGFFBAXIS)
-#define USE_AS5600          // milos, uncomment to enable magnetic encoder via i2C instead of optical encoder
-#define USE_TCA9548        // milos, uncomment to enable i2C multiplexer chip for using more than one AS5600 magnetic sensor via i2C (for now only used as y-axis input, must use with AS5600 and TWOFFBAXIS) 
-//#define USE_ZINDEX          // milos, use Z-index encoder channel (caution, can not be used with USE_ADS1015, USE_MCP4725 or USE_AS5600)
+#define USE_QUADRATURE_ENCODER		// milos, optical quadrature encoder (you may comment it out)
+//#define USE_TWOFFBAXIS        // milos, uncomment to enable 2nd FFB axis and PWM/DAC output for flight sticks (can't be used with USE_LOAD_CELL and without USE_ANALOGFFBAXIS)
+//#define USE_AS5600          // milos, uncomment to enable magnetic encoder via i2C instead of optical encoder
+//#define USE_TCA9548        // milos, uncomment to enable i2C multiplexer chip for using more than one AS5600 magnetic sensor via i2C (for now only used as y-axis input, must use with AS5600 and TWOFFBAXIS) 
+#define USE_ZINDEX          // milos, use Z-index encoder channel (caution, can not be used with USE_ADS1015, USE_MCP4725 or USE_AS5600)
 //#define USE_LOAD_CELL				// Load cell shield // milos, new library for LC (caution can not be used with TWOFFBAXIS)
 //#define USE_SHIFT_REGISTER			// 2x8-bit parallel-load shift registers G27 board steering wheel (milos, this one I modified for 16 buttons, caution can not be used with TWOFFBAXIS)
 //#define USE_DUAL_SHIFT_REGISTER		// Dual 8-bit Parallel-load shift registers G27 board shifter  (milos, not available curently, instead use SN74ALS166N for 24 buttons)
@@ -25,10 +25,10 @@
 //#define USE_BTNMATRIX        // milos, uncomment to use 8 pins as a 4x4 button matrix for total of 16 buttons (can not be used with load cell, shift register or XY shifter)
 //#define AVG_INPUTS        // milos, uncomment to use averaging of arduino analog inputs (can not be used with USE_ADS1015)
 //#define USE_AUTOCALIB        // milos, uncomment to use autocalibration for pedal axis (if left commented manual calibration is enabled)
-#define USE_CENTERBTN    // milos, uncomment to assign digital input pin D2 (or TX) for hardware wheel recenter to 0deg (caution, can only be used if quad encoder usage is commented out)
+//#define USE_CENTERBTN    // milos, uncomment to assign digital input pin D2 (or TX) for hardware wheel recenter to 0deg (caution, can only be used if quad encoder usage is commented out)
 //#define USE_EXTRABTN    // milos, uncomment to configure analog inputs on pins A2 and A3 as a digital button inputs (2 extra buttons, note that clutch and handbrake will be unavailable)
 //#define USE_MCP4725      // milos, 12bit DAC (0-5V), uncomment to enable output of FFB signal as 2ch DAC voltage output
-#define USE_ANALOGFFBAXIS // milos, uncomment to enable other than X-axis to be tied with xFFB axis (you can use analog inputs instead of digital encoders)
+#define USE_ANALOGFFBAXIS // milos, uncomment to enable other than X-axis to be tied with xFFB axis (you can use analog inputs instead of digital encoders
 //#define USE_PROMICRO    // milos, uncomment if you are using Arduino ProMicro board (leave commented for Leonardo or Micro variants)
 #define USE_EEPROM     // milos, uncomment to enable loading/saving settings from EEPROM (if commented out, default settings will be loaded on each powerup, one needs to reconfigure firmware defautls or use GUI configuration after each powerup) 
 
@@ -523,7 +523,7 @@ uint32_t decodeHat(uint32_t inbits) {
 }
 
 typedef struct xysh { // milos, added - holds shifter configuration
-  uint8_t cal[5]; // calibration limits that define where the gears are
+  uint16_t cal[5]; // calibration limits that define where the gears are
   // i  cal gears (if <=)
   // 0  x0  1
   // 1  x1  3

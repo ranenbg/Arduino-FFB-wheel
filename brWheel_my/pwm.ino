@@ -178,37 +178,30 @@ void SetPWM (s32v *torque) { // milos, takes pointer struct as argument - 2 axis
       if (!bitRead(pwmstate, 6)) { // if PWM+- mode (pwmstate bit1=0, bit6=0)
         if (torque->x > 0) {
           torque->x = map(torque->x, 0, MM_MAX_MOTOR_TORQUE, MM_MIN_MOTOR_TORQUE, R_bal * MM_MAX_MOTOR_TORQUE);
-          //PWM16A(0);
-          digitalWriteFast(PWM_PIN_L, LOW);
+          PWM16A(0);
           PWM16B(torque->x);
           digitalWriteFast(DIR_PIN, HIGH); //use dir pin as BTS7960 pwm motor enable signal
         } else if (torque->x < 0) {
           torque->x = map(-torque->x, 0, MM_MAX_MOTOR_TORQUE, MM_MIN_MOTOR_TORQUE, L_bal * MM_MAX_MOTOR_TORQUE);
           PWM16A(torque->x);
-          //PWM16B(0);
-          digitalWriteFast(PWM_PIN_R, LOW);
+          PWM16B(0);
           digitalWriteFast(DIR_PIN, HIGH);
         } else {
-          //PWM16A(0);
-          //PWM16B(0);
-          digitalWriteFast(PWM_PIN_L, LOW);
-          digitalWriteFast(PWM_PIN_R, LOW);
+          PWM16A(0);
+          PWM16B(0);
           digitalWriteFast(DIR_PIN, LOW); // disable bts output when no pwm signal to make it rotate freely
         }
       } else { // if PWM0.50.100 mode (pwmstate bit1=0 and bit6=1)
         if (torque->x > 0) {
           torque->x = map(torque->x, 0, MM_MAX_MOTOR_TORQUE, MM_MAX_MOTOR_TORQUE / 2 + MM_MIN_MOTOR_TORQUE, MM_MAX_MOTOR_TORQUE);
           PWM16A(torque->x);
-          //PWM16B(0);
         } else if (torque->x < 0) {
           torque->x = map(-torque->x, 0, MM_MAX_MOTOR_TORQUE, MM_MAX_MOTOR_TORQUE / 2 - MM_MIN_MOTOR_TORQUE, 0);
           PWM16A(torque->x);
-          //PWM16B(0);
         } else {
           PWM16A(MM_MAX_MOTOR_TORQUE / 2);
-          //PWM16B(0);
         }
-        digitalWriteFast(PWM_PIN_R, LOW);
+        PWM16B(0);
       }
     } else if (bitRead(pwmstate, 1)) { // if pwmstate bit1=1
       if (!bitRead(pwmstate, 6)) { // if PWM+dir mode (pwmstate bit1=1, bit6=0)
@@ -231,40 +224,33 @@ void SetPWM (s32v *torque) { // milos, takes pointer struct as argument - 2 axis
         }
       }
       PWM16B(RCM_zer);
-      digitalWriteFast(PWM_PIN_R, LOW);
+      //digitalWriteFast(PWM_PIN_R, LOW);
     }
 #else // milos, if we use 2 FFB axis
     if (!bitRead(pwmstate, 1)) { // if pwmstate bit1=0
       if (!bitRead(pwmstate, 6)) { // if 2CH PWM+- mode (pwmstate bit1=0, bit6=0)
         if (torque->x >= 0) { // milos, X axis FFB, pwm+-, D9 (left), D10 (right)
           torque->x = map(torque->x, 0, MM_MAX_MOTOR_TORQUE, MM_MIN_MOTOR_TORQUE, MM_MAX_MOTOR_TORQUE);
-          //PWM16A(0);
-          digitalWriteFast(PWM_PIN_L, LOW);
+          PWM16A(0);
           PWM16B(torque->x);
         } else if (torque->x < 0) {
           torque->x = map(-torque->x, 0, MM_MAX_MOTOR_TORQUE, MM_MIN_MOTOR_TORQUE, MM_MAX_MOTOR_TORQUE);
           PWM16A(torque->x);
-          //PWM16B(0);
-          digitalWriteFast(PWM_PIN_R, LOW);
+          PWM16B(0);
         } /*else {
-          digitalWriteFast(PWM_PIN_L, LOW);
-          digitalWriteFast(PWM_PIN_R, LOW);
           //PWM16A(0);
           //PWM16B(0);
         }*/
         if (torque->y >= 0) {  // milos, Y axis FFB, pwm+-, D11 (up), D5 (down)
           torque->y = map(torque->y, 0, MM_MAX_MOTOR_TORQUE, MM_MIN_MOTOR_TORQUE, MM_MAX_MOTOR_TORQUE);
           PWM16C(torque->y);
-          //PWM16D(0);
-          digitalWriteFast(PWM_PIN_D, LOW);
+          PWM16D(0);
         } else if (torque->y < 0) {
           torque->y = map(-torque->y, 0, MM_MAX_MOTOR_TORQUE, MM_MIN_MOTOR_TORQUE, MM_MAX_MOTOR_TORQUE);
-          //PWM16C(0);
-          digitalWriteFast(PWM_PIN_U, LOW);
+          PWM16C(0);
+          //digitalWriteFast(PWM_PIN_U, LOW);
           PWM16D(torque->y);
         } /*else {
-          digitalWriteFast(PWM_PIN_D, LOW);
-          digitalWriteFast(PWM_PIN_U, LOW);
           //PWM16C(0);
           //PWM16D(0);
         }*/
@@ -297,7 +283,6 @@ void SetPWM (s32v *torque) { // milos, takes pointer struct as argument - 2 axis
     } else { // milos, if pwmstate bit1=1
 #ifndef USE_TCA9548 // milos, only available if not using 2 mag encoders via i2C multilexer
       if (!bitRead(pwmstate, 6)) { // milos, if 2CH PWM+DIR mode (pwmstate bit1=1, bit6=0)
-        // milos, toDO: implement 2CH PWM+DIR mode
         if (torque->x >= 0) {
           digitalWriteFast(PWM_PIN_U, HIGH); // milos, pin D11
         } else {

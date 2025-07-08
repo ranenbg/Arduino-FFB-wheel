@@ -503,7 +503,7 @@ s32v cFFB::CalcTorqueCommands (s32v *pos) { // milos, pointer struct agument, re
 
     s32 limit = ROTATION_MID; // milos, +-ROTATION_MID distance from center is where endstop spring force will start
     //if ((pos->x < -limit) || (pos->x > limit)) {
-    limit -= (ROTATION_MID >> 6); //milos, here you can offset endstop limit by ROTATION_MIN/64 (encoder can go past the limit)
+    limit -= (ROTATION_MID >> 6); // milos, here you can offset endstop limit by ROTATION_MIN/64 (encoder can go past the limit)
     if ((pos->x < -limit) || (pos->x > limit)) {
       if (pos->x >= 0) {
         pos->x = pos->x - limit; //milos

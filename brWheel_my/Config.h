@@ -19,7 +19,7 @@
 //#define USE_LOAD_CELL				// Load cell shield // milos, new library for LC (caution can not be used with TWOFFBAXIS)
 #define USE_SHIFT_REGISTER			// 2x8-bit parallel-load shift registers G27 board steering wheel (milos, this one I modified for 16 buttons, caution can not be used with TWOFFBAXIS)
 //#define USE_DUAL_SHIFT_REGISTER		// Dual 8-bit Parallel-load shift registers G27 board shifter  (milos, not available curently, instead use SN74ALS166N for 24 buttons)
-//#define USE_SN74ALS166N          // milos, uncomment to use 3x8bit parralel-in serial-out shift register chips for 24 buttons, otherwise it's 16 buttons with ard nano-button box (must be used with USE_SHIFT_REGISTER)
+#define USE_SN74ALS166N          // milos, uncomment to use 3x8bit parralel-in serial-out shift register chips for 24 buttons, otherwise it's 16 buttons with ard nano-button box (must be used with USE_SHIFT_REGISTER)
 #define USE_XY_SHIFTER    // milos, uncomment to use XY analog shifter (can not be used with USE_BTNMATRIX, note that for proMicro clutch and handbrake will be unavailable)
 #define USE_HATSWITCH        // milos, uncomment to use first 4 buttons for hat switch (D-pad)
 //#define USE_BTNMATRIX        // milos, uncomment to use 8 pins as a 4x4 button matrix for total of 16 buttons (can not be used with load cell, shift register or XY shifter)

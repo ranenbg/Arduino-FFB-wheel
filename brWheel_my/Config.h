@@ -17,15 +17,15 @@
 //#define USE_TCA9548        // milos, uncomment to enable i2C multiplexer chip for using more than one AS5600 magnetic sensor via i2C (for now only used as y-axis input, must use with AS5600 and TWOFFBAXIS) 
 //#define USE_ZINDEX          // milos, use Z-index encoder channel (caution, can not be used with USE_ADS1015, USE_MCP4725 or USE_AS5600)
 //#define USE_LOAD_CELL				// Load cell shield // milos, new library for LC (caution can not be used with TWOFFBAXIS)
-#define USE_SHIFT_REGISTER			// 2x8-bit parallel-load shift registers G27 board steering wheel (milos, this one I modified for 16 buttons, caution can not be used with TWOFFBAXIS)
-//#define USE_DUAL_SHIFT_REGISTER		// Dual 8-bit Parallel-load shift registers G27 board shifter  (milos, not available curently, instead use SN74ALS166N for 24 buttons)
-#define USE_SN74ALS166N          // milos, uncomment to use 3x8bit parralel-in serial-out shift register chips for 24 buttons, otherwise it's 16 buttons with ard nano-button box (must be used with USE_SHIFT_REGISTER)
-#define USE_XY_SHIFTER    // milos, uncomment to use XY analog shifter (can not be used with USE_BTNMATRIX, note that for proMicro clutch and handbrake will be unavailable)
-#define USE_HATSWITCH        // milos, uncomment to use first 4 buttons for hat switch (D-pad)
+//#define USE_SHIFT_REGISTER			// 2x8-bit parallel-load shift registers G27 board steering wheel (milos, this one I modified for 16 buttons, caution can not be used with TWOFFBAXIS)
+//#define USE_DUAL_SHIFT_REGISTER		// Dual 8-bit Parallel-load shift registers G27 board shifter  (milos, not available curently, use SN74ALS166N instead for 24 buttons)
+//#define USE_SN74ALS166N          // milos, uncomment to use 3x8bit parralel-in serial-out shift register chips for 24 buttons, otherwise it's 16 buttons with ard nano-button box (must be used with USE_SHIFT_REGISTER)
+//#define USE_XY_SHIFTER    // milos, uncomment to use XY analog shifter (can not be used with USE_BTNMATRIX, note that for proMicro clutch and handbrake will be unavailable)
+//#define USE_HATSWITCH        // milos, uncomment to use first 4 buttons for hat switch (D-pad)
 //#define USE_BTNMATRIX        // milos, uncomment to use 8 pins as a 4x4 button matrix for total of 16 buttons (can not be used with load cell, shift register or XY shifter)
 //#define AVG_INPUTS        // milos, uncomment to use averaging of arduino analog inputs (can not be used with USE_ADS1015)
 //#define USE_AUTOCALIB        // milos, uncomment to use autocalibration for pedal axis (if left commented manual calibration is enabled)
-#define USE_CENTERBTN    // milos, uncomment to assign digital input pin D2 (or TX) for hardware wheel recenter to 0deg (caution, can only be used if quad encoder usage is commented out)
+//#define USE_CENTERBTN    // milos, uncomment to assign digital input pin D2 (or TX) for hardware wheel recenter to 0deg (caution, can only be used if quad encoder usage is commented out)
 //#define USE_EXTRABTN    // milos, uncomment to configure analog inputs on pins A2 and A3 as a digital button inputs (2 extra buttons, note that clutch and handbrake will be unavailable)
 //#define USE_MCP4725      // milos, 12bit DAC (0-5V), uncomment to enable output of FFB signal as 2ch DAC voltage output
 #define USE_ANALOGFFBAXIS // milos, uncomment to enable other than X-axis to be tied with xFFB axis (you can use analog inputs instead of digital encoders
@@ -79,8 +79,10 @@
 //#define SHIFTREG_DATA_H 7 // DATA from Shifter H (Dual 8-bit) //milos, not in use
 //#define SHIFTREG_DATA_OUT 13 // DATA Shift-Out LED (8-bit)   ###### NOT YET IMPLEMENTED ###### //milos, was 3
 #define SHIFTS_NUM 33 // milos, defines number of shifts (16) from the nano button box (depends on number of buttons we want to read, max is 65 for 32 buttons but we have only 24 ih hid, see inputs.ino and hid.cpp)
-#ifdef USE_SN74ALS166N
+#ifdef USE_SN74ALS166N // milos, if we use shift register chips
+#ifndef USE_XY_SHIFTER // milos, if we don't use xy shifter at the same time
 #define SHIFTS_NUM 49 // milos, for 24 shifts (3x8bit shift register chips)
+#endif // end of xy shifter
 #endif // end of sn74
 #else // milos, if no shift reg re-alocate some pins for buttons 4-6 instead
 #define BUTTON4 6 // D6 or bit7 of PIND

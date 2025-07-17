@@ -1,6 +1,6 @@
 Milos Rankovic, ranenbg@gmail.com
 created 05.03.2024
-last updated 02.04.2025.
+last updated 17.07.2025.
 
 Changes from fw-v24X to fw-v250
 
@@ -50,4 +50,7 @@ Changes from fw-v250x to fw-v250xnr
 - created wiring diagram for double AS5600 (options "b" + "w" + "u")
 - removed following 2CH PWM modes: PWM+DIR, PWM0-50-100 and RCM to free up memory when 2 magnetic encoders (AS5600) are used, 2CH PWM+- mode is still available (only for firmware options "b" + "w" + "u")
 - compiled additional firmware HEX combinations utilizing newly available features
+- fixed PWM signal generation bug
+- fixed XY shifter calibration bug
+- if both SN74ALS166N and XY shifter options are used, there are only 16 buttons available (only 2 chips needed) because last 8 are reserved for XY shifter
 

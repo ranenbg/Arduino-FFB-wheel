@@ -229,7 +229,7 @@ void SetPWM (s32v *torque) { // milos, takes pointer struct as argument - 2 axis
 #else // milos, if we use 2 FFB axis
     if (!bitRead(pwmstate, 1)) { // if pwmstate bit1=0
       if (!bitRead(pwmstate, 6)) { // if 2CH PWM+- mode (pwmstate bit1=0, bit6=0)
-        if (torque->x >= 0) { // milos, X axis FFB, pwm+-, D9 (left), D10 (right)
+        if (torque->x > 0) { // milos, X axis FFB, pwm+-, D9 (left), D10 (right)
           torque->x = map(torque->x, 0, MM_MAX_MOTOR_TORQUE, MM_MIN_MOTOR_TORQUE, MM_MAX_MOTOR_TORQUE);
           PWM16A(0);
           PWM16B(torque->x);
@@ -237,10 +237,10 @@ void SetPWM (s32v *torque) { // milos, takes pointer struct as argument - 2 axis
           torque->x = map(-torque->x, 0, MM_MAX_MOTOR_TORQUE, MM_MIN_MOTOR_TORQUE, MM_MAX_MOTOR_TORQUE);
           PWM16A(torque->x);
           PWM16B(0);
-        } /*else {
-          //PWM16A(0);
-          //PWM16B(0);
-        }*/
+        } else {
+          PWM16A(0);
+          PWM16B(0);
+        }
         if (torque->y >= 0) {  // milos, Y axis FFB, pwm+-, D11 (up), D5 (down)
           torque->y = map(torque->y, 0, MM_MAX_MOTOR_TORQUE, MM_MIN_MOTOR_TORQUE, MM_MAX_MOTOR_TORQUE);
           PWM16C(torque->y);
@@ -248,36 +248,35 @@ void SetPWM (s32v *torque) { // milos, takes pointer struct as argument - 2 axis
         } else if (torque->y < 0) {
           torque->y = map(-torque->y, 0, MM_MAX_MOTOR_TORQUE, MM_MIN_MOTOR_TORQUE, MM_MAX_MOTOR_TORQUE);
           PWM16C(0);
-          //digitalWriteFast(PWM_PIN_U, LOW);
           PWM16D(torque->y);
-        } /*else {
-          //PWM16C(0);
-          //PWM16D(0);
-        }*/
+        } else {
+          PWM16C(0);
+          PWM16D(0);
+        }
       } else {  // milos, 2CH PWM0.50.100 mode (pwmstate bit1=0, bit6=1)
 #ifndef USE_TCA9548 // milos, only available if not using 2 mag encoders via i2C multilexer
         //PWM16C(0);
         //PWM16D(0);
         //digitalWriteFast(PWM_PIN_D, LOW);
         //digitalWriteFast(PWM_PIN_U, LOW);
-        if (torque->x >= 0) {
+        if (torque->x > 0) {
           torque->x = map(torque->x, 0, MM_MAX_MOTOR_TORQUE, (MM_MAX_MOTOR_TORQUE >> 1) + MM_MIN_MOTOR_TORQUE, MM_MAX_MOTOR_TORQUE);
           PWM16A(torque->x);
         } else if (torque->x < 0) {
           torque->x = map(-torque->x, 0, MM_MAX_MOTOR_TORQUE, (MM_MAX_MOTOR_TORQUE >> 1) - MM_MIN_MOTOR_TORQUE, 0);
           PWM16A(torque->x);
-        } /*else {
+        } else {
           PWM16A(MM_MAX_MOTOR_TORQUE / 2);
-        }*/
-        if (torque->y >= 0) {
+        }
+        if (torque->y > 0) {
           torque->y = map(torque->y, 0, MM_MAX_MOTOR_TORQUE, (MM_MAX_MOTOR_TORQUE >> 1) + MM_MIN_MOTOR_TORQUE, MM_MAX_MOTOR_TORQUE);
           PWM16B(torque->y);
         } else if (torque->y < 0) {
           torque->y = map(-torque->y, 0, MM_MAX_MOTOR_TORQUE, (MM_MAX_MOTOR_TORQUE >> 1) - MM_MIN_MOTOR_TORQUE, 0);
           PWM16B(torque->y);
-        } /*else {
+        } else {
           PWM16B(MM_MAX_MOTOR_TORQUE / 2);
-        }*/
+        }
 #endif // end of tca
       }
     } else { // milos, if pwmstate bit1=1

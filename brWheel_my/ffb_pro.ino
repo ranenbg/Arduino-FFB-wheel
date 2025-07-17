@@ -503,14 +503,20 @@ s32v cFFB::CalcTorqueCommands (s32v *pos) { // milos, pointer struct agument, re
 
     s32 limit = ROTATION_MID; // milos, +-ROTATION_MID distance from center is where endstop spring force will start
     //if ((pos->x < -limit) || (pos->x > limit)) {
-    limit -= (ROTATION_MID >> 6); // milos, here you can offset endstop limit by ROTATION_MIN/64 (encoder can go past the limit)
+#ifdef USE_ANALOGFFBAXIS
+#ifndef USE_QUADRATURE_ENCODER
+#ifndef USE_AS5600
+    limit -= (ROTATION_MID >> 6); // milos, here you can offset endstop activation point by ROTATION_MID/64 (optical or magnetic encoders can go past the axis range limit, this is required only for analog input - pot)
+#endif // end of as5600
+#endif // end of quad enc
+#endif // end of 2 ffb axis
     if ((pos->x < -limit) || (pos->x > limit)) {
       if (pos->x >= 0) {
         pos->x = pos->x - limit; //milos
       } else {
         pos->x = pos->x + limit; //milos
       }
-      command.x += SpringEffect(pos->x, BOUNDARY_SPRING / EffectDivider() * configStopGain / 100); //milos, boundary spring force is equal (scaled accordingly) for all PWM modes, endstop force for xFFB axis
+      command.x += SpringEffect(pos->x, BOUNDARY_SPRING / EffectDivider() * configStopGain / 100); // milos, boundary spring force is equal (scaled accordingly) for all PWM modes, endstop force for xFFB axis
     }
     //}
 #ifdef USE_TWOFFBAXIS // milos, add y-axis endstop with yFFB (at the moment y-axis is on the pot only)

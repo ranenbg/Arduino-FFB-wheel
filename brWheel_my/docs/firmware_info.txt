@@ -1,6 +1,6 @@
 Milos Rankovic, ranenbg@gmail.com
 first created 21.11.2018.
-last updated 31.03.2025.
+last updated 17.07.2025.
 
 This txt file contains full details about Arduino FFB wheel firmware capabilities and features:
 
@@ -50,7 +50,7 @@ adjustment of encoder CPR, fully adjustable PWM settings that are stored in EEPR
 
 Wheel control GUI: made from scratch in Processing 3.5.4, visualizes all axis and buttons including serial commands sent and received from Arduino, full adjustment of FFB effect gains,
 FFB signal monitor graph, load/save last settings from EEPROM, recenter wheel, recalibrate pedals, encoder CPR adjustment, PWM adjustment, COM port CFG via dialog,
-Axis colors CFG txt, storing/loading FFB profiles to/from PC, autodetection of firmware version, XY analog shifter support, manual pedal axis calibration, PWM0.50.100 mode, hardware button wheel re-center, RCM PWM mode, Z-index reset button, FFB axis selector, XY shifter advanced config buttons, advanced info startup diagnostics, encoder type indicator, detection of available wheel buttons, latest version is v2.6.4
+Axis colors CFG txt, storing/loading FFB profiles to/from PC, autodetection of firmware version, XY analog shifter support, manual pedal axis calibration, PWM0.50.100 mode, hardware button wheel re-center, RCM PWM mode, Z-index reset button, FFB axis selector, XY shifter advanced config buttons, advanced info startup diagnostics, encoder type indicator, detection of available wheel buttons, 2-axis FFB joystick representation instead of a wheel, new blue FFB sliders, re-sizeable GUI window, latest version is v2.6.5
 
 FFB output options (requires recompiling):
 [1] digital: 4 channel fully configurable PWM settings - PWM frequency (tied to PWM resolution), PWM types (phase correct or fast pwm), 1CH PWM modes (PWM+-, PWM+DIR, PWM0-50-100, RCM), 2CH PWM modes (2CH PWM+-, 2CH PWM+DIR, 2CH PWM0-50-100, 2CH RCM - not used), changes of PWM settings require restarting Arduino

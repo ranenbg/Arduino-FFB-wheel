@@ -39,16 +39,16 @@ void InitPWM() {
   pinMode(FFBCLIP_LED_PIN, OUTPUT); // milos, if no proMicro we can use ffb clip led
   blinkFFBclipLED(); // milos, signals end of configuration
 #else // for proMicro
-#ifndef USE_CENTERBTN
+//#ifndef USE_CENTERBTN  // milos, we can only use it if no center button using pin 3 (for proMicro center button is on pin 2, so we skip this check)
 #ifndef USE_MCP4725 // milos, we can only use it if DAC is not using i2C pins 2,3
 #ifndef USE_ADS1015 // milos, we can only use it if ADS1015 is not using i2C pins 2,3
 #ifndef USE_AS5600 // milos, we can only use it if AS5600 is not using i2C pin 2,3
-  pinMode(FFBCLIP_LED_PIN, OUTPUT); // milos, for proMicro we can only use ffb clip led if no center button
+  pinMode(FFBCLIP_LED_PIN, OUTPUT); // milos, for promicro we can only use ffb clip led on D3 if not using all above
   blinkFFBclipLED(); // milos, signals end of configuration
 #endif // end of as5600
 #endif // end of ads1015
 #endif // end of mcp4725
-#endif // end of center button
+//#endif // end of center button
 #endif // end of proMicro
 }
 
@@ -76,17 +76,17 @@ void activateFFBclipLED(s32 t) {  // milos, added - turn on FFB clip LED if max 
 void SetPWM (s32v *torque) { // milos, takes pointer struct as argument - 2 axis FFB data
   if (torque != NULL) { // milos, this check is always required for pointers
 #ifndef USE_PROMICRO
-    activateFFBclipLED(torque->x); // milos, if no promicro we can use ffb clip led
+    activateFFBclipLED(torque->x); // milos, if no promicro we can use ffb clip led on D13
 #else // for proMicro
-#ifndef USE_CENTERBTN
+//#ifndef USE_CENTERBTN // milos, we can only use it if no center button using pin 3 (for proMicro center button is on pin 2, so we skip this check)
 #ifndef USE_MCP4725 // milos, we can only use it if DAC is not using i2C pins 2,3
 #ifndef USE_ADS1015 // milos, we can only use it if ADS1015 is not using i2C pins 2,3
 #ifndef USE_AS5600 // milos, we can only use it if AS5600 is not using i2C pin 2,3
-    activateFFBclipLED(torque->x); // milos, for promicro we can only use ffb clip led if no center button
+    activateFFBclipLED(torque->x); // milos, for promicro we can only use ffb clip led on D3 if not using all above
 #endif // end of as5600
 #endif // end of ads1015
 #endif // end of mcp4725
-#endif // end of center button
+//#endif // end of center button
 #endif // end of proMicro
 
 #ifndef USE_LOAD_CELL // milos, only allow FFB balance if not using load cell

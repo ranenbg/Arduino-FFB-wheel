@@ -43,13 +43,15 @@
 //milos, added - ffb clip LED indicator
 #define FFBCLIP_LED_PIN 13 // only for leonardo/micro
 
+#ifdef USE_PROMICRO // milos, if we use proMicro
 #ifndef USE_MCP4725 // milos, we can only use it if DAC is not using i2C pins 2,3
 #ifndef USE_ADS1015 // milos, we can only use it if ADS1015 is not using i2C pins 2,3
 #ifndef USE_AS5600 // milos, we can only use it if AS5600 is not using i2C pin 2,3
-#define FFBCLIP_LED_PIN 3 // for ProMicro if no i2C devices
+#define FFBCLIP_LED_PIN 3 // for ProMicro if no above i2C devices
 #endif // end of as5600
 #endif // end of ads1015
 #endif // end of mcp4725
+#endif // end of promicro
 
 #define ACCEL_PIN			A0
 #ifdef USE_LOAD_CELL // milos

@@ -222,4 +222,5 @@ version		features
 250bdwuxg	the same as v250bdxg, with support for 2 magnetic encoders (AS5600) via i2C multiplexer (TCA9548A)
 250chfxn	the same as v250cx, with support for hat switch, XY analog shifter and shift register (nano button box)
 250chfxnr	the same as v250chfxn, with support for 2x8bit shift register chip SN74ALS166N for 16 buttons, instead of nano button box
+250dwfx         the same as v250fx, with support for magnetic encoder (AS5600) instead of an optical one
 

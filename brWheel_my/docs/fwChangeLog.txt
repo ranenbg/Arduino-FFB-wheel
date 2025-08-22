@@ -1,6 +1,6 @@
 Milos Rankovic, ranenbg@gmail.com
 created 05.03.2024
-last updated 17.07.2025.
+last updated 21.08.2025.
 
 Changes from fw-v24X to fw-v250
 
@@ -53,4 +53,5 @@ Changes from fw-v250x to fw-v250xnr
 - fixed PWM signal generation bug
 - fixed XY shifter calibration bug
 - if both SN74ALS166N and XY shifter options are used, there are only 16 buttons available (only 2 chips needed) because last 8 are reserved for XY shifter
+- fixed FFB clip LED (pin D13 on Leonardo/micro and D3 on proMicro)
 

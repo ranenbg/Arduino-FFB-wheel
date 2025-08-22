@@ -184,6 +184,7 @@ version		features
 250abx		the same as v250bx, with pedal autocalibration		
 250bcdwx	the same as v250bx, without optical encoder, with magnetic encoder (AS5600) and hardware wheel recenter button on pin TX
 250cx		the same as v250x, with hardware wheel recenter button on pin D2
+250dx		the same as v250x, without support for optical encoder (you can use pots for x-axis)
 250zx		the same as v250x, with z-index support		
 250ix		the same as v250x, with averaging of analog inputs for pedals (4 samples)
 250sx		the same as v250x, with support for 12bit ADS1015 external ADC for pedals
@@ -208,7 +209,7 @@ version		features
 250zhxnl	the same as v250hxnl, with z-index support
 250zhfxnl	the same as v250zhxnl, with XY analog shifter support
 250bdwux	the same as v250bx, with support for 2 magnetic encoders (AS5600) via i2C multiplexer (TCA9548A)
-250bdcwux	the same as v250bdwux, with hardware wheel recenter button on pin TX
+250bcdwux	the same as v250bdwux, with hardware wheel recenter button on pin TX
 250xg		the same as v250x, with analog FFB output via 2x12bit external DAC (MCP4275)
 250bxg		the same as v250xg, with 2 FFB axis and 2 channel analog DAC output	
 250bdxg		the same as v250bxg, without optical encoder (full analog firmware)

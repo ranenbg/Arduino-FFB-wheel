@@ -259,7 +259,7 @@ void nextInputState() {
 #ifndef USE_SN74ALS166N // milos, default
       digitalWriteFast(SHIFTREG_PL, LOW); // milos, nano button box protocol
 #else // milos, with a shift register chips(s)
-      digitalWriteFast(SHIFTREG_PL, HIGH); // milos, serial loading is done on HIGH (data from other chips stacked chips)
+      digitalWriteFast(SHIFTREG_PL, HIGH); // milos, serial loading is done on HIGH (data from other stacked chips)
 #endif // end of sn74
     }
   } else {

@@ -173,4 +173,5 @@ version		features
 250chfxnm	the same as v250cxm, with support for hat switch, XY analog shifter and shifter register (nano button box)
 250chfxnrm	the same as v250chfxnm, with support for 2x8bit shift register chip SN74ALS166N for 16 buttons, instead of nano button box
 250dwfxm        the same as v250fxm, with support for magnetic encoder (AS5600) instead of an optical one
+250dwxnm        the same as v250xm, with support for magnetic encoder (AS5600) and with nano button box
 

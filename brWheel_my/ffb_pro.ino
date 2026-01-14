@@ -497,9 +497,10 @@ s32v cFFB::CalcTorqueCommands (s32v *pos) { // milos, pointer struct agument, re
         }
       }
     // milos, at the moment only xFFB axis has conditional desktop (internal) effects
-    if (bitRead(effstate, 1)) command.x += DamperEffect(spd, ScaleMagnitude(327 * configDamperGain, 32767, EffectDivider())) ; //milos, added - user damper effect
-    if (bitRead(effstate, 2)) command.x += InertiaEffect(acl, ScaleMagnitude(327 * configInertiaGain, 32767, EffectDivider())) ; //milos, added - user inertia effect
-    if (bitRead(effstate, 3)) command.x += FrictionEffect(spd, ScaleMagnitude(327 * configFrictionGain, 32767, EffectDivider())) ; //milos, added - user friction effect
+    // milos, casted effect gain into u16 to fix desktop effects oveflow when using gains above 100
+    if (bitRead(effstate, 1)) command.x += DamperEffect(spd, ScaleMagnitude((u16)configDamperGain * 327, 32767, EffectDivider())) ; //milos, added - user damper effect
+    if (bitRead(effstate, 2)) command.x += InertiaEffect(acl, ScaleMagnitude((u16)configInertiaGain * 327, 32767, EffectDivider())) ; //milos, added - user inertia effect
+    if (bitRead(effstate, 3)) command.x += FrictionEffect(spd, ScaleMagnitude((u16)configFrictionGain * 327, 32767, EffectDivider())) ; //milos, added - user friction effect
 
     s32 limit = ROTATION_MID; // milos, +-ROTATION_MID distance from center is where endstop spring force will start
     //if ((pos->x < -limit) || (pos->x > limit)) {

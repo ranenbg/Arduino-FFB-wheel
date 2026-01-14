@@ -93,6 +93,9 @@ void configCDC() { // milos, virtual serial port firmware configuration interfac
 #ifdef USE_EXTRABTN
         CONFIG_SERIAL.print("e");
 #endif
+#ifdef USE_SPLITAXIS
+        CONFIG_SERIAL.print("k");
+#endif
 #ifdef USE_ANALOGFFBAXIS
         CONFIG_SERIAL.print("x");
 #endif

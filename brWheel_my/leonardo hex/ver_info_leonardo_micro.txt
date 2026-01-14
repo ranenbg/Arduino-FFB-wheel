@@ -184,7 +184,7 @@ version		features
 250abx		the same as v250bx, with pedal autocalibration		
 250bcdwx	the same as v250bx, without optical encoder, with magnetic encoder (AS5600) and hardware wheel recenter button on pin TX
 250cx		the same as v250x, with hardware wheel recenter button on pin D2
-250dx		the same as v250x, without support for optical encoder (you can use pots for x-axis)
+250dx		the same as v250x, without support for optical encoder (you can use pot for x-axis)
 250zx		the same as v250x, with z-index support		
 250ix		the same as v250x, with averaging of analog inputs for pedals (4 samples)
 250sx		the same as v250x, with support for 12bit ADS1015 external ADC for pedals
@@ -225,4 +225,9 @@ version		features
 250chfxnr	the same as v250chfxn, with support for 2x8bit shift register chip SN74ALS166N for 16 buttons, instead of nano button box
 250dwfx         the same as v250fx, with support for magnetic encoder (AS5600) instead of an optical one
 250dwxn         the same as v250x, with support for magnetic encoder (AS5600) and with nano button box
+250kx		the same as v250x, with gas axis split into gas and brake axis
+
+- firmware HEX versions bellow require wheel control v2.6.6 or newer
+
+250dkx		the same as v250dx, with gas axis split into gas and brake axis
 

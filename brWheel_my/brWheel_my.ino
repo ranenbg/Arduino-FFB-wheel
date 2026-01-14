@@ -62,6 +62,10 @@
 //b8 fault; // milos, commented out
 fwOpt fwOptions; // milos, added - struct that holds all firmware options
 s16a accel, clutch, hbrake; // milos, changed from s16
+#ifdef USE_SPLITAXIS
+s16 combinedAxis; // milos, combined gas and brake axis
+s16 gasAxis; // milos, additional temp axis for accelerator (Z-axis) with no calibration available
+#endif
 #ifdef USE_XY_SHIFTER
 xysh shifter; // milos, added
 #endif // end of xy shifter
@@ -451,7 +455,30 @@ void loop() {
 #endif // end of h-shifter
 #endif // end of proMicro
 #else // if no avg
+#ifndef USE_SPLITAXIS
         accel.val = analogRead(ACCEL_PIN); // milos, Z axis
+#else // milos, use combined axis for gas and brake
+#ifdef USE_QUADRATURE_ENCODER // milos, when using optical encoder
+        combinedAxis = analogRead(ACCEL_PIN); // milos, store accelerator into temporary axis
+        if (combinedAxis >= 512) {
+          accel.val = map(combinedAxis, 512, 1023, 0, 1023); // milos, this is now Z-axis (accelerator)
+          brake.val = 0;
+        } else {
+          accel.val = 0;
+          brake.val = map(combinedAxis, 511, 0, 0, 1023);  // milos, this is now Y-axis (brake)
+        }
+#else // milos, without optical encoder
+        accel.val = analogRead(ACCEL_PIN); // milos, accelerator is used for X axis
+        combinedAxis = analogRead(BRAKE_PIN); // milos, store brake into temporary axis
+        if (combinedAxis >= 512) {
+          gasAxis = map(combinedAxis, 512, 1023, 0, Z_AXIS_PHYS_MAX); // milos, this is now Z-axis (accelerator)
+          brake.val = 0;
+        } else {
+          gasAxis = 0;
+          brake.val = map(combinedAxis, 511, 0, 0, 1023);  // milos, this is now Y-axis (brake)
+        }
+#endif // end of quad encoder        
+#endif // end of splitaxis
 #ifndef USE_PROMICRO // milos, for Leonardo and Micro
 #ifndef USE_EXTRABTN // milos, we can have clutch and hbrake only when not using extra buttons
         clutch.val = analogRead(CLUTCH_PIN); // milos, RX axis
@@ -504,7 +531,10 @@ void loop() {
 #ifdef AVG_INPUTS // milos, added option
         brake.val = analog_inputs[BRAKE_INPUT];
 #else // if no avg
+#ifndef USE_SPLITAXIS // milos, calculated above
         brake.val = analogRead(BRAKE_PIN); // milos, Y axis
+#else
+#endif
 #endif // end of avg
 #endif // end of ads
 #endif // end of lc
@@ -570,7 +600,11 @@ void loop() {
         SendInputReport(turn.x + MID_REPORT_Y + 1, turn.y + MID_REPORT_Y + 1, accel.val, clutch.val, hbrake.val, button); // milos, we use two as5600, send 2nd as5600 at y-axis instead of brake pedal
 #endif // end of tca
 #else // milos, if no quad enc and no as5600, Z-axis (accel) is used for X-axis, but we have have to send something instead of Z-axis -> half axis value for example
+#ifndef USE_SPLITAXIS // milos, only if not using combined gas and brake axis
         SendInputReport(turn.x + MID_REPORT_X + 1, brake.val, Z_AXIS_PHYS_MAX >> 1, clutch.val, hbrake.val, button); // milos
+#else // milos, when usign split axis, we have one more uncalibrated axis available to use for Z-axis
+        SendInputReport(turn.x + MID_REPORT_X + 1, brake.val, gasAxis, clutch.val, hbrake.val, button); // milos, full analog joystick
+#endif // end of split axis
 #endif // end of as5600
 #endif // end of quad enc
 

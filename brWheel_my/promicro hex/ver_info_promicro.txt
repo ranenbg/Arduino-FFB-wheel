@@ -174,4 +174,9 @@ version		features
 250chfxnrm	the same as v250chfxnm, with support for 2x8bit shift register chip SN74ALS166N for 16 buttons, instead of nano button box
 250dwfxm        the same as v250fxm, with support for magnetic encoder (AS5600) instead of an optical one
 250dwxnm        the same as v250xm, with support for magnetic encoder (AS5600) and with nano button box
+250kxm		the same as v250xm, with gas axis split into gas and brake axis
+
+- firmware HEX versions bellow require wheel control v2.6.6 or newer
+
+250dkxm		the same as v250dxm, with gas axis split into gas and brake axis
 

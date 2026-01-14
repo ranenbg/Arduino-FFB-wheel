@@ -25,6 +25,7 @@
 //#define USE_BTNMATRIX        // milos, uncomment to use 8 pins as a 4x4 button matrix for total of 16 buttons (can not be used with load cell, shift register or XY shifter)
 //#define AVG_INPUTS        // milos, uncomment to use averaging of arduino analog inputs (can not be used with USE_ADS1015)
 //#define USE_AUTOCALIB        // milos, uncomment to use autocalibration for pedal axis (if left commented manual calibration is enabled)
+//#define USE_SPLITAXIS   // milos, uncomment to split Z-axis into two combined gas and brake axis (only available if Y-axis is not used by AS5600 or loadcell)
 //#define USE_CENTERBTN    // milos, uncomment to assign digital input pin D2 (or TX) for hardware wheel recenter to 0deg (caution, can only be used if quad encoder usage is commented out)
 //#define USE_EXTRABTN    // milos, uncomment to configure analog inputs on pins A2 and A3 as a digital button inputs (2 extra buttons, note that clutch and handbrake will be unavailable)
 //#define USE_MCP4725      // milos, 12bit DAC (0-5V), uncomment to enable output of FFB signal as 2ch DAC voltage output
@@ -263,6 +264,7 @@ typedef struct fwOpt { // milos, added - firmware option stuct
   boolean g = false; // external dac (mcp4725)
   boolean h = false; // hat switch
   boolean i = false; // averaging (of analog axis)
+  boolean k = false; // combined gas and brake axis
   boolean l = false; // load cell
   boolean m = false; // proMicro pinouts
   boolean n = false; // shift register (nano button box)
@@ -303,6 +305,9 @@ void update(fwOpt *option) { // milos, added - update firmware options from pred
 #endif
 #ifdef AVG_INPUTS
   option->i = true;
+#endif
+#ifdef USE_SPLITAXIS
+  option->k = true;
 #endif
 #ifdef USE_LOAD_CELL
   option->l = true;

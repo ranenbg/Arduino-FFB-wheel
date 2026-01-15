@@ -1,0 +1,5 @@
+# List versions to build (space or newline separated)
+# Example:
+# v250
+# v251
+v250

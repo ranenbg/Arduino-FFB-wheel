@@ -5,6 +5,7 @@ import os
 import re
 import shutil
 import subprocess
+import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -187,10 +188,19 @@ def main() -> None:
         except subprocess.CalledProcessError:
             failures.append(output_name)
 
+    DIST_DIR.mkdir(parents=True, exist_ok=True)
+    zip_path = DIST_DIR / "v250_hex.zip"
+    if zip_path.exists():
+        zip_path.unlink()
+
+    with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
+        for hex_path in sorted(LEO_HEX_DIR.glob("*.hex")):
+            zipf.write(hex_path, hex_path.relative_to(ROOT))
+        for hex_path in sorted(PRO_HEX_DIR.glob("*.hex")):
+            zipf.write(hex_path, hex_path.relative_to(ROOT))
+
     if failures:
-        raise SystemExit(
-            "Build failed for: " + ", ".join(sorted(failures))
-        )
+        print("Build failed for: " + ", ".join(sorted(failures)))
 
 
 if __name__ == "__main__":

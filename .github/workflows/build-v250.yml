@@ -62,3 +62,9 @@ jobs:
           path: |
             brWheel_my/leonardo hex/fw_v250/*.hex
             brWheel_my/promicro hex/fw_v250/*.hex
+
+      - name: Upload v250 zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: v250-hex-zip
+          path: dist/v250_hex.zip

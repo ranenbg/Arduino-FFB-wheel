@@ -11,9 +11,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG_PATH = ROOT / "brWheel_my" / "Config.h"
 SKETCH_DIR = ROOT / "brWheel_my"
-LEO_HEX_DIR = ROOT / "brWheel_my" / "leonardo hex" / "fw_v250"
-PRO_HEX_DIR = ROOT / "brWheel_my" / "promicro hex" / "fw_v250"
-DIST_DIR = ROOT / "dist"
+LEO_BASE_DIR = ROOT / "brWheel_my" / "leonardo hex"
+PRO_BASE_DIR = ROOT / "brWheel_my" / "promicro hex"
+ZIP_PATH = Path(os.environ.get("ZIP_PATH", "build.zip"))
+VERSIONS = os.environ.get("VERSIONS")
+VERSIONS_FILE = ROOT / ".github" / "versions-to-build.txt"
 
 LIB_DIR = Path(os.environ.get("ARDUINO_LIB_DIR", Path.home() / "Arduino" / "libraries"))
 
@@ -34,14 +36,6 @@ DEFINE_MAP = {
     "u": "USE_TCA9548",
     "c": "USE_CENTERBTN",
     "k": "USE_SPLITAXIS",
-}
-
-SPECIAL_DEFINES = {
-    "USE_SHIFT_REGISTER",
-    "USE_SN74ALS166N",
-    "USE_PROMICRO",
-    "USE_EEPROM",
-    "USE_QUADRATURE_ENCODER",
 }
 
 
@@ -81,7 +75,6 @@ def apply_options(base_config: list[str], options: str, promicro: bool) -> list[
     for define in enabled_defines:
         updated = set_define(updated, define, True)
 
-    # Disable any mapped defines not explicitly enabled
     for define in DEFINE_MAP.values():
         if define not in enabled_defines:
             updated = set_define(updated, define, False)
@@ -95,16 +88,33 @@ def apply_options(base_config: list[str], options: str, promicro: bool) -> list[
     return updated
 
 
-def parse_variants(hex_dir: Path) -> list[tuple[str, str]]:
+def parse_variants(hex_dir: Path, version: str) -> list[tuple[str, str]]:
     variants: list[tuple[str, str]] = []
     for hex_path in sorted(hex_dir.glob("*.hex")):
         name = hex_path.name
-        match = re.search(r"v250([a-z]*)", name, flags=re.IGNORECASE)
+        match = re.search(rf"{re.escape(version)}([a-z]*)", name, flags=re.IGNORECASE)
         if not match:
             continue
         options = match.group(1).lower()
         variants.append((name, options))
     return variants
+
+
+def parse_versions(value: str) -> list[str]:
+    parts = re.split(r"[\s,]+", value.strip())
+    return [p for p in parts if p]
+
+
+def read_versions_file(path: Path) -> str | None:
+    if not path.exists():
+        return None
+    lines = []
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        lines.append(line)
+    return " ".join(lines) if lines else None
 
 
 def compile_variant(
@@ -145,59 +155,71 @@ def compile_variant(
 
     output_dir.mkdir(parents=True, exist_ok=True)
     shutil.copy2(hex_path, output_dir / output_name)
-    DIST_DIR.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(hex_path, DIST_DIR / output_name)
 
 
 def main() -> None:
-    leo_variants = parse_variants(LEO_HEX_DIR)
-    pro_variants = parse_variants(PRO_HEX_DIR)
-
-    if not leo_variants:
-        raise RuntimeError("No Leonardo v250 variants found")
-    if not pro_variants:
-        raise RuntimeError("No ProMicro v250 variants found")
-
+    versions_value = VERSIONS or read_versions_file(VERSIONS_FILE)
+    if not versions_value:
+        raise RuntimeError(
+            "No versions configured. Set VERSIONS env or add .github/versions-to-build.txt"
+        )
+    versions = parse_versions(versions_value)
     failures: list[str] = []
+    hex_dirs: list[Path] = []
 
-    # Build Leonardo variants
-    for output_name, options in leo_variants:
-        try:
-            compile_variant(
-                "arduino:avr:leonardo",
-                options,
-                output_name,
-                promicro=False,
-                output_dir=LEO_HEX_DIR,
-            )
-        except subprocess.CalledProcessError:
-            failures.append(output_name)
+    for version in versions:
+        leo_hex_dir = LEO_BASE_DIR / f"fw_{version}"
+        pro_hex_dir = PRO_BASE_DIR / f"fw_{version}"
 
-    # Build ProMicro variants (use Arduino Micro board definition + USE_PROMICRO)
-    for output_name, options in pro_variants:
-        if options.endswith("m"):
-            options = options[:-1]
-        try:
-            compile_variant(
-                "arduino:avr:micro",
-                options,
-                output_name,
-                promicro=True,
-                output_dir=PRO_HEX_DIR,
-            )
-        except subprocess.CalledProcessError:
-            failures.append(output_name)
+        if not leo_hex_dir.exists() and not pro_hex_dir.exists():
+            print(f"Skipping {version}: no fw_{version} folders found")
+            continue
 
-    DIST_DIR.mkdir(parents=True, exist_ok=True)
-    zip_path = DIST_DIR / "v250_hex.zip"
-    if zip_path.exists():
-        zip_path.unlink()
+        if leo_hex_dir.exists():
+            hex_dirs.append(leo_hex_dir)
+        if pro_hex_dir.exists():
+            hex_dirs.append(pro_hex_dir)
 
-    with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
-        for hex_path in sorted(LEO_HEX_DIR.glob("*.hex")):
-            zipf.write(hex_path, hex_path.relative_to(ROOT))
-        for hex_path in sorted(PRO_HEX_DIR.glob("*.hex")):
-            zipf.write(hex_path, hex_path.relative_to(ROOT))
+        leo_variants = parse_variants(leo_hex_dir, version) if leo_hex_dir.exists() else []
+        pro_variants = parse_variants(pro_hex_dir, version) if pro_hex_dir.exists() else []
+
+        for output_name, options in leo_variants:
+            try:
+                compile_variant(
+                    "arduino:avr:leonardo",
+                    options,
+                    output_name,
+                    promicro=False,
+                    output_dir=leo_hex_dir,
+                )
+            except subprocess.CalledProcessError:
+                failures.append(output_name)
+
+        for output_name, options in pro_variants:
+            if options.endswith("m"):
+                options = options[:-1]
+            try:
+                compile_variant(
+                    "arduino:avr:micro",
+                    options,
+                    output_name,
+                    promicro=True,
+                    output_dir=pro_hex_dir,
+                )
+            except subprocess.CalledProcessError:
+                failures.append(output_name)
+
+    if not hex_dirs:
+        raise RuntimeError("No fw_<version> folders found for configured VERSIONS")
+
+    ZIP_PATH.parent.mkdir(parents=True, exist_ok=True)
+    if ZIP_PATH.exists():
+        ZIP_PATH.unlink()
+
+    with zipfile.ZipFile(ZIP_PATH, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
+        for hex_dir in hex_dirs:
+            for hex_path in sorted(hex_dir.glob("*.hex")):
+                zipf.write(hex_path, hex_path.relative_to(ROOT))
 
     if failures:
         print("Build failed for: " + ", ".join(sorted(failures)))

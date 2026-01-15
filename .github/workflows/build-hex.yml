@@ -1,4 +1,4 @@
-name: Build v250 HEX
+name: Build HEX
 
 on:
   workflow_dispatch:
@@ -6,18 +6,20 @@ on:
     paths:
       - "brWheel_my/**"
       - "arduino-1.8.5/**"
-      - ".github/workflows/build-v250.yml"
-      - ".github/scripts/build_v250.py"
+      - ".github/workflows/build-hex.yml"
+      - ".github/scripts/build_hex.py"
   pull_request:
     paths:
       - "brWheel_my/**"
       - "arduino-1.8.5/**"
-      - ".github/workflows/build-v250.yml"
-      - ".github/scripts/build_v250.py"
+      - ".github/workflows/build-hex.yml"
+      - ".github/scripts/build_hex.py"
 
 jobs:
-  build-v250:
+  build-hex:
     runs-on: windows-latest
+    env:
+      ZIP_PATH: build.zip
 
     steps:
       - name: Checkout
@@ -50,16 +52,16 @@ jobs:
           Copy-Item -Path "arduino-1.8.5\libraries\*" -Destination $libDir -Recurse -Force
           "ARDUINO_LIB_DIR=$libDir" | Out-File -FilePath $env:GITHUB_ENV -Append
 
-      - name: Build v250 variants
+      - name: Build variants
         shell: pwsh
         run: |
-          python .github\scripts\build_v250.py
+          python .github\scripts\build_hex.py
 
-      - name: Upload v250 zip
+      - name: Upload build zip
         uses: actions/upload-artifact@v4
         with:
-          name: v250-hex-zip
-          path: dist/v250_hex.zip
+          name: build-hex-zip
+          path: ${{ env.ZIP_PATH }}
 
       - name: Commit rebuilt HEX files
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
@@ -67,10 +69,16 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add "brWheel_my/leonardo hex/fw_v250" "brWheel_my/promicro hex/fw_v250"
+          $versions = $env:VERSIONS -split '[,\s]+' | Where-Object { $_ -ne '' }
+          foreach ($version in $versions) {
+            $leo = "brWheel_my/leonardo hex/fw_$version"
+            $pro = "brWheel_my/promicro hex/fw_$version"
+            if (Test-Path $leo) { git add "$leo" }
+            if (Test-Path $pro) { git add "$pro" }
+          }
           $status = git status --porcelain
           if ($status) {
-            git commit -m "chore: rebuild v250 hex"
+            git commit -m "chore: rebuild hex"
             git push
           } else {
             Write-Host "No changes to commit."

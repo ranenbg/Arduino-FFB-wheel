@@ -456,7 +456,7 @@ void loop() {
 #endif // end of proMicro
 #else // if no avg
 #ifndef USE_SPLITAXIS
-        //accel.val = analogRead(ACCEL_PIN); // milos, Z axis
+        accel.val = analogRead(ACCEL_PIN); // milos, Z axis
 #else // milos, use combined axis for gas and brake
 #ifdef USE_QUADRATURE_ENCODER // milos, when using optical encoder
         combinedAxis = analogRead(ACCEL_PIN); // milos, store accelerator into temporary axis

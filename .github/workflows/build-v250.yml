@@ -1,0 +1,77 @@
+name: Build v250 HEX
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "brWheel_my/**"
+      - "arduino-1.8.5/**"
+      - ".github/workflows/build-v250.yml"
+      - ".github/scripts/build_v250.py"
+  pull_request:
+    paths:
+      - "brWheel_my/**"
+      - "arduino-1.8.5/**"
+      - ".github/workflows/build-v250.yml"
+      - ".github/scripts/build_v250.py"
+
+jobs:
+  build-v250:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Arduino CLI
+        uses: arduino/setup-arduino-cli@v1
+
+      - name: Install Arduino AVR core
+        run: |
+          arduino-cli core update-index
+          arduino-cli core install arduino:avr@1.6.21
+
+      - name: Apply modified Arduino core
+        shell: pwsh
+        run: |
+          $coreDir = Join-Path $env:LOCALAPPDATA "Arduino15\packages\arduino\hardware\avr\1.6.21\cores"
+          Rename-Item -Path (Join-Path $coreDir "arduino") -NewName "arduino_org"
+          Copy-Item -Path "arduino-1.8.5\hardware\arduino\cores\arduino" -Destination (Join-Path $coreDir "arduino") -Recurse
+          Copy-Item -Path (Join-Path $coreDir "arduino_org\IPAddress.cpp") -Destination (Join-Path $coreDir "arduino") -Force
+          Copy-Item -Path (Join-Path $coreDir "arduino_org\IPAddress.h") -Destination (Join-Path $coreDir "arduino") -Force
+          Copy-Item -Path (Join-Path $coreDir "arduino_org\new.cpp") -Destination (Join-Path $coreDir "arduino") -Force
+          Copy-Item -Path (Join-Path $coreDir "arduino_org\new.h") -Destination (Join-Path $coreDir "arduino") -Force
+
+      - name: Install custom libraries
+        shell: pwsh
+        run: |
+          $libDir = Join-Path $env:USERPROFILE "Arduino\libraries"
+          New-Item -ItemType Directory -Force -Path $libDir | Out-Null
+          Copy-Item -Path "arduino-1.8.5\libraries\*" -Destination $libDir -Recurse -Force
+          "ARDUINO_LIB_DIR=$libDir" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Build v250 variants
+        shell: pwsh
+        run: |
+          python .github\scripts\build_v250.py
+
+      - name: Upload v250 zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: v250-hex-zip
+          path: dist/v250_hex.zip
+
+      - name: Commit rebuilt HEX files
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        shell: pwsh
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "brWheel_my/leonardo hex/fw_v250" "brWheel_my/promicro hex/fw_v250"
+          $status = git status --porcelain
+          if ($status) {
+            git commit -m "chore: rebuild v250 hex"
+            git push
+          } else {
+            Write-Host "No changes to commit."
+          }

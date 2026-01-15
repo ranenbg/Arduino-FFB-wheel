@@ -106,7 +106,13 @@ def parse_variants(hex_dir: Path) -> list[tuple[str, str]]:
     return variants
 
 
-def compile_variant(fqbn: str, options: str, output_name: str, promicro: bool) -> None:
+def compile_variant(
+    fqbn: str,
+    options: str,
+    output_name: str,
+    promicro: bool,
+    output_dir: Path,
+) -> None:
     build_dir = ROOT / "build" / fqbn.replace(":", "_") / output_name.replace(".hex", "")
     build_dir.mkdir(parents=True, exist_ok=True)
 
@@ -125,7 +131,10 @@ def compile_variant(fqbn: str, options: str, output_name: str, promicro: bool) -
         "--libraries",
         str(LIB_DIR),
     ]
-    subprocess.check_call(cmd)
+    try:
+        subprocess.check_call(cmd)
+    finally:
+        CONFIG_PATH.write_text("".join(base_config), encoding="utf-8")
 
     hex_candidates = sorted(build_dir.glob("*.hex"))
     if not hex_candidates:
@@ -133,6 +142,8 @@ def compile_variant(fqbn: str, options: str, output_name: str, promicro: bool) -
     preferred = [p for p in hex_candidates if "with_bootloader" not in p.name]
     hex_path = preferred[0] if preferred else hex_candidates[0]
 
+    output_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(hex_path, output_dir / output_name)
     DIST_DIR.mkdir(parents=True, exist_ok=True)
     shutil.copy2(hex_path, DIST_DIR / output_name)
 
@@ -146,15 +157,40 @@ def main() -> None:
     if not pro_variants:
         raise RuntimeError("No ProMicro v250 variants found")
 
+    failures: list[str] = []
+
     # Build Leonardo variants
     for output_name, options in leo_variants:
-        compile_variant("arduino:avr:leonardo", options, output_name, promicro=False)
+        try:
+            compile_variant(
+                "arduino:avr:leonardo",
+                options,
+                output_name,
+                promicro=False,
+                output_dir=LEO_HEX_DIR,
+            )
+        except subprocess.CalledProcessError:
+            failures.append(output_name)
 
     # Build ProMicro variants (use Arduino Micro board definition + USE_PROMICRO)
     for output_name, options in pro_variants:
         if options.endswith("m"):
             options = options[:-1]
-        compile_variant("arduino:avr:micro", options, output_name, promicro=True)
+        try:
+            compile_variant(
+                "arduino:avr:micro",
+                options,
+                output_name,
+                promicro=True,
+                output_dir=PRO_HEX_DIR,
+            )
+        except subprocess.CalledProcessError:
+            failures.append(output_name)
+
+    if failures:
+        raise SystemExit(
+            "Build failed for: " + ", ".join(sorted(failures))
+        )
 
 
 if __name__ == "__main__":

@@ -52,6 +52,21 @@ jobs:
           Copy-Item -Path "arduino-1.8.5\libraries\*" -Destination $libDir -Recurse -Force
           "ARDUINO_LIB_DIR=$libDir" | Out-File -FilePath $env:GITHUB_ENV -Append
 
+      - name: Load versions to build
+        shell: pwsh
+        run: |
+          $versionsFile = ".github/versions-to-build.txt"
+          if (-not (Test-Path $versionsFile)) {
+            throw "Missing $versionsFile; expected at least one version like v250."
+          }
+          $versionsValue = (Get-Content $versionsFile |
+            ForEach-Object { $_.Trim() } |
+            Where-Object { $_ -and -not $_.StartsWith("#") }) -join " "
+          if (-not $versionsValue) {
+            throw "No versions found in $versionsFile."
+          }
+          "VERSIONS=$versionsValue" | Out-File -FilePath $env:GITHUB_ENV -Append
+
       - name: Build variants
         shell: pwsh
         run: |
@@ -64,11 +79,12 @@ jobs:
           path: ${{ env.ZIP_PATH }}
 
       - name: Commit rebuilt HEX files
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        if: github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         shell: pwsh
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+
           $versions = $env:VERSIONS -split '[,\s]+' | Where-Object { $_ -ne '' }
           foreach ($version in $versions) {
             $leo = "brWheel_my/leonardo hex/fw_$version"
@@ -76,6 +92,7 @@ jobs:
             if (Test-Path $leo) { git add "$leo" }
             if (Test-Path $pro) { git add "$pro" }
           }
+
           $status = git status --porcelain
           if ($status) {
             git commit -m "chore: rebuild hex"

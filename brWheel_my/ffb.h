@@ -31,7 +31,7 @@
 #ifndef _FFB_
 #define _FFB_
 
-#include <arduino.h>
+#include <Arduino.h>
 #include "Config.h" // milos, added
 
 /* Type Defines: */
